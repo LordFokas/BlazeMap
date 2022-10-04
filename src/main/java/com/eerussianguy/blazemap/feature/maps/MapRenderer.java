@@ -374,6 +374,7 @@ public class MapRenderer implements AutoCloseable {
 
     public boolean setMapType(MapType mapType) {
         if(this.mapType == mapType || dimension == null) return false;
+        if (mapType == null) return false;
         if(!mapType.shouldRenderInDimension(dimension)) return false;
         this.mapType = mapType;
         this.disabled = disabledLayers.computeIfAbsent(mapType.getID(), $ -> new LinkedList<>());
