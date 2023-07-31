@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Pseudo
-@Mixin(ChunkRenderList.class)
+@Mixin(value = ChunkRenderList.class, remap = false)
 public class RubidiumCompatMixin {
 
     @Inject(method = "add", at = @At("HEAD"))
