@@ -26,6 +26,7 @@ public class BlazeMapServerEngine {
     private static final Map<ResourceKey<Level>, ServerPipeline> PIPELINES = new HashMap<>();
     private static DebouncingThread debouncer;
     private static AsyncChain.Root async;
+    private static AsyncDataCruncher cruncher;
     private static MinecraftServer server;
     private static boolean isRunning;
     private static StorageAccess.Internal storage;
@@ -34,7 +35,8 @@ public class BlazeMapServerEngine {
     // Initialize in a client side context.
     // Some resources are shared with the client, there's no need to be greedy.
     public static void initForIntegrated() {
-        async = new AsyncChain.Root(BlazeMapClientEngine.cruncher(), BlazeMapServerEngine::submit);
+        cruncher = BlazeMapClientEngine.cruncher();
+        async = new AsyncChain.Root(cruncher, BlazeMapServerEngine::submit);
         debouncer = BlazeMapClientEngine.debouncer();
         init();
     }
@@ -42,8 +44,8 @@ public class BlazeMapServerEngine {
     // Initialize in a dedicated server context.
     // Since there is no client to share computing resources with, instantiate them all.
     public static void initForDedicated() {
-        AsyncDataCruncher dataCruncher = new AsyncDataCruncher("Blaze Map (Server)");
-        async = new AsyncChain.Root(dataCruncher, BlazeMapServerEngine::submit);
+        cruncher = new AsyncDataCruncher("Blaze Map (Server)");
+        async = new AsyncChain.Root(cruncher, BlazeMapServerEngine::submit);
         debouncer = new DebouncingThread("Blaze Map (Server)");
         init();
     }
@@ -103,7 +105,7 @@ public class BlazeMapServerEngine {
     }
 
     public static AsyncDataCruncher cruncher() {
-        return cruncher();
+        return cruncher;
     }
 
 
