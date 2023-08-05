@@ -2,6 +2,7 @@ package com.eerussianguy.blazemap.engine;
 
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 import net.minecraft.resources.ResourceKey;
@@ -28,10 +29,10 @@ public class CartographyPipeline {
     public final Set<Key<MapType>> availableMapTypes;
     public final Set<Key<Layer>> availableLayers;
     private final Collector<MasterDatum>[] collectors;
-    private final Map<Key<Layer>, List<MapType>> mapTriggers = new HashMap<>();
-    private final Map<Key<Collector<MasterDatum>>, List<Layer>> layerTriggers = new HashMap<>();
-    private final Map<Key<Collector<MasterDatum>>, List<Processor>> processorTriggers = new HashMap<>();
-    private final Map<Key<Layer>, Map<RegionPos, LayerRegionTile>> regions = new HashMap<>();
+    private final Map<Key<Layer>, List<MapType>> mapTriggers = new ConcurrentHashMap<>();
+    private final Map<Key<Collector<MasterDatum>>, List<Layer>> layerTriggers = new ConcurrentHashMap<>();
+    private final Map<Key<Collector<MasterDatum>>, List<Processor>> processorTriggers = new ConcurrentHashMap<>();
+    private final Map<Key<Layer>, Map<RegionPos, LayerRegionTile>> regions = new ConcurrentHashMap<>();
     private final DebouncingDomain<LayerRegionTile> dirtyRegions;
     private final DebouncingDomain<ChunkPos> dirtyChunks;
     private final PriorityLock lock = new PriorityLock();
