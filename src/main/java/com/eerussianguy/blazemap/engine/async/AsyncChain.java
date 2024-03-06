@@ -81,23 +81,25 @@ public class AsyncChain<I, O> {
         return next;
     }
 
-    private AsyncChain<O, O> thenDelay(int ms) {
-        if(closed) throw new IllegalStateException("AsyncChain is already closed");
-        closed = true;
-        AsyncChain<O, O> next = new AsyncChain<>(this, null, null, initiator) {
-            @Override
-            protected void execute(O input) {
-                if(ms == 0) {
-                    next.execute(input);
-                }
-                else {
-                    SCHEDULER.schedule(() -> next.execute(input), ms, TimeUnit.MILLISECONDS);
-                }
-            }
-        };
-        this.next = next;
-        return next;
-    }
+    // This function causes the game to crash with NoClassDefFoundError for some unknown reason. No idea why.
+    // private AsyncChain<O, O> thenDelay(int ms) {
+    //     if(closed) throw new IllegalStateException("AsyncChain is already closed");
+    //     closed = true;
+
+    //     AsyncChain<O, O> next = new AsyncChain<>(this, null, null, initiator) {
+    //         @Override
+    //         protected void execute(O input) {
+    //             if(ms == 0) {
+    //                 next.execute(input);
+    //             }
+    //             else {
+    //                 SCHEDULER.schedule(() -> next.execute(input), ms, TimeUnit.MILLISECONDS);
+    //             }
+    //         }
+    //     };
+    //     this.next = next;
+    //     return next;
+    // }
 
     protected void execute(I input) {
         threadQueue.submit(() -> {
