@@ -4,13 +4,11 @@ import com.eerussianguy.blazemap.engine.client.BlazeMapClientEngine;
 import me.jellysquid.mods.sodium.client.render.chunk.ChunkRenderList;
 import me.jellysquid.mods.sodium.client.render.chunk.RenderSection;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Pseudo
-@Mixin(value = ChunkRenderList.class, remap = false)
+@Mixin(ChunkRenderList.class)
 public class RubidiumCompatMixin {
 
     @Inject(method = "add", at = @At("HEAD"))
