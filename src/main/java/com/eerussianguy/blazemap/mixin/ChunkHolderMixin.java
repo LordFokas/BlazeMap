@@ -15,14 +15,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ChunkHolder.class)
 public class ChunkHolderMixin {
-    // @Shadow private boolean hasChangedSections;
-    // @Shadow @Final private BitSet skyChangedLightSectionFilter;
-    // @Shadow @Final private BitSet blockChangedLightSectionFilter;
+    @Shadow private boolean f_140010_; // hasChangedSections;
+    @Shadow @Final private BitSet f_140013_; // skyChangedLightSectionFilter;
+    @Shadow @Final private BitSet f_140012_; // blockChangedLightSectionFilter;
 
     @Inject(method = "broadcastChanges", at = @At("HEAD"))
     private void broadcastChanges(LevelChunk chunk, CallbackInfo ci) {
-        // if(this.hasChangedSections || !this.skyChangedLightSectionFilter.isEmpty() || !this.blockChangedLightSectionFilter.isEmpty()) {
-        if(true) {
+        if(this.f_140010_ || !this.f_140013_.isEmpty() || !this.f_140012_.isEmpty()) {
             BlazeMapServerEngine.onChunkChanged(chunk.getLevel().dimension(), chunk.getPos());
         }
     }
