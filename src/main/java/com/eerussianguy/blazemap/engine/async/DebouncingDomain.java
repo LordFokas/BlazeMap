@@ -1,11 +1,10 @@
 package com.eerussianguy.blazemap.engine.async;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 public class DebouncingDomain<T> {
-    private final Map<T, Delay> queue = new ConcurrentHashMap<>();
+    private final Map<T, Delay> queue = new HashMap<>();
     private final Consumer<T> callback;
     private final int step;
     private final int max;

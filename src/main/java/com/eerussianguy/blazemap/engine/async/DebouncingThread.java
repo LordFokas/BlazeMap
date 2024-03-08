@@ -44,10 +44,10 @@ public class DebouncingThread {
             }
             long wait = System.currentTimeMillis() - next;
             try {
-                if(wait > 0)
-                    Thread.sleep(wait);
-                else
-                    Thread.sleep(10);
+                synchronized(thread) {
+                    if(wait > 0) thread.wait(wait);
+                    else thread.wait(100);
+                }
             } catch(InterruptedException ignored) {}
         }
     }
