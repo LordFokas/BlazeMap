@@ -11,7 +11,7 @@ public class DebouncingThread {
 
     public DebouncingThread(String name) {
         this.domains = new ArrayList<>();
-        this.thread = new Thread(this::work, name + " Debouncer Thread");
+        this.thread = new Thread(this::loop, name + " Debouncer Thread");
         thread.setDaemon(true);
         thread.start();
         BlazeMap.LOGGER.info("Starting {} Debouncer Thread", name);
@@ -33,22 +33,39 @@ public class DebouncingThread {
         }
     }
 
-    private void work() {
-        while(true) {
-            long next = Long.MAX_VALUE;
-            synchronized(domains) {
-                for(DebouncingDomain<?> domain : domains) {
-                    long d = domain.pop();
-                    if(d < next) next = d;
-                }
+    private void work() throws InterruptedException {
+        long next = Long.MAX_VALUE; // When to execute next task. Start at max and find the lowest value (timestamp)
+
+        synchronized(domains) {
+            for(DebouncingDomain<?> domain : domains) {
+                long wait = domain.pop(); // Process all due tasks and get timestamp of next due task.
+                if(wait < next) next = wait; // find the lowest next task timestamp of all domains.
             }
-            long wait = System.currentTimeMillis() - next;
-            try {
-                synchronized(thread) {
-                    if(wait > 0) thread.wait(wait);
-                    else thread.wait(100);
-                }
-            } catch(InterruptedException ignored) {}
+        }
+
+        long wait = next - System.currentTimeMillis();
+        if(wait == 0) return;
+
+        synchronized(thread) {
+            thread.wait(wait);
+        }
+    }
+
+    private void loop() {
+        while(true) {
+            try{
+                work();
+            }
+            catch(InterruptedException ignored) {}
+            catch(Exception e){
+                BlazeMap.LOGGER.error("Exception in DebouncingThread main loop!");
+                e.printStackTrace();
+            }
+            catch(Throwable t){
+                BlazeMap.LOGGER.error("Throwable in DebouncingThread main loop! ABORTING.");
+                t.printStackTrace();
+                return;
+            }
         }
     }
 }
