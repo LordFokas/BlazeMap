@@ -45,6 +45,10 @@ public class DebouncingThread {
 
         long wait = next - System.currentTimeMillis();
         if(wait == 0) return;
+        if(wait < 0) {
+            BlazeMap.LOGGER.error("DebouncingThread: Attempted to wait for {}ms", wait);
+            wait = 100;
+        };
 
         synchronized(thread) {
             thread.wait(wait);

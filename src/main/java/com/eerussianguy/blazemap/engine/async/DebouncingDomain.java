@@ -46,6 +46,7 @@ public class DebouncingDomain<T> {
     private long pop(long curr) {
         Set<T> pop = new HashSet<>();
         synchronized(queue) {
+            // Execution time of the task with the next lowest execution time
             this.next = Long.MAX_VALUE;
             Iterator<Map.Entry<T, Delay>> iter = queue.entrySet().iterator();
             while(iter.hasNext()) {
@@ -85,9 +86,9 @@ public class DebouncingDomain<T> {
     }
 
     private static class Delay {
-        private final int step;
-        private final long max;
-        private long next;
+        private final int step; // How much incremented when touched
+        private final long max; // Latest time it will execute
+        private long next; // Time it expects to execute
 
         Delay(int step, int limit) {
             long curr = System.currentTimeMillis();
