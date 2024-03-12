@@ -18,10 +18,10 @@ public class FMLEventHandler {
     }
 
     private static void clientSetup(final FMLClientSetupEvent event) {
-        Overlays.reload();
+        // Overlays.reload();
     }
 
     private static void onConfigReload(ModConfigEvent.Reloading event) {
-        Overlays.reload();
+        // Overlays.reload();
     }
 }

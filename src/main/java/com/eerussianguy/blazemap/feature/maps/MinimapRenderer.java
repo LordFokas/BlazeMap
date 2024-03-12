@@ -8,7 +8,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.gui.ForgeIngameGui;
+import net.minecraftforge.client.gui.overlay.ForgeGui;
 
 import com.eerussianguy.blazemap.BlazeMapConfig;
 import com.eerussianguy.blazemap.api.maps.IScreenSkipsMinimap;
@@ -43,7 +43,7 @@ public class MinimapRenderer implements AutoCloseable {
         return mapRenderer.getMapType();
     }
 
-    public void draw(PoseStack stack, MultiBufferSource buffers, ForgeIngameGui gui, int width, int height) {
+    public void draw(PoseStack stack, MultiBufferSource buffers, ForgeGui gui, int width, int height) {
         Minecraft mc = Minecraft.getInstance();
         if(mc.screen instanceof IScreenSkipsMinimap) return;
 

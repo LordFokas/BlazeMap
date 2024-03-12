@@ -8,7 +8,6 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 
 import com.eerussianguy.blazemap.util.Colors;
@@ -18,7 +17,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 
 public abstract class BlazeGui extends Screen {
-    private static final TextComponent EMPTY = new TextComponent("");
+    private static final Component EMPTY = Component.literal("");
     public static final ResourceLocation SLOT = Helpers.identifier("textures/gui/slot.png");
     public static final ResourceLocation GUI = Helpers.identifier("textures/gui/gui.png");
 

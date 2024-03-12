@@ -6,7 +6,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import net.minecraft.client.gui.components.Widget;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
@@ -36,12 +36,12 @@ public abstract class Layer implements RegistryEntry, Consumer {
 
     private final Key<Layer> id;
     private final Set<Key<DataType<MasterDatum>>> inputs;
-    private final TranslatableComponent name;
+    private final Component name;
     private final ResourceLocation icon;
     private final boolean opaque;
 
     @SafeVarargs
-    public Layer(Key<Layer> id, TranslatableComponent name, Key<DataType<MasterDatum>>... inputs) {
+    public Layer(Key<Layer> id, Component name, Key<DataType<MasterDatum>>... inputs) {
         this.id = id;
         this.name = name;
         this.icon = null;
@@ -50,7 +50,7 @@ public abstract class Layer implements RegistryEntry, Consumer {
     }
 
     @SafeVarargs
-    public Layer(Key<Layer> id, TranslatableComponent name, ResourceLocation icon, Key<DataType<MasterDatum>>... inputs) {
+    public Layer(Key<Layer> id, Component name, ResourceLocation icon, Key<DataType<MasterDatum>>... inputs) {
         this.id = id;
         this.name = name;
         this.icon = icon;
@@ -77,7 +77,7 @@ public abstract class Layer implements RegistryEntry, Consumer {
 
     public abstract boolean renderTile(NativeImage tile, TileResolution resolution, IDataSource data, int xGridOffset, int zGridOffset);
 
-    public TranslatableComponent getName() {
+    public Component getName() {
         return name;
     }
 

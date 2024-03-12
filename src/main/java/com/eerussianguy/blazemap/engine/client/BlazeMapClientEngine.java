@@ -71,7 +71,7 @@ public class BlazeMapClientEngine {
     }
 
     @SubscribeEvent
-    public static void onJoinServer(ClientPlayerNetworkEvent.LoggedInEvent event) {
+    public static void onJoinServer(ClientPlayerNetworkEvent.LoggingIn event) {
         RegistryController.ensureRegistriesReady();
         LocalPlayer player = event.getPlayer();
         if(player == null) return;
@@ -86,7 +86,7 @@ public class BlazeMapClientEngine {
     }
 
     @SubscribeEvent
-    public static void onLeaveServer(ClientPlayerNetworkEvent.LoggedOutEvent event) {
+    public static void onLeaveServer(ClientPlayerNetworkEvent.LoggingOut event) {
         PIPELINES.clear();
         WAYPOINTS.clear();
         if(activePipeline != null) {

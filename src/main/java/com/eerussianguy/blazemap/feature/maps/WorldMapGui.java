@@ -12,7 +12,6 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
@@ -36,7 +35,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 
 public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost {
-    private static final TextComponent EMPTY = new TextComponent("");
+    private static final Component EMPTY = Component.literal("");
     private static final ResourceLocation ICON = Helpers.identifier("textures/mod_icon.png");
     private static final ResourceLocation NAME = Helpers.identifier("textures/mod_name.png");
     public static final double MIN_ZOOM = 0.125, MAX_ZOOM = 8;

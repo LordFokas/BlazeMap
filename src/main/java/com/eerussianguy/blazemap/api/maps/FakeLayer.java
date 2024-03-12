@@ -1,7 +1,7 @@
 package com.eerussianguy.blazemap.api.maps;
 
 import net.minecraft.client.gui.components.Widget;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 import com.eerussianguy.blazemap.api.BlazeRegistry;
@@ -22,7 +22,7 @@ import com.mojang.blaze3d.platform.NativeImage;
  */
 public class FakeLayer extends Layer {
 
-    public FakeLayer(BlazeRegistry.Key<Layer> id, TranslatableComponent name, ResourceLocation icon) {
+    public FakeLayer(BlazeRegistry.Key<Layer> id, Component name, ResourceLocation icon) {
         super(id, name, icon);
     }
 

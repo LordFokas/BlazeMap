@@ -69,8 +69,8 @@ repositories {
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    compileOnly fg.deobf("_:rubidium:0.5.6")
-//    implementation fg.deobf("_:rubidium:0.5.6")
+    compileOnly fg.deobf("_:rubidium:mc1.19.2-0.6.2c")
+//    implementation fg.deobf("_:rubidium:mc1.19.2-0.6.2c")
 
 //    implementation fg.deobf("_:Patchouli:1.18.2-71.1")
 //    implementation fg.deobf("_:TerraFirmaCraft:Forge-1.18.2-2.1.11-beta")
