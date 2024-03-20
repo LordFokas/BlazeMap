@@ -88,7 +88,7 @@ public abstract class Pipeline {
     private void begin(ChunkPos pos) {
         async.startOnGameThread($ -> this.runCollectors(pos))
             .thenOnDataThread(data -> this.processMasterData(pos, data))
-            .start();
+            .execute();
     }
 
     // TODO: figure out why void gives generic errors but null Void is OK. Does it have to be an Object?

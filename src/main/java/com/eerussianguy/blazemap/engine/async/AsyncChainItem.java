@@ -49,9 +49,9 @@ public abstract class AsyncChainItem<I, O> {
         closed = true;
     }
 
-    public void start() {
-        (this.root == null ? this : this.root).execute(null);
+    public void execute() {
+        (this.root == null ? this : this.root).executeTask(null);
     }
 
-    protected abstract void execute(I input);
+    protected abstract void executeTask(I input);
 }

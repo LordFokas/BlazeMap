@@ -23,11 +23,28 @@ public class AsyncChainRoot {
         return new AsyncChainDelay<>(null, this, delay_ms);
     }
 
+    public AsyncChainItem<Void, Void> begin() {
+        return new AsyncChainDummyItem(this);
+    }
+
     public void runOnGameThread(Runnable r) {
         gameThreadQueue.submit(r);
     }
 
     public void runOnDataThread(Runnable r) {
         dataThreadQueue.submit(r);
+    }
+
+
+
+    private static class AsyncChainDummyItem extends AsyncChainItem<Void, Void> {
+        AsyncChainDummyItem(AsyncChainRoot initiator) {
+            super(null, initiator);
+        }
+
+        @Override
+        protected void executeTask(Void input) {
+            this.nextItem.executeTask(null);
+        }
     }
 }

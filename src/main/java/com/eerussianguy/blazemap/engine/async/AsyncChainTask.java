@@ -13,12 +13,12 @@ public class AsyncChainTask<I, O> extends AsyncChainItem<I, O>{
     }
 
     @Override
-    protected void execute(I input) {
+    protected void executeTask(I input) {
         threadQueue.submit(() -> {
             O output = task.apply(input);
 
             if(nextItem != null) {
-                nextItem.execute(output);
+                nextItem.executeTask(output);
             }
         });
     }

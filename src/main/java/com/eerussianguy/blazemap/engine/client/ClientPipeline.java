@@ -91,27 +91,20 @@ class ClientPipeline extends Pipeline {
 
     @Override
     public void insertMasterData(ChunkPos pos, List<MasterDatum> data) {
-        if(cold) {
-            async
-                .startWithDelay((int) (500 + ((System.nanoTime() / 1000) % 1000)))
-                .thenOnGameThread($ -> {
-                    if(level.get().getChunkSource().hasChunk(pos.x, pos.z)) {
-                        data.addAll(runCollectors(pos));
-                    }
-                    return data;
-                })
-                .thenOnDataThread(d -> processMasterData(pos, d)).start();
-        }
-        else {
-            async
-                .startOnGameThread($ -> {
-                    if(level.get().getChunkSource().hasChunk(pos.x, pos.z)) {
-                        data.addAll(runCollectors(pos));
-                    }
-                    return data;
-                })
-                .thenOnDataThread(d -> processMasterData(pos, d)).start();
-        }
+        AsyncChainItem<Void, Void> chain = async.begin();
+        if(cold) chain = chain.thenDelay((int) (500 + ((System.nanoTime() / 1000) % 1000)));
+        chain
+            .thenOnGameThread($ -> {
+                if(!active){ // When the pipeline is shut down, abort processing.
+                    return Collections.EMPTY_LIST;
+                }
+                if(level.get().getChunkSource().hasChunk(pos.x, pos.z)) {
+                    data.addAll(runCollectors(pos));
+                }
+                return data;
+            })
+            .thenOnDataThread(d -> processMasterData(pos, d))
+            .execute();
     }
 
     // Redraw tiles based on MD changes

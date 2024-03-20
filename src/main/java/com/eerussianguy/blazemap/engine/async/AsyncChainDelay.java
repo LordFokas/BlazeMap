@@ -17,12 +17,12 @@ public class AsyncChainDelay<I, O> extends AsyncChainItem<I, O> {
     }
 
     @Override
-    protected void execute(I input) {
+    protected void executeTask(I input) {
         if(delay_ms == 0) {
-            nextItem.execute(null);
+            nextItem.executeTask(null);
         }
         else {
-            SCHEDULER.schedule(() -> nextItem.execute(null), delay_ms, TimeUnit.MILLISECONDS);
+            SCHEDULER.schedule(() -> nextItem.executeTask(null), delay_ms, TimeUnit.MILLISECONDS);
         }
     }
 }
