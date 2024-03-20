@@ -40,7 +40,9 @@ public class DebouncingThread {
      */
     public void nextTask(long timestamp){
         if(timestamp < nextTaskTimestamp){
-            thread.interrupt();
+            synchronized(thread){
+                thread.notify();
+            }
         }
     }
 
