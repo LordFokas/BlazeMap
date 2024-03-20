@@ -52,6 +52,7 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
 
 
     private double zoom = 1;
+    private double mxr = 0, myr = 0;
     private final ResourceKey<Level> dimension;
     private final MapRenderer mapRenderer;
     private final MapConfigSynchronizer synchronizer;
@@ -147,7 +148,11 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
     @Override
     public boolean mouseDragged(double cx, double cy, int button, double dx, double dy) {
         double scale = getMinecraft().getWindow().getGuiScale();
-        mapRenderer.moveCenter(-(int) (dx * scale / zoom), -(int) (dy * scale / zoom));
+        double mx = (dx * scale) + mxr;
+        double my = (dy * scale) + myr;
+        mxr = mx % zoom;
+        myr = my % zoom;
+        mapRenderer.moveCenter(-(int) (mx / zoom), -(int) (my / zoom));
         return super.mouseDragged(cx, cy, button, dx, dy);
     }
 
