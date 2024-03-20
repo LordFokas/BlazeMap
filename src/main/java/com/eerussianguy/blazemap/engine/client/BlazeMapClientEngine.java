@@ -26,7 +26,7 @@ import com.eerussianguy.blazemap.api.pipeline.PipelineType;
 import com.eerussianguy.blazemap.api.util.IStorageAccess;
 import com.eerussianguy.blazemap.engine.RegistryController;
 import com.eerussianguy.blazemap.engine.StorageAccess;
-import com.eerussianguy.blazemap.engine.async.AsyncChain;
+import com.eerussianguy.blazemap.engine.async.AsyncChainRoot;
 import com.eerussianguy.blazemap.engine.async.AsyncDataCruncher;
 import com.eerussianguy.blazemap.engine.async.DebouncingThread;
 import com.eerussianguy.blazemap.network.BlazeNetwork;
@@ -40,7 +40,7 @@ public class BlazeMapClientEngine {
 
     private static DebouncingThread debouncer;
     private static AsyncDataCruncher dataCruncher;
-    private static AsyncChain.Root async;
+    private static AsyncChainRoot async;
     private static ClientPipeline activePipeline;
     private static IMarkerStorage.Layered<MapLabel> activeLabels;
     private static IMarkerStorage<Waypoint> activeWaypoints;
@@ -53,11 +53,11 @@ public class BlazeMapClientEngine {
     public static void init() {
         MinecraftForge.EVENT_BUS.register(BlazeMapClientEngine.class);
         dataCruncher = new AsyncDataCruncher("Blaze Map (Client)");
-        async = new AsyncChain.Root(dataCruncher, Helpers::runOnMainThread);
+        async = new AsyncChainRoot(dataCruncher, Helpers::runOnMainThread);
         debouncer = new DebouncingThread("Blaze Map (Client)");
     }
 
-    public static AsyncChain.Root async() {
+    public static AsyncChainRoot async() {
         return async;
     }
 

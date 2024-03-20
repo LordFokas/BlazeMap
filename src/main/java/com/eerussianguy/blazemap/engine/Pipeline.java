@@ -10,7 +10,7 @@ import net.minecraft.world.level.Level;
 import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
 import com.eerussianguy.blazemap.api.pipeline.*;
 import com.eerussianguy.blazemap.api.util.RegionPos;
-import com.eerussianguy.blazemap.engine.async.AsyncChain;
+import com.eerussianguy.blazemap.engine.async.AsyncChainRoot;
 import com.eerussianguy.blazemap.engine.async.DebouncingDomain;
 import com.eerussianguy.blazemap.engine.async.DebouncingThread;
 
@@ -24,7 +24,7 @@ public abstract class Pipeline {
     protected final ThreadLocal<MapView> MAP_VIEWS = ThreadLocal.withInitial(MapView::new);
 
     private final PipelineProfiler profiler;
-    protected final AsyncChain.Root async;
+    protected final AsyncChainRoot async;
     protected final DebouncingDomain<ChunkPos> dirtyChunks;
     public final ResourceKey<Level> dimension;
     protected final Supplier<Level> level;
@@ -38,7 +38,7 @@ public abstract class Pipeline {
 
 
     protected Pipeline(
-        AsyncChain.Root async, DebouncingThread debouncer, PipelineProfiler profiler,
+        AsyncChainRoot async, DebouncingThread debouncer, PipelineProfiler profiler,
         ResourceKey<Level> dimension, Supplier<Level> level,
         Set<Key<Collector<MasterDatum>>> availableCollectors,
         Set<Key<Transformer<MasterDatum>>> availableTransformers,

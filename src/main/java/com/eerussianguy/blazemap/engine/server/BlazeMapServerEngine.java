@@ -17,7 +17,7 @@ import com.eerussianguy.blazemap.api.BlazeMapAPI;
 import com.eerussianguy.blazemap.engine.Pipeline;
 import com.eerussianguy.blazemap.engine.RegistryController;
 import com.eerussianguy.blazemap.engine.StorageAccess;
-import com.eerussianguy.blazemap.engine.async.AsyncChain;
+import com.eerussianguy.blazemap.engine.async.AsyncChainRoot;
 import com.eerussianguy.blazemap.engine.async.AsyncDataCruncher;
 import com.eerussianguy.blazemap.engine.async.DebouncingThread;
 import com.eerussianguy.blazemap.engine.client.BlazeMapClientEngine;
@@ -25,7 +25,7 @@ import com.eerussianguy.blazemap.engine.client.BlazeMapClientEngine;
 public class BlazeMapServerEngine {
     private static final Map<ResourceKey<Level>, ServerPipeline> PIPELINES = new HashMap<>();
     private static DebouncingThread debouncer;
-    private static AsyncChain.Root async;
+    private static AsyncChainRoot async;
     private static AsyncDataCruncher cruncher;
     private static MinecraftServer server;
     private static boolean isRunning;
@@ -36,7 +36,7 @@ public class BlazeMapServerEngine {
     // Some resources are shared with the client, there's no need to be greedy.
     public static void initForIntegrated() {
         cruncher = BlazeMapClientEngine.cruncher();
-        async = new AsyncChain.Root(cruncher, BlazeMapServerEngine::submit);
+        async = new AsyncChainRoot(cruncher, BlazeMapServerEngine::submit);
         debouncer = BlazeMapClientEngine.debouncer();
         init();
     }
@@ -45,7 +45,7 @@ public class BlazeMapServerEngine {
     // Since there is no client to share computing resources with, instantiate them all.
     public static void initForDedicated() {
         cruncher = new AsyncDataCruncher("Blaze Map (Server)");
-        async = new AsyncChain.Root(cruncher, BlazeMapServerEngine::submit);
+        async = new AsyncChainRoot(cruncher, BlazeMapServerEngine::submit);
         debouncer = new DebouncingThread("Blaze Map (Server)");
         init();
     }
@@ -100,7 +100,7 @@ public class BlazeMapServerEngine {
         return debouncer;
     }
 
-    public static AsyncChain.Root async() {
+    public static AsyncChainRoot async() {
         return async;
     }
 

@@ -20,10 +20,7 @@ import com.eerussianguy.blazemap.api.maps.*;
 import com.eerussianguy.blazemap.api.pipeline.*;
 import com.eerussianguy.blazemap.api.util.RegionPos;
 import com.eerussianguy.blazemap.engine.*;
-import com.eerussianguy.blazemap.engine.async.AsyncChain;
-import com.eerussianguy.blazemap.engine.async.DebouncingDomain;
-import com.eerussianguy.blazemap.engine.async.DebouncingThread;
-import com.eerussianguy.blazemap.engine.async.PriorityLock;
+import com.eerussianguy.blazemap.engine.async.*;
 import com.eerussianguy.blazemap.util.Helpers;
 import com.mojang.blaze3d.platform.NativeImage;
 
@@ -51,7 +48,7 @@ class ClientPipeline extends Pipeline {
     private final PriorityLock lock = new PriorityLock();
     private boolean active, cold;
 
-    public ClientPipeline(AsyncChain.Root async, DebouncingThread debouncer, ResourceKey<Level> dimension, StorageAccess.Internal storage, PipelineType type) {
+    public ClientPipeline(AsyncChainRoot async, DebouncingThread debouncer, ResourceKey<Level> dimension, StorageAccess.Internal storage, PipelineType type) {
         super(
             async, debouncer, CLIENT_PIPELINE_PROFILER, dimension, Helpers::levelOrThrow,
             computeCollectorSet(dimension, type),

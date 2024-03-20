@@ -20,7 +20,7 @@ import com.eerussianguy.blazemap.api.pipeline.MasterDataDispatcher;
 import com.eerussianguy.blazemap.api.pipeline.MasterDatum;
 import com.eerussianguy.blazemap.api.pipeline.PipelineType;
 import com.eerussianguy.blazemap.engine.*;
-import com.eerussianguy.blazemap.engine.async.AsyncChain;
+import com.eerussianguy.blazemap.engine.async.AsyncChainRoot;
 import com.eerussianguy.blazemap.engine.async.DebouncingThread;
 import com.eerussianguy.blazemap.network.PacketChunkMDUpdate;
 
@@ -40,7 +40,7 @@ class ServerPipeline extends Pipeline {
     private final StorageAccess addonStorage;
     private final MasterDataDispatcher dispatcher;
 
-    public ServerPipeline(AsyncChain.Root async, DebouncingThread debouncer, ResourceKey<Level> dimension, Supplier<Level> level, StorageAccess.Internal storage) {
+    public ServerPipeline(AsyncChainRoot async, DebouncingThread debouncer, ResourceKey<Level> dimension, Supplier<Level> level, StorageAccess.Internal storage) {
         super(
             async, debouncer, SERVER_PIPELINE_PROFILER, dimension, level,
             BlazeMapAPI.COLLECTORS.keys().stream().filter(k -> k.value().shouldExecuteIn(dimension, PipelineType.SERVER)).collect(Collectors.toUnmodifiableSet()),
