@@ -4,7 +4,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class AsyncChainDelay<I, O> extends AsyncChainItem<I, O> {
+public class AsyncChainDelay<I> extends AsyncChainItem<I, I> {
     private static final ScheduledExecutorService SCHEDULER = Executors.newSingleThreadScheduledExecutor();
     private final int delay_ms;
 
@@ -19,10 +19,10 @@ public class AsyncChainDelay<I, O> extends AsyncChainItem<I, O> {
     @Override
     protected void executeTask(I input) {
         if(delay_ms == 0) {
-            nextItem.executeTask(null);
+            nextItem.executeTask(input);
         }
         else {
-            SCHEDULER.schedule(() -> nextItem.executeTask(null), delay_ms, TimeUnit.MILLISECONDS);
+            SCHEDULER.schedule(() -> nextItem.executeTask(input), delay_ms, TimeUnit.MILLISECONDS);
         }
     }
 }
