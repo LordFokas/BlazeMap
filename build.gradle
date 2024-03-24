@@ -1,19 +1,25 @@
 buildscript {
     repositories {
-        maven { url = 'https://files.minecraftforge.net/maven' }
         mavenCentral()
+        maven { url = 'https://files.minecraftforge.net/maven' }
+        maven {
+            url = 'https://repo.spongepowered.org/repository/maven-public/'
+            content { includeGroup "org.spongepowered" }
+        }
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
+        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
     }
 }
 apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'org.spongepowered.mixin'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'maven-publish'
 
-version = '0.5.8-alpha'
+version = '0.5.9-alpha'
 group = 'com.eerussianguy.blazemap' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "BlazeMap-${minecraft_version}"
 
@@ -28,10 +34,6 @@ minecraft {
         client {
             workingDirectory project.file('run')
 
-            args "-mixin.config=blazemap.mixins.json"
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
-
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
             mods {
@@ -43,10 +45,6 @@ minecraft {
 
         server {
             workingDirectory project.file('run')
-
-            args "-mixin.config=blazemap.mixins.json"
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
 
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
@@ -76,10 +74,27 @@ dependencies {
 //    implementation fg.deobf("_:Patchouli:1.18.2-71.1")
 //    implementation fg.deobf("_:TerraFirmaCraft:Forge-1.18.2-2.1.11-beta")
 //    implementation fg.deobf("_:Cartography:1.18.2-0.4.0-alpha3")
+
+
+    // Apply Mixin AP
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+}
+
+mixin {
+    // MixinGradle Settings
+    add sourceSets.main, 'blazemap.refmap.json'
+    config 'blazemap.mixins.json'
+
+    // Mixin Debugging Settings
+    // debug.verbose = true
+    // debug.export = true
+    // dumpTargetOnFailure = true
+    // debug.countInjections = true
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..
 jar {
+    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
     manifest {
         attributes([
                 "Specification-Title"     : "blazemap",
