@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ChunkRenderList.class)
 public class RubidiumCompatMixin {
 
-    @Inject(method = "add", at = @At("HEAD"))
+    @Inject(method = "add", at = @At("HEAD"), remap = false)
     void onAdd(RenderSection render, CallbackInfo ci) {
         BlazeMapClientEngine.onChunkChanged(render.getChunkPos().chunk(), "Rubidium Chunk Hook");
     }

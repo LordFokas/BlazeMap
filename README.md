@@ -65,3 +65,11 @@ del "build\libs\BlazeMap-*.jar" & gradlew jar && del "<path-to-mc-instance>\mods
 ```
 
 You can find the logs for the latest run of that server at `"<path-to-mc-instance>\logs\latest.log"`.
+
+To test why a mixin isn't working from a prod jar, add the following to the JVM Arguments in the
+Minecraft Launcher. This will add mixin debug logs to the normal server logs as well as outputting
+the mixed in version of each `.class` to `.mixin.out` in that instance's folder:
+
+```
+-Dmixin.debug.export=true -Dmixin.debug.verbose=true -Dmixin.debug.countInjections=true 
+```
