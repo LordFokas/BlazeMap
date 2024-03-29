@@ -9,7 +9,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import com.eerussianguy.blazemap.engine.server.BlazeMapServerEngine;
 
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -21,9 +20,6 @@ public abstract class ServerLevelMixin extends Level {
     public ServerLevelMixin() {
         super(null, null, null, null, false, false, 0);
     }
-
-    @Shadow
-    public abstract void onBlockStateChange(BlockPos block, BlockState s1, BlockState s2);
 
     @Inject(method = "onBlockStateChange", at = @At("HEAD"), expect = 1)
     public void onOnBlockStateChange(BlockPos block, BlockState s1, BlockState s2, CallbackInfo ci) {
