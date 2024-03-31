@@ -13,8 +13,10 @@ public class Profilers {
         public static final TimeProfilerAsync TRANSFORMER_TIME_PROFILER = new TimeProfilerAsync(20);
         public static final LoadProfiler TRANSFORMER_LOAD_PROFILER = new LoadProfiler(20, 50);
 
-        public static final TimeProfilerSync TRIGGER_CHUNK_DIRTY_TIME_PROFILER = new TimeProfilerSync(20);
-        public static final LoadProfiler TRIGGER_CHUNK_DIRTY_LOAD_PROFILER = new LoadProfiler(20, 50);
+        public static final TimeProfilerSync CHUNKHOLDER_TIME_PROFILER = new TimeProfilerSync(20);
+        public static final LoadProfiler CHUNKHOLDER_LOAD_PROFILER = new LoadProfiler(20, 50);
+        public static final TimeProfilerSync SERVERLEVEL_TIME_PROFILER = new TimeProfilerSync(20);
+        public static final LoadProfiler SERVERLEVEL_LOAD_PROFILER = new LoadProfiler(20, 50);
     }
 
     public static class Client {

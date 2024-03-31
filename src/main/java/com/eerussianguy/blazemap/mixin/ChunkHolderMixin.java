@@ -20,12 +20,12 @@ public class ChunkHolderMixin {
     @Inject(method = "broadcastChanges", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;getLevel()Lnet/minecraft/world/level/Level;"))
     private void onBroadcastChangesBody(LevelChunk chunk, CallbackInfo ci) {
         if(this.hasChangedSections) {
-            Profilers.Server.TRIGGER_CHUNK_DIRTY_LOAD_PROFILER.hit();
-            Profilers.Server.TRIGGER_CHUNK_DIRTY_TIME_PROFILER.begin();
+            Profilers.Server.CHUNKHOLDER_LOAD_PROFILER.hit();
+            Profilers.Server.CHUNKHOLDER_TIME_PROFILER.begin();
 
             BlazeMapServerEngine.onChunkChanged(chunk.getLevel().dimension(), chunk.getPos());
 
-            Profilers.Server.TRIGGER_CHUNK_DIRTY_TIME_PROFILER.end();
+            Profilers.Server.CHUNKHOLDER_TIME_PROFILER.end();
         }
     }
 }
