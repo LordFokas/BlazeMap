@@ -125,7 +125,8 @@ public class ProfilingRenderer {
         Profilers.Server.PROCESSOR_LOAD_PROFILER.ping();
         Profilers.Server.TRANSFORMER_LOAD_PROFILER.ping();
         Profilers.Server.SERVERLEVEL_LOAD_PROFILER.ping();
-        Profilers.Server.CHUNKHOLDER_LOAD_PROFILER.ping();
+        Profilers.Server.CHUNKHOLDER_HEAD_LOAD_PROFILER.ping();
+        Profilers.Server.CHUNKHOLDER_BODY_LOAD_PROFILER.ping();
 
         Matrix4f matrix = stack.last().pose();
 
@@ -147,7 +148,8 @@ public class ProfilingRenderer {
 
         fontRenderer.drawInBatch("Server Engine", 5F, y += 20, 0x0088FF, false, matrix, buffers, false, 0, LightTexture.FULL_BRIGHT);
         y = drawSubsystem(Profilers.Server.SERVERLEVEL_LOAD_PROFILER, Profilers.Server.SERVERLEVEL_TIME_PROFILER, y += 10, "ServerLevel Mixin", "[ last second ]", fontRenderer, matrix, buffers, "tick load");
-        y = drawSubsystem(Profilers.Server.CHUNKHOLDER_LOAD_PROFILER, Profilers.Server.CHUNKHOLDER_TIME_PROFILER, y += 10, "ChunkHolder Mixin", "[ last second ]", fontRenderer, matrix, buffers, "tick load");
+        // y = drawSubsystem(Profilers.Server.CHUNKHOLDER_HEAD_LOAD_PROFILER, Profilers.Server.CHUNKHOLDER_HEAD_TIME_PROFILER, y += 10, "ChunkHolder Head", "[ last second ]", fontRenderer, matrix, buffers, "tick load");
+        y = drawSubsystem(Profilers.Server.CHUNKHOLDER_BODY_LOAD_PROFILER, Profilers.Server.CHUNKHOLDER_BODY_TIME_PROFILER, y += 10, "ChunkHolder Body", "[ last second ]", fontRenderer, matrix, buffers, "tick load");
 
         fontRenderer.drawInBatch(String.format(FMT, "Server Pipelines", BlazeMapServerEngine.numPipelines()), 5F, y += 20, 0x0088FF, false, matrix, buffers, false, 0, LightTexture.FULL_BRIGHT);
         if(c > 0) {
