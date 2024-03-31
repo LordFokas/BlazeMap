@@ -35,6 +35,10 @@ public class BlazeMap {
         if(FMLEnvironment.dist == Dist.CLIENT) {
             FMLEventHandler.init();
             BlazeMapConfig.init();
+
+            // Enabling this will log when certain events happen in the world, allowing you
+            // to crossreference what's happening on screen with what's happening in the logs.
+            // DebuggingEventHandler.init();
         }
         else {
             // These are forbidden in the dedicated server.
