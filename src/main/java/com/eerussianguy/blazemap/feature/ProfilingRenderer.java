@@ -124,9 +124,7 @@ public class ProfilingRenderer {
         Profilers.Server.COLLECTOR_LOAD_PROFILER.ping();
         Profilers.Server.PROCESSOR_LOAD_PROFILER.ping();
         Profilers.Server.TRANSFORMER_LOAD_PROFILER.ping();
-        Profilers.Server.SERVERLEVEL_LOAD_PROFILER.ping();
-        Profilers.Server.CHUNKHOLDER_HEAD_LOAD_PROFILER.ping();
-        Profilers.Server.CHUNKHOLDER_BODY_LOAD_PROFILER.ping();
+        Profilers.Server.TRIGGER_CHUNK_DIRTY_LOAD_PROFILER.ping();
 
         Matrix4f matrix = stack.last().pose();
 
@@ -134,7 +132,7 @@ public class ProfilingRenderer {
         int t = BlazeMapServerEngine.numTransformers();
         int p = BlazeMapServerEngine.numProcessors();
 
-        float w = 250, h = 160;
+        float w = 250, h = 120;
         if(c > 0) h += 60;
         if(p > 0) h += 50;
         if(t > 0) h += 50;
@@ -147,9 +145,7 @@ public class ProfilingRenderer {
         fontRenderer.drawInBatch(String.format("[ %d tps ]", tps), 120F, y, 0xFFAAAA, false, matrix, buffers, false, 0, LightTexture.FULL_BRIGHT);
 
         fontRenderer.drawInBatch("Server Engine", 5F, y += 20, 0x0088FF, false, matrix, buffers, false, 0, LightTexture.FULL_BRIGHT);
-        y = drawSubsystem(Profilers.Server.SERVERLEVEL_LOAD_PROFILER, Profilers.Server.SERVERLEVEL_TIME_PROFILER, y += 10, "ServerLevel Mixin", "[ last second ]", fontRenderer, matrix, buffers, "tick load");
-        // y = drawSubsystem(Profilers.Server.CHUNKHOLDER_HEAD_LOAD_PROFILER, Profilers.Server.CHUNKHOLDER_HEAD_TIME_PROFILER, y += 10, "ChunkHolder Head", "[ last second ]", fontRenderer, matrix, buffers, "tick load");
-        y = drawSubsystem(Profilers.Server.CHUNKHOLDER_BODY_LOAD_PROFILER, Profilers.Server.CHUNKHOLDER_BODY_TIME_PROFILER, y += 10, "ChunkHolder Body", "[ last second ]", fontRenderer, matrix, buffers, "tick load");
+        y = drawSubsystem(Profilers.Server.TRIGGER_CHUNK_DIRTY_LOAD_PROFILER, Profilers.Server.TRIGGER_CHUNK_DIRTY_TIME_PROFILER, y += 10, "Trigger Dirty", "[ last second ]", fontRenderer, matrix, buffers, "tick load");
 
         fontRenderer.drawInBatch(String.format(FMT, "Server Pipelines", BlazeMapServerEngine.numPipelines()), 5F, y += 20, 0x0088FF, false, matrix, buffers, false, 0, LightTexture.FULL_BRIGHT);
         if(c > 0) {
