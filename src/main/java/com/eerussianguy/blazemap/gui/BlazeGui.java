@@ -52,6 +52,8 @@ public abstract class BlazeGui extends Screen {
 
         var buffers = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
         renderFrame(stack, buffers);
+
+        stack.pushPose();
         stack.translate(left, top, 0.05F);
         if(title != EMPTY) {
             renderLabel(stack, buffers, title, 12, 12, true);
