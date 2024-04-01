@@ -5,6 +5,7 @@ import java.util.List;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 
 import com.eerussianguy.blazemap.BlazeMapConfig;
@@ -13,16 +14,20 @@ import com.eerussianguy.blazemap.engine.client.LayerRegionTile;
 import com.eerussianguy.blazemap.engine.server.BlazeMapServerEngine;
 import com.eerussianguy.blazemap.feature.MDSources;
 import com.eerussianguy.blazemap.feature.maps.WorldMapGui;
+import com.eerussianguy.blazemap.profiling.Profiler;
 import com.eerussianguy.blazemap.profiling.Profilers;
 import com.eerussianguy.blazemap.profiling.overlay.Container.Style;
 import com.eerussianguy.blazemap.util.Helpers;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Matrix4f;
 
 public class ProfilingRenderer {
     public static final List<Container> PANELS = Arrays.asList(
         new Container("Client Debug Info", Style.PANEL,
             new Container("Overlays", Style.SECTION,
-                new Container("Debug UI", Style.BLOCK, new TimeProfile(Profilers.DEBUG_TIME_PROFILER)),
+                new Container("Debug UI", Style.BLOCK,
+                    new TimeProfile(Profilers.DEBUG_TIME_PROFILER, "Render")
+                ),
                 new SubsystemProfile("Minimap", Profilers.Minimap.TEXTURE_LOAD_PROFILER, Profilers.Minimap.TEXTURE_TIME_PROFILER, "frame load")
                     .enable(BlazeMapConfig.CLIENT.minimap.enabled)
             ),
@@ -89,7 +94,9 @@ public class ProfilingRenderer {
         stack.pushPose();
         stack.translate(5, 5, 0);
         double guiScale = mc.getWindow().getGuiScale();
-        stack.scale((float)(DEBUG_SCALE / guiScale), (float)(DEBUG_SCALE / guiScale), 1);
+        if(guiScale > DEBUG_SCALE){
+            stack.scale((float)(DEBUG_SCALE / guiScale), (float)(DEBUG_SCALE / guiScale), 1);
+        }
         drawPanels(stack, buffers, mc.font);
         stack.popPose();
 
@@ -104,5 +111,67 @@ public class ProfilingRenderer {
             stack.popPose();
             stack.translate(Container.PANEL_WIDTH + 5, 0, 0);
         }
+    }
+
+    // =================================================================================================================
+    public static final int TIME_COLOR = 0xFFFFAA;
+    public static final int LOAD_COLOR = 0xAAAAFF;
+    public static final int IMPACT_COLOR = 0xFFAAAA;
+    public static void drawSubsystem(Profiler.LoadProfiler load, Profiler.TimeProfiler time, String label, String roll, String type, Style style, Font fontRenderer, Matrix4f matrix, MultiBufferSource buffers) {
+        fontRenderer.drawInBatch(label, style.indent, 0, style.header, false, matrix, buffers, false, 0, LightTexture.FULL_BRIGHT);
+        fontRenderer.drawInBatch(roll, Container.PANEL_MIDDLE, 0, style.metric, false, matrix, buffers, false, 0, LightTexture.FULL_BRIGHT);
+        drawTimeProfiler(time, 10, "\u0394 ", style, fontRenderer, matrix, buffers);
+        drawLoadProfiler(load, 20, "# ", style, fontRenderer, matrix, buffers);
+        drawSubsystemLoad(load, time, 30, "\u03C1 ", type, style, fontRenderer, matrix, buffers);
+    }
+
+    /** Used by WorldMapGui as Container.Style should not leave the profiling package. */
+    public static void drawTimeProfiler(Profiler.TimeProfiler profiler, float y, String label, Font fontRenderer, Matrix4f matrix, MultiBufferSource buffers) {
+        drawTimeProfiler(profiler, y, label, Style.BLOCK, fontRenderer, matrix, buffers);
+    }
+
+    public static void drawTimeProfiler(Profiler.TimeProfiler profiler, float y, String label, Style style, Font fontRenderer, Matrix4f matrix, MultiBufferSource buffers) {
+        double at = profiler.getAvg() / 1000D, nt = profiler.getMin() / 1000D, xt = profiler.getMax() / 1000D;
+        String au = "\u03BC", nu = "\u03BC", xu = "\u03BC";
+        if(at >= 1000) {
+            at /= 1000D;
+            au = "m";
+        }
+        if(nt >= 1000) {
+            nt /= 1000D;
+            nu = "m";
+        }
+        if(xt >= 1000) {
+            xt /= 1000D;
+            xu = "m";
+        }
+        String avg = String.format("%s : %.2f%ss", label, at, au);
+        String dst = String.format("[ %.1f%ss - %.1f%ss ]", nt, nu, xt, xu);
+        fontRenderer.drawInBatch(avg, style.indent, y, TIME_COLOR, false, matrix, buffers, false, 0, LightTexture.FULL_BRIGHT);
+        fontRenderer.drawInBatch(dst, Container.PANEL_MIDDLE, y, TIME_COLOR, false, matrix, buffers, false, 0, LightTexture.FULL_BRIGHT);
+    }
+
+    public static void drawLoadProfiler(Profiler.LoadProfiler profiler, float y, String label, Style style, Font fontRenderer, Matrix4f matrix, MultiBufferSource buffers) {
+        String u = profiler.unit;
+        String avg = String.format("%s : %.2f\u0394/%s", label, profiler.getAvg(), u);
+        String dst = String.format("[ %.0f\u0394/%s - %.0f\u0394/%s ]", profiler.getMin(), u, profiler.getMax(), u);
+        fontRenderer.drawInBatch(avg, style.indent, y, LOAD_COLOR, false, matrix, buffers, false, 0, LightTexture.FULL_BRIGHT);
+        fontRenderer.drawInBatch(dst, Container.PANEL_MIDDLE, y, LOAD_COLOR, false, matrix, buffers, false, 0, LightTexture.FULL_BRIGHT);
+    }
+
+    public static void drawSubsystemLoad(Profiler.LoadProfiler load, Profiler.TimeProfiler time, float y, String label, String type, Style style, Font fontRenderer, Matrix4f matrix, MultiBufferSource buffers) {
+        double l = load.getAvg();
+        double t = time.getAvg() / 1000D;
+        double w = l * t;
+        double p = 100 * w / (load.interval * 1000);
+        String u = "\u03BC";
+        if(w >= 1000) {
+            w /= 1000D;
+            u = "m";
+        }
+        String con = String.format("%s : %.2f%ss/%s", label, w, u, load.unit);
+        String pct = String.format("%.3f%% %s", p, type);
+        fontRenderer.drawInBatch(con, style.indent, y, IMPACT_COLOR, false, matrix, buffers, false, 0, LightTexture.FULL_BRIGHT);
+        fontRenderer.drawInBatch(pct, Container.PANEL_MIDDLE, y, IMPACT_COLOR, false, matrix, buffers, false, 0, LightTexture.FULL_BRIGHT);
     }
 }

@@ -8,9 +8,11 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 public class TimeProfile implements IDrawable {
     private final Profiler.TimeProfiler time;
+    private final String label;
 
-    public TimeProfile(Profiler.TimeProfiler time){
+    public TimeProfile(Profiler.TimeProfiler time, String label){
         this.time = time;
+        this.label = label;
     }
 
     @Override
@@ -20,6 +22,6 @@ public class TimeProfile implements IDrawable {
 
     @Override
     public void draw(PoseStack stack, MultiBufferSource buffers, Font fontRenderer) {
-        SubsystemProfile.drawTimeProfiler(time, 0, Container.Style.BLOCK, fontRenderer, stack.last().pose(), buffers);
+        ProfilingRenderer.drawTimeProfiler(time, 0, label, Container.Style.BLOCK, fontRenderer, stack.last().pose(), buffers);
     }
 }
