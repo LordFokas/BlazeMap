@@ -8,6 +8,7 @@ import java.util.Objects;
 
 import net.minecraft.resources.ResourceLocation;
 
+import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.maps.TileResolution;
 import com.eerussianguy.blazemap.api.util.IStorageAccess;
 import com.eerussianguy.blazemap.api.util.MinecraftStreams;
@@ -16,6 +17,7 @@ public class StorageAccess implements IStorageAccess {
     protected final File dir;
 
     public StorageAccess(File dir) {
+        BlazeMap.LOGGER.warn("666 StorageAccess: {}", dir.getName());
         this.dir = dir;
     }
 
@@ -50,6 +52,7 @@ public class StorageAccess implements IStorageAccess {
 
         public Internal(File dir, String child) {
             this(new File(dir, child));
+            BlazeMap.LOGGER.warn("666 StorageAccess$Internal: {} {}", dir.getName(), child);
         }
 
         public Internal(File dir) {
@@ -59,6 +62,8 @@ public class StorageAccess implements IStorageAccess {
 
         @Override
         public File getFile(ResourceLocation node) {
+            BlazeMap.LOGGER.warn("666 getFile: {} {}", node, dir.getName());
+
             Objects.requireNonNull(node);
             File file = new File(dir, String.format(NEW_PATTERN, node.getNamespace(), node.getPath()));
             file.getParentFile().mkdirs();
@@ -88,6 +93,7 @@ public class StorageAccess implements IStorageAccess {
         }
 
         public StorageAccess.Internal internal(ResourceLocation node) {
+            BlazeMap.LOGGER.warn("666 Trying to do the internal thing: {}", node);
             return new Internal(getFile(node));
         }
     }
