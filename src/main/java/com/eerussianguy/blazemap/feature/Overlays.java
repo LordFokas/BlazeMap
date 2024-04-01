@@ -24,16 +24,14 @@ public class Overlays {
 
     public static void renderMinimap(ForgeIngameGui gui, PoseStack stack, float partialTicks, int width, int height) {
         stack.pushPose();
-        stack.scale(0.5f, 0.5f, 1f);
         var buffers = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-        MinimapRenderer.INSTANCE.draw(stack, buffers, gui, width * 2, height * 2);
+        MinimapRenderer.INSTANCE.draw(stack, buffers, gui, width, height);
         buffers.endBatch();
         stack.popPose();
     }
 
     public static void renderProfiler(ForgeIngameGui gui, PoseStack stack, float partialTicks, int width, int height) {
         stack.pushPose();
-        stack.scale(0.5f, 0.5f, 1f);
         var buffers = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
         ProfilingRenderer.INSTANCE.draw(stack, buffers);
         buffers.endBatch();

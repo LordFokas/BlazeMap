@@ -80,7 +80,7 @@ public class ProfilingRenderer {
 
     // =================================================================================================================
     public static final ProfilingRenderer INSTANCE = new ProfilingRenderer();
-    private static final double DEBUG_SCALE = 4D;
+    private static final double DEBUG_SCALE = 2D;
 
     private ProfilingRenderer() {}
 

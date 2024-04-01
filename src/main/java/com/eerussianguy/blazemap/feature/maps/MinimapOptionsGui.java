@@ -20,16 +20,18 @@ import com.mojang.blaze3d.vertex.PoseStack;
 public class MinimapOptionsGui extends BlazeGui implements IScreenSkipsMinimap, IMapHost {
     private static final TranslatableComponent MAP_TYPES = Helpers.translate("blazemap.gui.minimap_options.map_types");
     private static final TranslatableComponent LAYERS = Helpers.translate("blazemap.gui.minimap_options.layers");
+    private static final int WIDTH = 128, HEIGHT = 154;
 
     public static void open() {
         Minecraft.getInstance().setScreen(new MinimapOptionsGui());
     }
 
-    private final MapRenderer mapRenderer = new MapRenderer(MinimapRenderer.SIZE, MinimapRenderer.SIZE, Helpers.identifier("dynamic/map/minimap_preview"), MinimapRenderer.MIN_ZOOM, MinimapRenderer.MAX_ZOOM, false);
-    private final MapConfigSynchronizer synchronizer = MinimapRenderer.INSTANCE.synchronizer;
+    private final MapRenderer mapRenderer = new MapRenderer(0, 0, Helpers.identifier("dynamic/map/minimap_preview"), MinimapRenderer.MIN_ZOOM, MinimapRenderer.MAX_ZOOM, false);
+    private final MinimapConfigSynchronizer synchronizer = MinimapRenderer.INSTANCE.synchronizer;
+    private final MinimapWidget minimap = new MinimapWidget(mapRenderer, synchronizer, true);
 
     public MinimapOptionsGui() {
-        super(Helpers.translate("blazemap.gui.minimap_options.title"), 270, 154);
+        super(Helpers.translate("blazemap.gui.minimap_options.title"), WIDTH, HEIGHT);
     }
 
     @Override
@@ -101,17 +103,11 @@ public class MinimapOptionsGui extends BlazeGui implements IScreenSkipsMinimap, 
 
         renderLabel(stack, buffers, LAYERS, 12, 86, false);
         renderSlot(stack, buffers, 12, 97, 104, 45);
-
-        renderMap(stack, buffers);
     }
 
-    private void renderMap(PoseStack stack, MultiBufferSource buffers) {
-        stack.pushPose();
-        stack.translate(guiWidth - 141, 13, 0);
-        renderSlot(stack, buffers, -1, -1, 130, 130);
-        stack.scale(0.25F, 0.25F, 1);
-        mapRenderer.render(stack, buffers);
-        stack.popPose();
+    @Override
+    protected void renderAbsolute(PoseStack stack, MultiBufferSource buffers, float scale) {
+        minimap.render(stack, buffers);
     }
 
     @Override
@@ -120,5 +116,15 @@ public class MinimapOptionsGui extends BlazeGui implements IScreenSkipsMinimap, 
         mapRenderer.close();
         synchronizer.save();
         synchronizer.clear();
+    }
+
+    @Override
+    public boolean mouseDragged(double cx, double cy, int button, double dx, double dy) {
+        double scale = getMinecraft().getWindow().getGuiScale();
+        if(minimap.mouseDragged(cx * scale, cy * scale, button, dx * scale, dy * scale)){
+            return true;
+        }else{
+            return super.mouseDragged(cx, cy, button, dx, dy);
+        }
     }
 }

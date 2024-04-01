@@ -6,7 +6,7 @@ import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.MapType;
 
 public class MapConfigSynchronizer {
-    private final MapConfig config;
+    protected final MapConfig config;
     protected final MapRenderer map;
     protected MapRenderer renderer;
 
