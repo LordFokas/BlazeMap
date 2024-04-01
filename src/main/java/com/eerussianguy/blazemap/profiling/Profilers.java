@@ -1,6 +1,6 @@
-package com.eerussianguy.blazemap.util;
+package com.eerussianguy.blazemap.profiling;
 
-import com.eerussianguy.blazemap.util.Profiler.*;
+import com.eerussianguy.blazemap.profiling.Profiler.*;
 
 public class Profilers {
     public static final TimeProfilerSync DEBUG_TIME_PROFILER = new TimeProfilerSync(60);
@@ -13,10 +13,12 @@ public class Profilers {
         public static final TimeProfilerAsync TRANSFORMER_TIME_PROFILER = new TimeProfilerAsync(20);
         public static final LoadProfiler TRANSFORMER_LOAD_PROFILER = new LoadProfiler(20, 50);
 
-        public static final TimeProfilerSync CHUNKHOLDER_TIME_PROFILER = new TimeProfilerSync(20);
-        public static final LoadProfiler CHUNKHOLDER_LOAD_PROFILER = new LoadProfiler(20, 50);
-        public static final TimeProfilerSync SERVERLEVEL_TIME_PROFILER = new TimeProfilerSync(20);
-        public static final LoadProfiler SERVERLEVEL_LOAD_PROFILER = new LoadProfiler(20, 50);
+        public static class Mixin {
+            public static final TimeProfilerSync CHUNKHOLDER_TIME_PROFILER = new TimeProfilerSync(20);
+            public static final LoadProfiler CHUNKHOLDER_LOAD_PROFILER = new LoadProfiler(20, 50);
+            public static final TimeProfilerSync CHUNKPACKET_TIME_PROFILER = new TimeProfilerSync(20);
+            public static final LoadProfiler CHUNKPACKET_LOAD_PROFILER = new LoadProfiler(20, 50);
+        }
     }
 
     public static class Client {
@@ -30,6 +32,13 @@ public class Profilers {
         public static final LoadProfiler LAYER_LOAD_PROFILER = new LoadProfiler(20, 50);
         public static final TimeProfilerAsync TILE_TIME_PROFILER = new TimeProfilerAsync(60);
         public static final LoadProfiler TILE_LOAD_PROFILER = new LoadProfiler(60, 1000);
+
+        public static class Mixin {
+            public static final TimeProfilerSync RENDERCHUNK_TIME_PROFILER = new TimeProfilerSync(20);
+            public static final LoadProfiler RENDERCHUNK_LOAD_PROFILER = new LoadProfiler(20, 50);
+            public static final TimeProfilerSync RUBIDIUM_TIME_PROFILER = new TimeProfilerSync(20);
+            public static final LoadProfiler RUBIDIUM_LOAD_PROFILER = new LoadProfiler(20, 50);
+        }
     }
 
     public static class Minimap {

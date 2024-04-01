@@ -4,7 +4,7 @@ import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.world.level.chunk.LevelChunk;
 
 import com.eerussianguy.blazemap.engine.server.BlazeMapServerEngine;
-import com.eerussianguy.blazemap.util.Profilers;
+import com.eerussianguy.blazemap.profiling.Profilers;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -20,12 +20,12 @@ public class ChunkHolderMixin {
     @Inject(method = "broadcastChanges", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;getLevel()Lnet/minecraft/world/level/Level;"))
     private void onBroadcastChangesBody(LevelChunk chunk, CallbackInfo ci) {
         if(this.hasChangedSections) {
-            Profilers.Server.CHUNKHOLDER_LOAD_PROFILER.hit();
-            Profilers.Server.CHUNKHOLDER_TIME_PROFILER.begin();
+            Profilers.Server.Mixin.CHUNKHOLDER_LOAD_PROFILER.hit();
+            Profilers.Server.Mixin.CHUNKHOLDER_TIME_PROFILER.begin();
 
             BlazeMapServerEngine.onChunkChanged(chunk.getLevel().dimension(), chunk.getPos());
 
-            Profilers.Server.CHUNKHOLDER_TIME_PROFILER.end();
+            Profilers.Server.Mixin.CHUNKHOLDER_TIME_PROFILER.end();
         }
     }
 }

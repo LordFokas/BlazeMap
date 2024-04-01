@@ -1,6 +1,6 @@
 package com.eerussianguy.blazemap.engine;
 
-import com.eerussianguy.blazemap.util.Profiler;
+import com.eerussianguy.blazemap.profiling.Profiler;
 
 public class PipelineProfiler {
     public final Profiler.TimeProfilerSync collectorTime;

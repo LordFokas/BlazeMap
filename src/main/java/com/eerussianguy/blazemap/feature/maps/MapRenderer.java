@@ -42,7 +42,7 @@ import com.eerussianguy.blazemap.engine.async.AsyncAwaiter;
 import com.eerussianguy.blazemap.engine.client.BlazeMapClientEngine;
 import com.eerussianguy.blazemap.util.Colors;
 import com.eerussianguy.blazemap.util.Helpers;
-import com.eerussianguy.blazemap.util.Profiler;
+import com.eerussianguy.blazemap.profiling.Profiler;
 import com.eerussianguy.blazemap.util.RenderHelper;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.vertex.PoseStack;

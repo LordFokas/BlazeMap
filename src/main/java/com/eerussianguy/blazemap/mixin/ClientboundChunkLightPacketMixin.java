@@ -7,6 +7,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 
 import com.eerussianguy.blazemap.engine.server.BlazeMapServerEngine;
+import com.eerussianguy.blazemap.profiling.Profilers;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -17,6 +18,11 @@ public class ClientboundChunkLightPacketMixin {
 
     @Inject(method = "<init>(Lnet/minecraft/world/level/chunk/LevelChunk;Lnet/minecraft/world/level/lighting/LevelLightEngine;Ljava/util/BitSet;Ljava/util/BitSet;Z)V", at = @At("RETURN"))
     private void constructor(LevelChunk chunk, LevelLightEngine light, BitSet b1, BitSet b2, boolean bool, CallbackInfo ci) {
+        Profilers.Server.Mixin.CHUNKPACKET_LOAD_PROFILER.hit();
+        Profilers.Server.Mixin.CHUNKPACKET_TIME_PROFILER.begin();
+
         BlazeMapServerEngine.onChunkChanged(chunk.getLevel().dimension(), chunk.getPos());
+
+        Profilers.Server.Mixin.CHUNKPACKET_TIME_PROFILER.end();
     }
 }

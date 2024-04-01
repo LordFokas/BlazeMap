@@ -14,7 +14,7 @@ import com.eerussianguy.blazemap.BlazeMapConfig;
 import com.eerussianguy.blazemap.api.maps.IScreenSkipsMinimap;
 import com.eerussianguy.blazemap.api.maps.MapType;
 import com.eerussianguy.blazemap.util.Helpers;
-import com.eerussianguy.blazemap.util.Profilers;
+import com.eerussianguy.blazemap.profiling.Profilers;
 import com.eerussianguy.blazemap.util.RenderHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;

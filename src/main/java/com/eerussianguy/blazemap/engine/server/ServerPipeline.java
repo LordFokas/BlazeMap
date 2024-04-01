@@ -24,7 +24,7 @@ import com.eerussianguy.blazemap.engine.async.AsyncChainRoot;
 import com.eerussianguy.blazemap.engine.async.DebouncingThread;
 import com.eerussianguy.blazemap.network.PacketChunkMDUpdate;
 
-import static com.eerussianguy.blazemap.util.Profilers.Server.*;
+import static com.eerussianguy.blazemap.profiling.Profilers.Server.*;
 
 class ServerPipeline extends Pipeline {
     private static final PipelineProfiler SERVER_PIPELINE_PROFILER = new PipelineProfiler(

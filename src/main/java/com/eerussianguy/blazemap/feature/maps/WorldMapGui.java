@@ -23,13 +23,11 @@ import com.eerussianguy.blazemap.api.BlazeRegistry;
 import com.eerussianguy.blazemap.api.maps.IScreenSkipsMinimap;
 import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.MapType;
-import com.eerussianguy.blazemap.engine.client.BlazeMapClientEngine;
 import com.eerussianguy.blazemap.feature.BlazeMapFeaturesClient;
-import com.eerussianguy.blazemap.feature.ProfilingRenderer;
 import com.eerussianguy.blazemap.gui.Image;
 import com.eerussianguy.blazemap.util.Colors;
 import com.eerussianguy.blazemap.util.Helpers;
-import com.eerussianguy.blazemap.util.Profiler;
+import com.eerussianguy.blazemap.profiling.Profiler;
 import com.eerussianguy.blazemap.util.RenderHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -216,6 +214,7 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
     }
 
     private void renderDebug(PoseStack stack) {
+        /*
         stack.translate(32, 25, 0);
         RenderHelper.fillRect(stack.last().pose(), 135, 110, 0x80000000);
         font.draw(stack, "Debug Info", 5, 5, 0xFFFF0000);
@@ -242,6 +241,7 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
 
         font.draw(stack, String.format("Addon Labels: %d", debug.labels), 0, y += 18, -1);
         font.draw(stack, String.format("Player Waypoints: %d", debug.waypoints), 0, y += 12, -1);
+        */
     }
 
     @Override

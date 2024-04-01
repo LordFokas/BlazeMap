@@ -1,4 +1,4 @@
-package com.eerussianguy.blazemap.util;
+package com.eerussianguy.blazemap.profiling;
 
 import java.util.Arrays;
 
@@ -113,6 +113,7 @@ public abstract class Profiler {
     public static class LoadProfiler extends Profiler {
         public final int interval;
         public final String unit;
+        public final String span;
         private long last;
 
         public LoadProfiler(int rollSize, int interval) {
@@ -124,6 +125,19 @@ public abstract class Profiler {
                 case 1000 -> this.unit = "s";
                 default -> this.unit = "?";
             }
+
+            double window = interval * rollSize;
+            if(window < 950){
+                span = String.format("%d ms", Math.round(window));
+                return;
+            }
+            window /= 1000;
+            if(window < 59.5){
+                span = String.format("%d sec", Math.round(window));
+                return;
+            }
+            window /= 60;
+            span = String.format("%d min", Math.round(window));
         }
 
         public void hit() {

@@ -3,6 +3,7 @@ package com.eerussianguy.blazemap.engine.client;
 import java.util.*;
 import java.util.function.Consumer;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -197,5 +198,9 @@ public class BlazeMapClientEngine {
 
     public static int dirtyChunks() {
         return activePipeline.getDirtyChunks();
+    }
+
+    public static String avgFPS(){
+        return Minecraft.getInstance().fpsString.split(" ")[0];
     }
 }

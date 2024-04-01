@@ -24,7 +24,7 @@ import com.eerussianguy.blazemap.engine.async.*;
 import com.eerussianguy.blazemap.util.Helpers;
 import com.mojang.blaze3d.platform.NativeImage;
 
-import static com.eerussianguy.blazemap.util.Profilers.Client.*;
+import static com.eerussianguy.blazemap.profiling.Profilers.Client.*;
 
 class ClientPipeline extends Pipeline {
     private static final PipelineProfiler CLIENT_PIPELINE_PROFILER = new PipelineProfiler(
