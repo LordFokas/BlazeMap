@@ -26,7 +26,7 @@ public class MinimapRenderer implements AutoCloseable {
 
     private final RenderType backgroundRenderType;
     private BlockPos last = BlockPos.ZERO;
-    public final MapConfigSynchronizer synchronizer;
+    public final MinimapConfigSynchronizer synchronizer;
     private final MapRenderer mapRenderer;
 
     public MinimapRenderer() {
@@ -34,7 +34,7 @@ public class MinimapRenderer implements AutoCloseable {
         this.backgroundRenderType = RenderType.text(mapBackground);
         this.mapRenderer = new MapRenderer(SIZE, SIZE, Helpers.identifier("dynamic/map/minimap"), MIN_ZOOM, MAX_ZOOM, true)
             .setProfilers(Profilers.Minimap.DRAW_TIME_PROFILER, Profilers.Minimap.TEXTURE_TIME_PROFILER);
-        this.synchronizer = new MapConfigSynchronizer(mapRenderer, BlazeMapConfig.CLIENT.minimap);
+        this.synchronizer = new MinimapConfigSynchronizer(mapRenderer, BlazeMapConfig.CLIENT.minimap);
     }
 
     public void setMapType(MapType mapType) {

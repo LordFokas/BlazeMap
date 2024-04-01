@@ -1,5 +1,6 @@
 package com.eerussianguy.blazemap.feature.maps;
 
+@Deprecated
 public enum MinimapSize {
     SMALL(1.00F),
     MEDIUM(1.25F),

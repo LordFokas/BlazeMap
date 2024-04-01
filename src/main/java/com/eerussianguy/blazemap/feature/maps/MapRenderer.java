@@ -596,6 +596,14 @@ public class MapRenderer implements AutoCloseable {
         setCenter((int) pos.x, (int) pos.z);
     }
 
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
     @Override
     public void close() {
         mapTexture.close();

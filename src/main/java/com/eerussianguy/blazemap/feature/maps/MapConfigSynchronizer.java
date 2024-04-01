@@ -7,8 +7,8 @@ import com.eerussianguy.blazemap.api.maps.MapType;
 
 public class MapConfigSynchronizer {
     private final MapConfig config;
-    private final MapRenderer map;
-    private MapRenderer renderer;
+    protected final MapRenderer map;
+    protected MapRenderer renderer;
 
 
     public MapConfigSynchronizer(MapRenderer map, MapConfig config) {
