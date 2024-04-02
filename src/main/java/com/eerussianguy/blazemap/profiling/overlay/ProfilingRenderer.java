@@ -42,8 +42,8 @@ public class ProfilingRenderer {
                 }),
                 new SubsystemProfile("Chunk Render Mixin", Profilers.Client.Mixin.RENDERCHUNK_LOAD_PROFILER, Profilers.Client.Mixin.RENDERCHUNK_TIME_PROFILER, "tick load")
                     .enable(() -> BlazeMapClientEngine.getMDSource().equals(MDSources.Client.VANILLA)),
-                new SubsystemProfile("Rubidium Mixin", Profilers.Client.Mixin.RUBIDIUM_LOAD_PROFILER, Profilers.Client.Mixin.RUBIDIUM_TIME_PROFILER, "tick load")
-                    .enable(() -> BlazeMapClientEngine.getMDSource().equals(MDSources.Client.RUBIDIUM))
+                new SubsystemProfile("Sodium Mixin", Profilers.Client.Mixin.SODIUM_LOAD_PROFILER, Profilers.Client.Mixin.SODIUM_TIME_PROFILER, "tick load")
+                    .enable(() -> BlazeMapClientEngine.getMDSource().equals(MDSources.Client.SODIUM))
             ),
             new Container("Client Pipeline", Style.SECTION,
                 new SubsystemProfile("MD Collect", Profilers.Client.COLLECTOR_LOAD_PROFILER, Profilers.Client.COLLECTOR_TIME_PROFILER, "tick load",
