@@ -7,6 +7,7 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import com.eerussianguy.blazemap.api.BlazeMapAPI;
 import com.eerussianguy.blazemap.api.event.BlazeRegistryEvent;
+import com.eerussianguy.blazemap.profiling.KnownMods;
 
 public class RegistryController {
     private static boolean frozenRegistries = false;
@@ -30,6 +31,7 @@ public class RegistryController {
                 ensureClientRegistriesReady();
             }
             frozenRegistries = true;
+            KnownMods.init();
         }
     }
 
