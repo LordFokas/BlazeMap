@@ -1,7 +1,10 @@
 package com.eerussianguy.blazemap.feature.maps;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.world.phys.Vec3;
 
 import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.BlazeMapConfig;
@@ -17,6 +20,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 public class MinimapWidget {
     private static final int HANDLE_SIZE = 30; // size of the resizing handle (red square)
     private static final int BORDER_SIZE = 5; // size of the translucent black minimap border
+    private static final int COORDS_BORDER = 3; // size of the background padding around the player coordinates
 
     private final MinimapConfigSynchronizer synchronizer;
     private final ClientConfig.MinimapConfig config = BlazeMapConfig.CLIENT.minimap;
@@ -44,9 +48,23 @@ public class MinimapWidget {
         map.render(stack, buffers);
 
         if(editor){
+            stack.pushPose();
             stack.translate(width - HANDLE_SIZE, height - HANDLE_SIZE, 0);
             RenderHelper.fillRect(buffers, stack.last().pose(), HANDLE_SIZE, HANDLE_SIZE, 0xFFFF0000);
+            stack.popPose();
         }
+
+        Vec3 pos = Helpers.getPlayer().position();
+        String coords = String.format("[ %d | %d | %d ]", (int) pos.x, (int) pos.y, (int) pos.z);
+        Font font = Minecraft.getInstance().font;
+        stack.pushPose();
+        stack.translate(width / 2, height + BORDER_SIZE * 2, 0);
+        stack.scale(2, 2, 1);
+        int length = font.width(coords);
+        stack.translate(-COORDS_BORDER - ((float)length) / 2F, 0, 0);
+        RenderHelper.fillRect(buffers, stack.last().pose(), length + COORDS_BORDER*2, font.lineHeight - 2 + COORDS_BORDER*2, Colors.WIDGET_BACKGROUND);
+        font.drawInBatch(coords, COORDS_BORDER, COORDS_BORDER, Colors.WHITE, false, stack.last().pose(), buffers, false, 0, LightTexture.FULL_BRIGHT);
+        stack.popPose();
     }
 
     public boolean mouseDragged(double mouseX, double mouseY, int button, double draggedX, double draggedY) {
