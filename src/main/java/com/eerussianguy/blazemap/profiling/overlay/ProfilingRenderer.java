@@ -28,8 +28,9 @@ public class ProfilingRenderer {
                 new Container("Debug UI", Style.BLOCK,
                     new TimeProfile(Profilers.DEBUG_TIME_PROFILER, "Render")
                 ),
-                new SubsystemProfile("Minimap", Profilers.Minimap.TEXTURE_LOAD_PROFILER, Profilers.Minimap.TEXTURE_TIME_PROFILER, "frame load")
-                    .enable(BlazeMapConfig.CLIENT.minimap.enabled)
+                new Container("Minimap", Style.BLOCK,
+                    new TimeProfile(Profilers.Minimap.DRAW_TIME_PROFILER, "Render")
+                )
             ),
             new Container("Client Engine", Style.SECTION,
                 new StringSource(() -> String.format("MD Source: %s / %s", BlazeMapClientEngine.isClientSource() ? "Client" : "Server", BlazeMapClientEngine.getMDSource())),
