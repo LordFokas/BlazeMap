@@ -12,20 +12,26 @@ public class MinimapConfigSynchronizer extends MapConfigSynchronizer {
         return (MinimapConfig) this.config;
     }
 
-    public void setSize(int width, int height){
-        config().width.set(width);
-        config().height.set(height);
-        this.onWidgetChanged();
+    public void resize(int x, int y){
+        MinimapConfig config = config();
+        if(x != 0){
+            config.width.set(config.width.get() + x);
+        }
+        if(y != 0){
+            config.height.set(config.height.get() + y);
+        }
+        load();
     }
 
-    public void setPosition(int x, int y){
-        config().positionX.set(x);
-        config().positionY.set(y);
-        this.onWidgetChanged();
-    }
-
-    private void onWidgetChanged(){
-        save();
+    public void move(int x, int y){
+        MinimapConfig config = config();
+        if(x != 0){
+            config.positionX.set(config.positionX.get() + x);
+        }
+        if(y != 0){
+            config.positionY.set(config.positionY.get() + y);
+        }
+        load();
     }
 
     @Override

@@ -3,16 +3,19 @@ package com.eerussianguy.blazemap.feature.maps;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 
+import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.BlazeMapConfig;
 import com.eerussianguy.blazemap.ClientConfig;
 import com.eerussianguy.blazemap.util.Colors;
 import com.eerussianguy.blazemap.util.Helpers;
 import com.eerussianguy.blazemap.util.RenderHelper;
+import com.electronwill.nightconfig.core.io.WritingException;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 public class MinimapWidget {
-    private static final int HANDLE_SIZE = 30;
+    private static final int HANDLE_SIZE = 30; // size of the resizing handle (red square)
+    private static final int BORDER_SIZE = 5; // size of the translucent black minimap border
 
     private final MinimapConfigSynchronizer synchronizer;
     private final ClientConfig.MinimapConfig config = BlazeMapConfig.CLIENT.minimap;
@@ -31,8 +34,8 @@ public class MinimapWidget {
         stack.translate(config.positionX.get(), config.positionY.get(), 0);
 
         stack.pushPose();
-        stack.translate(-5, -5, 0);
-        RenderHelper.fillRect(stack.last().pose(), width + 10, height + 10, Colors.WIDGET_BACKGROUND);
+        stack.translate(-BORDER_SIZE, -BORDER_SIZE, 0);
+        RenderHelper.fillRect(stack.last().pose(), width + BORDER_SIZE*2, height + BORDER_SIZE*2, Colors.WIDGET_BACKGROUND);
         stack.popPose();
 
         map.render(stack, buffers);
@@ -43,34 +46,42 @@ public class MinimapWidget {
         }
     }
 
-    public boolean mouseDragged(double cx, double cy, int button, double dx, double dy) {
-        int px = config.positionX.get();
-        int py = config.positionY.get();
-        int sx = config.width.get();
-        int sy = config.height.get();
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double draggedX, double draggedY) {
+        int mapPosX = config.positionX.get();
+        int mapPosY = config.positionY.get();
+        int mapSizeX = config.width.get();
+        int mapSizeY = config.height.get();
+        int mapEndX = mapPosX + mapSizeX;
+        int mapEndY = mapPosY + mapSizeY;
 
-        // Check if mouse is within minimap bounds
-        if(cx < px || cy < py || cx > px + sx || cy > py + sy){
-            return false;
+        // Check if the mouse is outside the minimap bounds, and ignore input if so.
+        if(mouseX < mapPosX || mouseY < mapPosY || mouseX > mapEndX || mouseY > mapEndY) {
+            return false; // We did not handle this input.
         }
 
         // Calculate window relative bounds
         Window window = Minecraft.getInstance().getWindow();
-        int maxX = window.getWidth() - (px+sx);
-        int maxY = window.getHeight() - (py+sy);
+        int maxX = window.getWidth() - mapEndX;
+        int maxY = window.getHeight() - mapEndY;
 
-        // Check if outside handle bounds
-        if(cx < px + sx - HANDLE_SIZE || cy < py + sy - HANDLE_SIZE){
-            // Move map
-            int mx = Helpers.clamp(-px, (int) dx, maxX);
-            int my = Helpers.clamp(-py, (int) dy, maxY);
-            synchronizer.setPosition(px + mx, py + my);
-        }else{
-            // Resize map
-            int rx = Helpers.clamp(-sx, (int) dx, maxX);
-            int ry = Helpers.clamp(-sy, (int) dy, maxY);
-            synchronizer.setSize(sx + rx, sy + ry);
+        try{
+            // Check if outside the resize handle (red square) bounds
+            if(mouseX < mapEndX - HANDLE_SIZE || mouseY < mapEndY - HANDLE_SIZE) {
+                // Move map
+                int moveX = Helpers.clamp(-mapPosX, (int) draggedX, maxX);
+                int moveY = Helpers.clamp(-mapPosY, (int) draggedY, maxY);
+                synchronizer.move(moveX, moveY);
+            } else {
+                // Resize map
+                int resizeX = Helpers.clamp(-mapSizeX, (int) draggedX, maxX);
+                int resizeY = Helpers.clamp(-mapSizeY, (int) draggedY, maxY);
+                synchronizer.resize(resizeX, resizeY);
+            }
         }
-        return true;
+        catch(WritingException we){ // FIXME: BME-54   The proper thing to do here is not to catch but debounce saving.
+            BlazeMap.LOGGER.error("Config exception while saving minimap config", we);
+        }
+
+        return true; // Input was handled, take no further action.
     }
 }
