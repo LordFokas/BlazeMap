@@ -6,6 +6,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.BlazeMapConfig;
 import com.eerussianguy.blazemap.ClientConfig;
+import com.eerussianguy.blazemap.gui.MouseSubpixelSmoother;
 import com.eerussianguy.blazemap.util.Colors;
 import com.eerussianguy.blazemap.util.Helpers;
 import com.eerussianguy.blazemap.util.RenderHelper;
@@ -21,11 +22,13 @@ public class MinimapWidget {
     private final ClientConfig.MinimapConfig config = BlazeMapConfig.CLIENT.minimap;
     private final MapRenderer map;
     private final boolean editor;
+    private final MouseSubpixelSmoother mouse;
 
     public MinimapWidget(MapRenderer map, MinimapConfigSynchronizer synchronizer, boolean editor){
         this.map = map;
         this.synchronizer = synchronizer;
         this.editor = editor;
+        this.mouse = editor ? new MouseSubpixelSmoother() : null;
     }
 
     public void render(PoseStack stack, MultiBufferSource buffers) {
@@ -59,22 +62,25 @@ public class MinimapWidget {
             return false; // We did not handle this input.
         }
 
-        // Calculate window relative bounds
+        // Calculate window "end" distance from "map end"
         Window window = Minecraft.getInstance().getWindow();
         int maxX = window.getWidth() - mapEndX;
         int maxY = window.getHeight() - mapEndY;
+
+        // Used to smooth out subpixel movements
+        mouse.addMovement(draggedX, draggedY);
 
         try{
             // Check if outside the resize handle (red square) bounds
             if(mouseX < mapEndX - HANDLE_SIZE || mouseY < mapEndY - HANDLE_SIZE) {
                 // Move map
-                int moveX = Helpers.clamp(-mapPosX, (int) draggedX, maxX);
-                int moveY = Helpers.clamp(-mapPosY, (int) draggedY, maxY);
+                int moveX = Helpers.clamp(-mapPosX, mouse.movementX(), maxX);
+                int moveY = Helpers.clamp(-mapPosY, mouse.movementY(), maxY);
                 synchronizer.move(moveX, moveY);
             } else {
                 // Resize map
-                int resizeX = Helpers.clamp(-mapSizeX, (int) draggedX, maxX);
-                int resizeY = Helpers.clamp(-mapSizeY, (int) draggedY, maxY);
+                int resizeX = Helpers.clamp(-mapSizeX, mouse.movementX(), maxX);
+                int resizeY = Helpers.clamp(-mapSizeY, mouse.movementY(), maxY);
                 synchronizer.resize(resizeX, resizeY);
             }
         }
