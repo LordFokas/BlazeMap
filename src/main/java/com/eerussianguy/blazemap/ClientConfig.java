@@ -11,7 +11,6 @@ import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
 import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.MapType;
 import com.eerussianguy.blazemap.feature.maps.MinimapRenderer;
-import com.eerussianguy.blazemap.feature.maps.MinimapSize;
 import com.eerussianguy.blazemap.feature.maps.WorldMapGui;
 import com.eerussianguy.blazemap.util.IConfigAdapter;
 import com.eerussianguy.blazemap.util.LayerListAdapter;
@@ -61,16 +60,12 @@ public class ClientConfig {
     }
 
     public static class MinimapConfig extends MapConfig {
-        @Deprecated
-        public final EnumValue<MinimapSize> overlaySize;
-
         public final BooleanValue enabled;
         public final IntValue positionX, positionY;
         public final IntValue width, height;
 
         MinimapConfig(Function<String, Builder> builder) {
             super(builder, MinimapRenderer.MIN_ZOOM, MinimapRenderer.MAX_ZOOM);
-            this.overlaySize = builder.apply("overlaySize").comment("Overlay size").defineEnum("overlaySize", MinimapSize.LARGE);
             this.enabled = builder.apply("enabled").comment("Enable the minimap?").define("enabled", true);
             this.positionX = builder.apply("positionX").comment("Minimap horizontal position on screen").defineInRange("positionX", 0, 0, 16000);
             this.positionY = builder.apply("positionY").comment("Minimap vertical position on screen").defineInRange("positionY", 0, 0, 9000);

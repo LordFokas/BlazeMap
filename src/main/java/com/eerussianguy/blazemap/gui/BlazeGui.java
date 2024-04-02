@@ -66,7 +66,19 @@ public abstract class BlazeGui extends Screen {
         stack.translate(0, 0, 0.1F);
         super.render(stack, i0, i1, f0);
         stack.popPose();
+
+        stack.pushPose();
+        float scale = (float) getMinecraft().getWindow().getGuiScale();
+        float unscale = 1F / scale;
+        stack.scale(unscale, unscale, 1);
+        stack.translate(0, 0, 0.5F);
+        buffers = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        renderAbsolute(stack, buffers, scale);
+        buffers.endBatch();
+        stack.popPose();
     }
+
+    protected void renderAbsolute(PoseStack stack, MultiBufferSource buffers, float scale){}
 
     protected void renderFrame(PoseStack stack, MultiBufferSource buffers) {
         stack.pushPose();

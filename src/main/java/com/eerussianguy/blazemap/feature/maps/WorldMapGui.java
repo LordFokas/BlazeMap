@@ -26,6 +26,7 @@ import com.eerussianguy.blazemap.api.maps.MapType;
 import com.eerussianguy.blazemap.engine.client.BlazeMapClientEngine;
 import com.eerussianguy.blazemap.feature.BlazeMapFeaturesClient;
 import com.eerussianguy.blazemap.gui.Image;
+import com.eerussianguy.blazemap.gui.MouseSubpixelSmoother;
 import com.eerussianguy.blazemap.profiling.overlay.ProfilingRenderer;
 import com.eerussianguy.blazemap.util.Colors;
 import com.eerussianguy.blazemap.util.Helpers;
@@ -52,12 +53,12 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
 
 
     private double zoom = 1;
-    private double mxr = 0, myr = 0;
     private final ResourceKey<Level> dimension;
     private final MapRenderer mapRenderer;
     private final MapConfigSynchronizer synchronizer;
     private final List<MapType> mapTypes;
     private final int layersBegin;
+    private final MouseSubpixelSmoother mouse;
     private Widget legend;
     private EditBox search;
 
@@ -68,6 +69,7 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
         dimension = Minecraft.getInstance().level.dimension();
         mapTypes = BlazeMapAPI.MAPTYPES.keys().stream().map(BlazeRegistry.Key::value).filter(m -> m.shouldRenderInDimension(dimension)).collect(Collectors.toUnmodifiableList());
         layersBegin = 50 + (mapTypes.size() * 20);
+        mouse = new MouseSubpixelSmoother();
         zoom = mapRenderer.getZoom();
 
         mapRenderer.setSearchHost(active -> {
@@ -146,14 +148,11 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
     }
 
     @Override
-    public boolean mouseDragged(double cx, double cy, int button, double dx, double dy) {
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double draggedX, double draggedY) {
         double scale = getMinecraft().getWindow().getGuiScale();
-        double mx = (dx * scale) + mxr;
-        double my = (dy * scale) + myr;
-        mxr = mx % zoom;
-        myr = my % zoom;
-        mapRenderer.moveCenter(-(int) (mx / zoom), -(int) (my / zoom));
-        return super.mouseDragged(cx, cy, button, dx, dy);
+        mouse.addMovement(draggedX * scale / zoom, draggedY * scale / zoom);
+        mapRenderer.moveCenter(-mouse.movementX(), -mouse.movementY());
+        return super.mouseDragged(mouseX, mouseY, button, draggedX, draggedY);
     }
 
     @Override

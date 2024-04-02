@@ -3,26 +3,40 @@ package com.eerussianguy.blazemap.feature.maps;
 import com.eerussianguy.blazemap.ClientConfig.MinimapConfig;
 
 public class MinimapConfigSynchronizer extends MapConfigSynchronizer {
-    private final MinimapConfig config;
 
     public MinimapConfigSynchronizer(MapRenderer map, MinimapConfig config) {
         super(map, config);
-        this.config = config;
     }
 
-    public void setSize(int width, int height){
-        config.width.set(width);
-        config.height.set(height);
-        this.onWidgetChanged();
+    private MinimapConfig config(){
+        return (MinimapConfig) this.config;
     }
 
-    public void setPosition(int x, int y){
-        config.positionX.set(x);
-        config.positionY.set(y);
-        this.onWidgetChanged();
+    public void resize(int x, int y){
+        MinimapConfig config = config();
+        if(x != 0){
+            config.width.set(config.width.get() + x);
+        }
+        if(y != 0){
+            config.height.set(config.height.get() + y);
+        }
+        load();
     }
 
-    private void onWidgetChanged(){
+    public void move(int x, int y){
+        MinimapConfig config = config();
+        if(x != 0){
+            config.positionX.set(config.positionX.get() + x);
+        }
+        if(y != 0){
+            config.positionY.set(config.positionY.get() + y);
+        }
+        load();
+    }
 
+    @Override
+    public void load() {
+        super.load();
+        renderer.resize(config().width.get(), config().height.get());
     }
 }
