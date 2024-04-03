@@ -49,7 +49,9 @@ public class MinimapWidget {
 
         if(editor){
             stack.pushPose();
-            stack.translate(width - HANDLE_SIZE, height - HANDLE_SIZE, 0);
+            stack.translate(width - HANDLE_SIZE - BORDER_SIZE, height - HANDLE_SIZE - BORDER_SIZE, 0);
+            RenderHelper.fillRect(buffers, stack.last().pose(), HANDLE_SIZE + BORDER_SIZE, HANDLE_SIZE + BORDER_SIZE, Colors.WIDGET_BACKGROUND);
+            stack.translate(BORDER_SIZE, BORDER_SIZE, 0.1);
             RenderHelper.fillRect(buffers, stack.last().pose(), HANDLE_SIZE, HANDLE_SIZE, 0xFFFF0000);
             stack.popPose();
         }
