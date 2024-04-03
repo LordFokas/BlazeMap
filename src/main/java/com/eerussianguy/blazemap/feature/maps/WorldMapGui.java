@@ -163,15 +163,6 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
         super.mouseMoved(mouseX, mouseY);
     }
 
-    private Coordination coordination = new Coordination();
-    private double mouseX = -1, mouseY = -1;
-    private void setMouse(double mouseX, double mouseY){
-        this.mouseX = mouseX;
-        this.mouseY = mouseY;
-        double scale = getMinecraft().getWindow().getGuiScale();
-        mapRenderer.populateCoordination(coordination, (int) (mouseX * scale), (int) (mouseY * scale));
-    }
-
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scroll) {
         boolean zoomed;
@@ -187,6 +178,39 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
     }
 
     @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        setMouse(mouseX, mouseY);
+        if(contextMenu != null && contextMenu.intercepts(rawMouseX, rawMouseY)){ // On existing menu, pass into
+            if(contextMenu.mouseReleased(rawMouseX, rawMouseY, button)) { // if handled, exit
+                return true;
+            }
+        }
+        if(button == GLFW.GLFW_MOUSE_BUTTON_1) { // on any click destroy menu
+            contextMenu = null;
+        }
+        if(super.mouseReleased(mouseX, mouseY, button)) { // If super handled, exit
+            return true;
+        }
+        if(button == GLFW.GLFW_MOUSE_BUTTON_2) { // If right click open new menu
+            int scale = (int) getMinecraft().getWindow().getGuiScale();
+            contextMenu = new WorldMapPopup(coordination, width * scale, height * scale);
+            return true;
+        }
+        return false;
+    }
+
+    private final Coordination coordination = new Coordination();
+    private double rawMouseX = -1, rawMouseY = -1;
+    private WorldMapPopup contextMenu;
+
+    private void setMouse(double mouseX, double mouseY) {
+        double scale = getMinecraft().getWindow().getGuiScale();
+        this.rawMouseX = mouseX * scale;
+        this.rawMouseY = mouseY * scale;
+        coordination.calculate((int) this.rawMouseX, (int) this.rawMouseY, mapRenderer.getBeginX(), mapRenderer.getBeginZ(), mapRenderer.getZoom());
+    }
+
+    @Override
     public void render(PoseStack stack, int i0, int i1, float f0) {
         float scale = (float) getMinecraft().getWindow().getGuiScale();
         fillGradient(stack, 0, 0, this.width, this.height, 0xFF333333, 0xFF333333);
@@ -196,6 +220,9 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
         var buffers = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
         mapRenderer.render(stack, buffers);
         buffers.endBatch();
+        if(contextMenu != null){
+            contextMenu.render(stack, i0, i1, f0);
+        }
         stack.popPose();
 
         if(legend != null) {
@@ -238,7 +265,7 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
     }
 
     private void renderCoordination(PoseStack stack, float scale){
-        if(mouseX == -1 || mouseY == -1) return;
+        if(rawMouseX == -1 || rawMouseY == -1) return;
 
         stack.pushPose();
         stack.translate(coordination.regionPixelX, coordination.regionPixelY, 0.1);
