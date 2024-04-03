@@ -511,6 +511,14 @@ public class MapRenderer implements AutoCloseable {
     // =================================================================================================================
 
 
+    public void populateCoordination(Coordination coordination, int mouseX, int mouseY) {
+        coordination.calculate(mouseX, mouseY, begin.getX(), begin.getZ(), zoom);
+    }
+
+
+    // =================================================================================================================
+
+
     public boolean setMapType(MapType mapType) {
         if(this.mapType == mapType || dimension == null) return false;
         if(mapType == null) {

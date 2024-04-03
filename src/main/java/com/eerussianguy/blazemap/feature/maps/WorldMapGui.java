@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import org.lwjgl.glfw.GLFW;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -114,7 +115,7 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
     @Override
     protected void init() {
         double scale = getMinecraft().getWindow().getGuiScale();
-        mapRenderer.resize((int) (width * scale), (int) (height * scale));
+        mapRenderer.resize((int) (Math.ceil(width * scale / MAX_ZOOM) * MAX_ZOOM), (int) (Math.ceil(height * scale / MAX_ZOOM) * MAX_ZOOM));
 
         addRenderableOnly(new Image(ICON, 5, 5, 20, 20));
         addRenderableOnly(new Image(NAME, 30, 5, 110, 20));
@@ -149,10 +150,26 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double draggedX, double draggedY) {
+        setMouse(mouseX, mouseY);
         double scale = getMinecraft().getWindow().getGuiScale();
         mouse.addMovement(draggedX * scale / zoom, draggedY * scale / zoom);
         mapRenderer.moveCenter(-mouse.movementX(), -mouse.movementY());
         return super.mouseDragged(mouseX, mouseY, button, draggedX, draggedY);
+    }
+
+    @Override
+    public void mouseMoved(double mouseX, double mouseY) {
+        setMouse(mouseX, mouseY);
+        super.mouseMoved(mouseX, mouseY);
+    }
+
+    private Coordination coordination = new Coordination();
+    private double mouseX = -1, mouseY = -1;
+    private void setMouse(double mouseX, double mouseY){
+        this.mouseX = mouseX;
+        this.mouseY = mouseY;
+        double scale = getMinecraft().getWindow().getGuiScale();
+        mapRenderer.populateCoordination(coordination, (int) (mouseX * scale), (int) (mouseY * scale));
     }
 
     @Override
@@ -165,6 +182,7 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
             zoomed = synchronizer.zoomOut();
         }
         zoom = mapRenderer.getZoom();
+        setMouse(mouseX, mouseY);
         return zoomed;
     }
 
@@ -211,7 +229,43 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
             stack.pushPose();
             renderDebug(stack);
             stack.popPose();
+
+            stack.pushPose();
+            stack.scale(1F / scale, 1F / scale, 1);
+            renderCoordination(stack, scale);
+            stack.popPose();
         }
+    }
+
+    private void renderCoordination(PoseStack stack, float scale){
+        if(mouseX == -1 || mouseY == -1) return;
+
+        stack.pushPose();
+        stack.translate(coordination.regionPixelX, coordination.regionPixelY, 0.1);
+        RenderHelper.fillRect(stack.last().pose(), coordination.regionPixels, coordination.regionPixels, 0x400000FF);
+        stack.popPose();
+
+        stack.pushPose();
+        stack.translate(coordination.chunkPixelX, coordination.chunkPixelY, 0.2);
+        RenderHelper.fillRect(stack.last().pose(), coordination.chunkPixels, coordination.chunkPixels, 0x6000FF00);
+        stack.popPose();
+
+        stack.pushPose();
+        stack.translate(coordination.blockPixelX, coordination.blockPixelY, 0.3);
+        RenderHelper.fillRect(stack.last().pose(), coordination.blockPixels, coordination.blockPixels, 0x80FF0000);
+        stack.popPose();
+
+        stack.pushPose();
+        stack.translate(width * scale / 2, 10, 1);
+        stack.scale(3, 3, 0);
+        Font font = getMinecraft().font;
+        String region = String.format("Rg %d %d  |  px: %d %d", coordination.regionX, coordination.regionZ, coordination.regionPixelX, coordination.regionPixelY);
+        font.draw(stack, region, 0, 0, 0x0000FF);
+        String chunk = String.format("Ch %d %d  |  px: %d %d", coordination.chunkX, coordination.chunkZ, coordination.chunkPixelX, coordination.chunkPixelY);
+        font.draw(stack, chunk, 0, 10, 0x00FF00);
+        String block = String.format("Bl %d %d  |  px: %d %d", coordination.blockX, coordination.blockZ, coordination.blockPixelX, coordination.blockPixelY);
+        font.draw(stack, block, 0, 20, 0xFF0000);
+        stack.popPose();
     }
 
     private void renderDebug(PoseStack stack) {
