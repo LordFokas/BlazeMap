@@ -7,6 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.monster.Blaze;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
@@ -32,6 +33,7 @@ import com.eerussianguy.blazemap.engine.async.AsyncDataCruncher;
 import com.eerussianguy.blazemap.engine.async.DebouncingThread;
 import com.eerussianguy.blazemap.network.BlazeNetwork;
 import com.eerussianguy.blazemap.util.Helpers;
+import com.ibm.icu.impl.duration.TimeUnit;
 
 public class BlazeMapClientEngine {
     private static final Set<Consumer<LayerRegion>> TILE_CHANGE_LISTENERS = new HashSet<>();
@@ -110,6 +112,7 @@ public class BlazeMapClientEngine {
             if(activePipeline.dimension.equals(dimension)) return;
             activePipeline.shutdown();
         }
+
         activePipeline = getPipeline(dimension);
         activeLabels = new LabelStorage(dimension);
 
@@ -156,7 +159,23 @@ public class BlazeMapClientEngine {
     public static void submitChanges(ResourceKey<Level> dimension, ChunkPos pos, List<MasterDatum> data, String source) {
         isServerSource = true;
         mdSource = source;
+
+        // If the storage hasn't been set, that means the player login event hasn't been received yet
+        // and getPipeline will throw a NullPointerException that crashes the game.
+        // To avoid this, will wait until storage exists before submitting this MD
+        while (storage == null) {
+            try {
+                // BlazeMap.LOGGER.warn("666 tried to submitChanges but storage was null");
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                // This isn't supposed to happen, but I can't compile without it
+                e.printStackTrace();
+            }
+        }
+
+        // if (storage == null) {
         getPipeline(dimension).insertMasterData(pos, data);
+        // }
     }
 
     static void notifyLayerRegionChange(LayerRegion layerRegion) {
