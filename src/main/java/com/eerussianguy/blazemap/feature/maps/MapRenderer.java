@@ -580,6 +580,10 @@ public class MapRenderer implements AutoCloseable {
         return true;
     }
 
+    List<BlazeRegistry.Key<Layer>> getVisibleLayers() {
+        return visible;
+    }
+
     public boolean isLayerVisible(BlazeRegistry.Key<Layer> layer) {
         return !disabled.contains(layer);
     }

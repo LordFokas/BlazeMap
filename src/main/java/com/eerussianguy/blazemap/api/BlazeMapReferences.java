@@ -11,6 +11,7 @@ import com.eerussianguy.blazemap.api.pipeline.Collector;
 import com.eerussianguy.blazemap.api.pipeline.DataType;
 import com.eerussianguy.blazemap.api.pipeline.MasterDatum;
 import com.eerussianguy.blazemap.api.pipeline.Transformer;
+import com.eerussianguy.blazemap.util.Helpers;
 
 import static com.eerussianguy.blazemap.api.BlazeMapAPI.*;
 import static com.eerussianguy.blazemap.api.BlazeRegistry.Key;
@@ -73,5 +74,12 @@ public class BlazeMapReferences {
         static {
             ALL_WAYPOINTS = List.of(WAYPOINT, HOUSE, CAVE, INGOT, SWORD, AXE, PICKAXE, SHOVEL, HOE);
         }
+    }
+
+    public static class MapMenu {
+        public static final ResourceLocation MENU_ROOT = Helpers.identifier("map.menu");
+        public static final ResourceLocation MENU_BLOCK = Helpers.identifier("map.menu.block");
+        public static final ResourceLocation MENU_CHUNK = Helpers.identifier("map.menu.chunk");
+        public static final ResourceLocation MENU_REGION = Helpers.identifier("map.menu.region");
     }
 }

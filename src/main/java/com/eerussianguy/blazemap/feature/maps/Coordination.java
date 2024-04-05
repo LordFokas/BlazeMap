@@ -8,8 +8,12 @@ public class Coordination {
     public int blockPixelX, blockPixelY, blockPixels;
     public int chunkPixelX, chunkPixelY, chunkPixels;
     public int regionPixelX, regionPixelY, regionPixels;
+    public int mousePixelX, mousePixelY;
 
     public void calculate(int mouseX, int mouseY, int beginX, int beginZ, double zoom) {
+        mousePixelX = mouseX;
+        mousePixelY = mouseY;
+
         blockX = (int) (beginX + (mouseX / zoom));
         blockZ = (int) (beginZ + (mouseY / zoom));
         chunkX = blockX >> 4;

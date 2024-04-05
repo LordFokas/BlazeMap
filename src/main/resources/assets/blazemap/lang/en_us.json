@@ -19,5 +19,9 @@
   "blazemap.gui.waypoint_editor.save": "Save",
   "blazemap.gui.waypoint_manager.title": "Your Waypoints",
   "blazemap.gui.waypoint_manager.delete": "Delete",
-  "blazemap.gui.waypoint_manager.edit": "Edit"
+  "blazemap.gui.waypoint_manager.edit": "Edit",
+  "blazemap.gui.worldmap.menu.root": "Actions ...",
+  "blazemap.gui.worldmap.menu.block": "Block",
+  "blazemap.gui.worldmap.menu.chunk": "Chunk",
+  "blazemap.gui.worldmap.menu.region": "Region"
 }

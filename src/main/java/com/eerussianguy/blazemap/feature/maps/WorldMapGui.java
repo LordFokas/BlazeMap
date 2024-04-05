@@ -178,24 +178,29 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
         setMouse(mouseX, mouseY);
-        if(contextMenu != null && contextMenu.intercepts(rawMouseX, rawMouseY)){ // On existing menu, pass into
-            if(contextMenu.mouseReleased(rawMouseX, rawMouseY, button)) { // if handled, exit
+
+        if(contextMenu != null){ // On existing menu, pass into
+            var result = contextMenu.onClick((int) rawMouseX, (int) rawMouseY, button);
+            if(result.shouldDismiss) {
+                contextMenu = null;
+            }
+            if(result.wasHandled) {
                 return true;
             }
         }
-        if(button == GLFW.GLFW_MOUSE_BUTTON_1) { // on any click destroy menu
-            contextMenu = null;
-        }
-        if(super.mouseReleased(mouseX, mouseY, button)) { // If super handled, exit
+
+        if(super.mouseClicked(mouseX, mouseY, button)) { // If super handled, exit
             return true;
         }
+
         if(button == GLFW.GLFW_MOUSE_BUTTON_2) { // If right click open new menu
             int scale = (int) getMinecraft().getWindow().getGuiScale();
-            contextMenu = new WorldMapPopup(coordination, width * scale, height * scale);
+            contextMenu = new WorldMapPopup(coordination, width * scale, height * scale, mapRenderer.getVisibleLayers());
             return true;
         }
+
         return false;
     }
 
@@ -208,6 +213,9 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
         this.rawMouseX = mouseX * scale;
         this.rawMouseY = mouseY * scale;
         coordination.calculate((int) this.rawMouseX, (int) this.rawMouseY, mapRenderer.getBeginX(), mapRenderer.getBeginZ(), mapRenderer.getZoom());
+        if(contextMenu != null) {
+            contextMenu.setMouse(coordination.mousePixelX, coordination.mousePixelY);
+        }
     }
 
     @Override
