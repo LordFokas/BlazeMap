@@ -75,11 +75,4 @@ public class BlazeMapReferences {
             ALL_WAYPOINTS = List.of(WAYPOINT, HOUSE, CAVE, INGOT, SWORD, AXE, PICKAXE, SHOVEL, HOE);
         }
     }
-
-    public static class MapMenu {
-        public static final ResourceLocation MENU_ROOT = Helpers.identifier("map.menu");
-        public static final ResourceLocation MENU_BLOCK = Helpers.identifier("map.menu.block");
-        public static final ResourceLocation MENU_CHUNK = Helpers.identifier("map.menu.chunk");
-        public static final ResourceLocation MENU_REGION = Helpers.identifier("map.menu.region");
-    }
 }

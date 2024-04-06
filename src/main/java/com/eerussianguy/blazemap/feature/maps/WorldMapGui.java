@@ -62,6 +62,9 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
     private final MouseSubpixelSmoother mouse;
     private Widget legend;
     private EditBox search;
+    private final Coordination coordination = new Coordination();
+    private double rawMouseX = -1, rawMouseY = -1;
+    private WorldMapPopup contextMenu;
 
     public WorldMapGui() {
         super(EMPTY);
@@ -151,9 +154,12 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double draggedX, double draggedY) {
         setMouse(mouseX, mouseY);
-        double scale = getMinecraft().getWindow().getGuiScale();
-        mouse.addMovement(draggedX * scale / zoom, draggedY * scale / zoom);
-        mapRenderer.moveCenter(-mouse.movementX(), -mouse.movementY());
+        if(button == GLFW.GLFW_MOUSE_BUTTON_1) {
+            double scale = getMinecraft().getWindow().getGuiScale();
+            mouse.addMovement(draggedX * scale / zoom, draggedY * scale / zoom);
+            mapRenderer.moveCenter(-mouse.movementX(), -mouse.movementY());
+            return true;
+        }
         return super.mouseDragged(mouseX, mouseY, button, draggedX, draggedY);
     }
 
@@ -203,10 +209,6 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
 
         return false;
     }
-
-    private final Coordination coordination = new Coordination();
-    private double rawMouseX = -1, rawMouseY = -1;
-    private WorldMapPopup contextMenu;
 
     private void setMouse(double mouseX, double mouseY) {
         double scale = getMinecraft().getWindow().getGuiScale();
