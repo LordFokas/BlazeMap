@@ -43,7 +43,12 @@ public class WorldMapPopup implements Widget {
             container.add(WorldMapMenu.NOOP);
         }
 
+        // Set up position and dimensions
+        anchorX = coordination.mousePixelX;
+        anchorY = coordination.mousePixelY;
         middleY = height / 2;
+        invertX = anchorX > width / 2;
+        invertY = anchorY > middleY;
 
         // Materialize self and children; determine width
         sizeY = this.materialize(container);
@@ -55,13 +60,7 @@ public class WorldMapPopup implements Widget {
         }
         sizeX = widest;
 
-        // Set up position and dimensions
-        anchorX = coordination.mousePixelX;
-        anchorY = coordination.mousePixelY;
-        invertX = anchorX > width / 2;
-        invertY = anchorY > middleY;
         spawnFrom(null, 0);
-
         setMouse(coordination.mousePixelX, coordination.mousePixelY);
     }
 
