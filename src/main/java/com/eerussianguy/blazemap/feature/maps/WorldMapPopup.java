@@ -30,7 +30,8 @@ public class WorldMapPopup implements Widget {
 
     private final int sizeX, sizeY, middleY;
     private int posX, posY, anchorX, anchorY;
-    private final boolean invertX, invertY;
+    private final boolean invertX;
+    private boolean invertY;
     private final ArrayList<PopupItem> items = new ArrayList<>();
     private WorldMapPopup activeChild = null;
     private PopupItem lastClicked, hovered;
@@ -109,7 +110,9 @@ public class WorldMapPopup implements Widget {
     private void spawnFrom(WorldMapPopup parent, int folderY) {
         if(parent != null) {
             anchorX = parent.anchorX + parent.sizeX * (invertX ? -1 : 1);
-            anchorY = parent.posY + folderY + (invertY ? PopupItem.HEIGHT : 0);
+            anchorY = parent.posY + folderY;
+            invertY = anchorY > middleY;
+            anchorY += (invertY ? PopupItem.HEIGHT : 0);
         }
 
         posX = anchorX - (invertX ? sizeX : 0);
