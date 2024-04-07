@@ -11,6 +11,7 @@ import com.eerussianguy.blazemap.api.pipeline.Collector;
 import com.eerussianguy.blazemap.api.pipeline.DataType;
 import com.eerussianguy.blazemap.api.pipeline.MasterDatum;
 import com.eerussianguy.blazemap.api.pipeline.Transformer;
+import com.eerussianguy.blazemap.util.Helpers;
 
 import static com.eerussianguy.blazemap.api.BlazeMapAPI.*;
 import static com.eerussianguy.blazemap.api.BlazeRegistry.Key;

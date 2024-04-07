@@ -23,7 +23,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 
 public class ProfilingRenderer {
-    private static final StringSource NO_MODS_FOUND = new StringSource("No mods found", 0x666666);
+    private static final StringSource NO_MODS_FOUND = new StringSource("No mods found", Colors.DISABLED);
     private static final StringSource NO_BAD_MODS_FOUND = new StringSource("No troublemakers found", 0xAAFFAA);
 
     public static final List<Container> PANELS = Arrays.asList(
