@@ -77,6 +77,10 @@ public class MinimapWidget {
         int mapEndX = mapPosX + mapSizeX;
         int mapEndY = mapPosY + mapSizeY;
 
+        // Make bounds checks against _previous_ mouse positions to avoid issues when mouse moves fast (BME-62)
+        mouseX -= draggedX;
+        mouseY -= draggedY;
+
         // Check if the mouse is outside the minimap bounds, and ignore input if so.
         if(mouseX < mapPosX || mouseY < mapPosY || mouseX > mapEndX || mouseY > mapEndY) {
             return false; // We did not handle this input.
