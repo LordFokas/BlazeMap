@@ -73,22 +73,20 @@ public class WaypointStore implements IMarkerStorage<Waypoint> {
             return;
         }
 
-        if(store.size() > 0) {
-            try(MinecraftStreams.Output output = outputSupplier.get()) {
-                output.writeInt(store.size());
-                for(Waypoint waypoint : store.values()) {
-                    output.writeResourceLocation(waypoint.getID());
-                    output.writeDimensionKey(waypoint.getDimension());
-                    output.writeBlockPos(waypoint.getPosition());
-                    output.writeUTF(waypoint.getName());
-                    output.writeResourceLocation(waypoint.getIcon());
-                    output.writeInt(waypoint.getColor());
-                    output.writeFloat(waypoint.getRotation());
-                }
+        try(MinecraftStreams.Output output = outputSupplier.get()) {
+            output.writeInt(store.size());
+            for(Waypoint waypoint : store.values()) {
+                output.writeResourceLocation(waypoint.getID());
+                output.writeDimensionKey(waypoint.getDimension());
+                output.writeBlockPos(waypoint.getPosition());
+                output.writeUTF(waypoint.getName());
+                output.writeResourceLocation(waypoint.getIcon());
+                output.writeInt(waypoint.getColor());
+                output.writeFloat(waypoint.getRotation());
             }
-            catch(IOException e) {
-                e.printStackTrace();
-            }
+        }
+        catch(IOException e) {
+            e.printStackTrace();
         }
     }
 
