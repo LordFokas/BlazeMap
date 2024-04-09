@@ -24,7 +24,7 @@ import com.eerussianguy.blazemap.api.BlazeRegistry;
 import com.eerussianguy.blazemap.api.maps.IScreenSkipsMinimap;
 import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.MapType;
-import com.eerussianguy.blazemap.engine.client.BlazeMapClientEngine;
+import com.eerussianguy.blazemap.engine.BlazeMapAsync;
 import com.eerussianguy.blazemap.feature.BlazeMapFeaturesClient;
 import com.eerussianguy.blazemap.gui.Image;
 import com.eerussianguy.blazemap.gui.MouseSubpixelSmoother;
@@ -328,7 +328,7 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
         font.draw(stack, String.format("Region Matrix: %d x %d", debug.ox, debug.oz), 0, y += 18, -1);
         font.draw(stack, String.format("Active Layers: %d", debug.layers), 0, y += 12, -1);
         font.draw(stack, String.format("Stitching: %s", debug.stitching), 0, y += 12, 0xFF0088FF);
-        font.draw(stack, String.format("Parallel Pool: %d", BlazeMapClientEngine.cruncher().poolSize()), 0, y += 12, 0xFFFFFF00);
+        font.draw(stack, String.format("Parallel Pool: %d", BlazeMapAsync.instance().cruncher.poolSize()), 0, y += 12, 0xFFFFFF00);
 
         font.draw(stack, String.format("Addon Labels: %d", debug.labels), 0, y += 18, -1);
         font.draw(stack, String.format("Player Waypoints: %d", debug.waypoints), 0, y += 12, -1);

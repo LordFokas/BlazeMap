@@ -38,8 +38,8 @@ import com.eerussianguy.blazemap.api.event.WaypointEvent;
 import com.eerussianguy.blazemap.api.maps.*;
 import com.eerussianguy.blazemap.api.markers.*;
 import com.eerussianguy.blazemap.api.util.RegionPos;
+import com.eerussianguy.blazemap.engine.BlazeMapAsync;
 import com.eerussianguy.blazemap.engine.async.AsyncAwaiter;
-import com.eerussianguy.blazemap.engine.client.BlazeMapClientEngine;
 import com.eerussianguy.blazemap.util.Colors;
 import com.eerussianguy.blazemap.util.Helpers;
 import com.eerussianguy.blazemap.profiling.Profiler;
@@ -410,7 +410,7 @@ public class MapRenderer implements AutoCloseable {
 
     // Run generateMapTile in an engine background thread. Useful for parallelizing massive workloads.
     private void generateMapTileAsync(NativeImage texture, TileResolution resolution, int textureW, int textureH, int cornerXOffset, int cornerZOffset, int regionIndexX, int regionIndexZ, AsyncAwaiter jobs) {
-        BlazeMapClientEngine.async().runOnDataThread(() -> {
+        BlazeMapAsync.instance().clientChain.runOnDataThread(() -> {
             generateMapTile(texture, resolution, textureW, textureH, cornerXOffset, cornerZOffset, regionIndexX, regionIndexZ);
             jobs.done();
         });
