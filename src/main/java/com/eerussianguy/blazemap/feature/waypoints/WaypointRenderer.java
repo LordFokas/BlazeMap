@@ -52,10 +52,15 @@ public class WaypointRenderer {
                 long gameTime = level.getGameTime();
                 waypointStorage.getAll().forEach(w -> {
                     final BlockPos pos = w.getPosition();
-                    final AABB fakeAABB = new AABB(pos).setMinY(level.getMinBuildHeight()).setMaxY(level.getMaxBuildHeight());
-                    if(Helpers.isInRenderDistance(pos) && event.getFrustum().isVisible(fakeAABB)) {
+                    // To render from the bottom of the world
+                    final BlockPos lowestPos = pos.mutable().setY(level.getMinBuildHeight());
+                    // To not get cut off if the bottom of the world is out of the player's render distance
+                    final BlockPos playerHeightPos = pos.mutable().setY(entity.getBlockY());
+
+                    final AABB fakeAABB = new AABB(lowestPos).setMaxY(level.getMaxBuildHeight());
+                    if(Helpers.isInRenderDistance(playerHeightPos) && event.getFrustum().isVisible(fakeAABB)) {
                         stack.pushPose();
-                        translateFromCameraToPos(stack, pos);
+                        translateFromCameraToPos(stack, lowestPos);
 
                         final float[] colors = Colors.decomposeRGB(w.getColor());
                         BeaconRenderer.renderBeaconBeam(stack, buffers, BeaconRenderer.BEAM_LOCATION, partialTick, 1f, gameTime, 0, 1024, colors, 0.2f, 0.25f);
