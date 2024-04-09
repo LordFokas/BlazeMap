@@ -13,6 +13,7 @@ import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
+import com.eerussianguy.blazemap.BlazeMapConfig;
 import com.eerussianguy.blazemap.api.BlazeMapAPI;
 import com.eerussianguy.blazemap.engine.Pipeline;
 import com.eerussianguy.blazemap.engine.RegistryController;
@@ -35,10 +36,12 @@ public class BlazeMapServerEngine {
     // Initialize in a client side context.
     // Some resources are shared with the client, there's no need to be greedy.
     public static void initForIntegrated() {
-        cruncher = BlazeMapClientEngine.cruncher();
-        async = new AsyncChainRoot(cruncher, BlazeMapServerEngine::submit);
-        debouncer = BlazeMapClientEngine.debouncer();
-        init();
+        if(BlazeMapConfig.CLIENT.enableServerEngine.get()){
+            cruncher = BlazeMapClientEngine.cruncher();
+            async = new AsyncChainRoot(cruncher, BlazeMapServerEngine::submit);
+            debouncer = BlazeMapClientEngine.debouncer();
+            init();
+        }
     }
 
     // Initialize in a dedicated server context.

@@ -15,6 +15,7 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import com.eerussianguy.blazemap.BlazeMap;
+import com.eerussianguy.blazemap.BlazeMapConfig;
 import com.eerussianguy.blazemap.api.event.DimensionChangedEvent;
 import com.eerussianguy.blazemap.api.event.ServerJoinedEvent;
 import com.eerussianguy.blazemap.api.maps.LayerRegion;
@@ -77,7 +78,11 @@ public class BlazeMapClientEngine {
         if(player == null) return;
         serverID = Helpers.getServerID();
         storage = new StorageAccess.Internal(Helpers.getClientSideStorageDir());
-        isServerSource = BlazeNetwork.ENGINE.isRemotePresent(event.getConnection());
+        if(Helpers.isIntegratedServerRunning()) {
+            isServerSource = BlazeMapConfig.CLIENT.enableServerEngine.get();
+        } else {
+            isServerSource = BlazeNetwork.ENGINE.isRemotePresent(event.getConnection());
+        }
         ServerJoinedEvent serverJoined = new ServerJoinedEvent(serverID, storage.addon(), isServerSource);
         MinecraftForge.EVENT_BUS.post(serverJoined);
         waypointStorageFactory = serverJoined.getWaypointStorageFactory();
