@@ -8,28 +8,33 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 
-import com.eerussianguy.blazemap.BlazeMapConfig;
 import com.eerussianguy.blazemap.engine.client.BlazeMapClientEngine;
 import com.eerussianguy.blazemap.engine.client.LayerRegionTile;
 import com.eerussianguy.blazemap.engine.server.BlazeMapServerEngine;
-import com.eerussianguy.blazemap.feature.MDSources;
+import com.eerussianguy.blazemap.feature.ModIntegration;
+import com.eerussianguy.blazemap.profiling.KnownMods;
 import com.eerussianguy.blazemap.feature.maps.WorldMapGui;
 import com.eerussianguy.blazemap.profiling.Profiler;
 import com.eerussianguy.blazemap.profiling.Profilers;
 import com.eerussianguy.blazemap.profiling.overlay.Container.Style;
+import com.eerussianguy.blazemap.util.Colors;
 import com.eerussianguy.blazemap.util.Helpers;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 
 public class ProfilingRenderer {
+    private static final StringSource NO_MODS_FOUND = new StringSource("No mods found", Colors.DISABLED);
+    private static final StringSource NO_BAD_MODS_FOUND = new StringSource("No troublemakers found", 0xAAFFAA);
+
     public static final List<Container> PANELS = Arrays.asList(
         new Container("Client Debug Info", Style.PANEL,
             new Container("Overlays", Style.SECTION,
                 new Container("Debug UI", Style.BLOCK,
                     new TimeProfile(Profilers.DEBUG_TIME_PROFILER, "Render")
                 ),
-                new SubsystemProfile("Minimap", Profilers.Minimap.TEXTURE_LOAD_PROFILER, Profilers.Minimap.TEXTURE_TIME_PROFILER, "frame load")
-                    .enable(BlazeMapConfig.CLIENT.minimap.enabled)
+                new Container("Minimap", Style.BLOCK,
+                    new TimeProfile(Profilers.Minimap.DRAW_TIME_PROFILER, "Render")
+                )
             ),
             new Container("Client Engine", Style.SECTION,
                 new StringSource(() -> String.format("MD Source: %s / %s", BlazeMapClientEngine.isClientSource() ? "Client" : "Server", BlazeMapClientEngine.getMDSource())),
@@ -41,9 +46,9 @@ public class ProfilingRenderer {
                     return String.format("Layer Region Tiles: %d   [ %.2f %sB ]", tiles, size, scale);
                 }),
                 new SubsystemProfile("Chunk Render Mixin", Profilers.Client.Mixin.RENDERCHUNK_LOAD_PROFILER, Profilers.Client.Mixin.RENDERCHUNK_TIME_PROFILER, "tick load")
-                    .enable(() -> BlazeMapClientEngine.getMDSource().equals(MDSources.Client.VANILLA)),
-                new SubsystemProfile("Rubidium Mixin", Profilers.Client.Mixin.RUBIDIUM_LOAD_PROFILER, Profilers.Client.Mixin.RUBIDIUM_TIME_PROFILER, "tick load")
-                    .enable(() -> BlazeMapClientEngine.getMDSource().equals(MDSources.Client.RUBIDIUM))
+                    .enable(() -> !KnownMods.isAnyLoaded(ModIntegration.SODIUM_FAMILY)),
+                new SubsystemProfile("Sodium Mixin", Profilers.Client.Mixin.SODIUM_LOAD_PROFILER, Profilers.Client.Mixin.SODIUM_TIME_PROFILER, "tick load")
+                    .enable(() -> KnownMods.isAnyLoaded(ModIntegration.SODIUM_FAMILY))
             ),
             new Container("Client Pipeline", Style.SECTION,
                 new SubsystemProfile("MD Collect", Profilers.Client.COLLECTOR_LOAD_PROFILER, Profilers.Client.COLLECTOR_TIME_PROFILER, "tick load",
@@ -74,7 +79,15 @@ public class ProfilingRenderer {
                 new SubsystemProfile("MD Process", Profilers.Server.PROCESSOR_LOAD_PROFILER, Profilers.Server.PROCESSOR_TIME_PROFILER, "delay")
                     .enable(() -> BlazeMapServerEngine.numProcessors() > 0).metric(() -> String.valueOf(BlazeMapServerEngine.numProcessors()))
             ).metric(() -> String.valueOf(BlazeMapServerEngine.numPipelines()))
-        ).metric(() -> String.format("[ %d tps ]", BlazeMapServerEngine.avgTPS())).enable(BlazeMapServerEngine::isRunning)
+        ).metric(() -> String.format("[ %d tps ]", BlazeMapServerEngine.avgTPS())).enable(BlazeMapServerEngine::isRunning),
+
+        new Container("Mod Interactions", Style.PANEL,
+            new Container("Core", Style.SECTION, KnownMods.getCore(IDrawable.class, mod -> new StringSource(mod.name).note(mod.version, Colors.WHITE), NO_MODS_FOUND)),
+            new Container("Built-in Support", Style.SECTION, KnownMods.getCompat(IDrawable.class, mod -> new StringSource(mod.name).note(mod.version, Colors.WHITE), NO_MODS_FOUND)),
+            new Container("Known Problematic", Style.SECTION, KnownMods.getProblem(IDrawable.class, mod -> new StringSource(mod.name, 0xFFAAAA).note(mod.version, 0xFFAAAA), NO_BAD_MODS_FOUND)),
+            new Container("Registered API Objects", Style.SECTION, KnownMods.getAPICall(IDrawable.class, mod -> new StringSource(mod.name).note(mod.version, Colors.WHITE), NO_MODS_FOUND)),
+            new Container("Announced", Style.SECTION, KnownMods.getAnnounced(IDrawable.class, mod -> new StringSource(mod.name).note(mod.version, Colors.WHITE), NO_MODS_FOUND))
+        )
     );
 
 
@@ -92,11 +105,11 @@ public class ProfilingRenderer {
         Profilers.DEBUG_TIME_PROFILER.begin();
 
         stack.pushPose();
-        stack.translate(5, 5, 0);
         double guiScale = mc.getWindow().getGuiScale();
         if(guiScale > DEBUG_SCALE){
             stack.scale((float)(DEBUG_SCALE / guiScale), (float)(DEBUG_SCALE / guiScale), 1);
         }
+        stack.translate(5, 5, 0);
         drawPanels(stack, buffers, mc.font);
         stack.popPose();
 

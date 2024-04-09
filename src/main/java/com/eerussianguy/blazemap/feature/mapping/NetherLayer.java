@@ -2,6 +2,9 @@ package com.eerussianguy.blazemap.feature.mapping;
 
 import java.awt.*;
 
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
+
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
 import com.eerussianguy.blazemap.api.builtin.TerrainHeightMD;
 import com.eerussianguy.blazemap.api.maps.Layer;
@@ -42,6 +45,10 @@ public class NetherLayer extends Layer {
         }
     }
 
+    @Override
+    public boolean shouldRenderInDimension(ResourceKey<Level> dimension) {
+        return dimension.equals(Level.NETHER);
+    }
 
     @Override
     public boolean renderTile(NativeImage tile, TileResolution resolution, IDataSource data, int xGridOffset, int zGridOffset) {

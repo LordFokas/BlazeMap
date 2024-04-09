@@ -19,7 +19,7 @@ apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'maven-publish'
 
-version = '0.5.9d-alpha'
+version = '0.5.10-alpha'
 group = 'com.eerussianguy.blazemap' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "BlazeMap-${minecraft_version}"
 
@@ -70,6 +70,7 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
     compileOnly fg.deobf("_:rubidium:0.5.6")
+//    implementation fg.deobf("_:rubidium:0.5.6")
 
 //    implementation fg.deobf("_:Patchouli:1.18.2-71.1")
 //    implementation fg.deobf("_:TerraFirmaCraft:Forge-1.18.2-2.1.11-beta")

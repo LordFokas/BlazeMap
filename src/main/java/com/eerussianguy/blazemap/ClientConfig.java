@@ -24,7 +24,7 @@ import static com.eerussianguy.blazemap.BlazeMap.MOD_ID;
  * We are free to use key binds to allow what is essentially config editing on the fly
  */
 public class ClientConfig {
-    public final BooleanValue enableDebug;
+    public final BooleanValue enableDebug, enableServerEngine;
     public final MapConfig worldMap;
     public final MinimapConfig minimap;
 
@@ -33,6 +33,7 @@ public class ClientConfig {
 
         innerBuilder.push("general");
         enableDebug = builder.apply("enableDebug").comment("Enable debug mode?").define("enableDebug", !FMLEnvironment.production);
+        enableServerEngine = builder.apply("enableServerEngine").comment("Enable Server Engine on the Integrated Server").define("enableServerEngine", true);
         innerBuilder.pop();
 
         innerBuilder.push("worldmap");

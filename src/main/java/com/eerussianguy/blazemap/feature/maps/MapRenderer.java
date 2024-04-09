@@ -563,6 +563,14 @@ public class MapRenderer implements AutoCloseable {
         return zoom;
     }
 
+    public int getBeginX() {
+        return begin.getX();
+    }
+
+    public int getBeginZ() {
+        return begin.getZ();
+    }
+
     public boolean toggleLayer(BlazeRegistry.Key<Layer> layer) {
         if(!mapType.getLayers().contains(layer)) return false;
         if(disabled.contains(layer)) disabled.remove(layer);
@@ -570,6 +578,10 @@ public class MapRenderer implements AutoCloseable {
         updateVisibleLayers();
         needsUpdate = true;
         return true;
+    }
+
+    List<BlazeRegistry.Key<Layer>> getVisibleLayers() {
+        return visible;
     }
 
     public boolean isLayerVisible(BlazeRegistry.Key<Layer> layer) {

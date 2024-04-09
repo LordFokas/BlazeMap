@@ -5,6 +5,7 @@ import java.awt.*;
 public class Colors {
     public static final int NO_TINT = -1;
     public static final int WHITE = 0xFFFFFFFF;
+    public static final int DISABLED = 0x666666;
     public static final int LABEL_COLOR = 0xFF404040;
     public static final int WIDGET_BACKGROUND = 0xA0000000;
 

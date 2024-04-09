@@ -9,16 +9,46 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 public class StringSource implements IDrawable {
-    private final int color;
-    private final Supplier<String> string;
+    private static final int DEFAULT_COLOR = 0xFFFFAA;
 
-    public StringSource(Supplier<String> string){
-        this(string, 0xFFFFAA);
+    private final Supplier<String> main;
+    private final int main_color;
+    private Supplier<String> note;
+    private int note_color;
+
+    public StringSource(String string) {
+        this(() -> string, DEFAULT_COLOR);
+    }
+
+    public StringSource(String string, int color) {
+        this(() -> string, color);
+    }
+
+    public StringSource(Supplier<String> string) {
+        this(string, DEFAULT_COLOR);
     }
 
     public StringSource(Supplier<String> string, int color){
-        this.string = string;
-        this.color = color;
+        this.main = string;
+        this.main_color = color;
+    }
+
+    public StringSource note(String note) {
+        return note(() -> note, DEFAULT_COLOR);
+    }
+
+    public StringSource note(String note, int color) {
+        return note(() -> note, color);
+    }
+
+    public StringSource note(Supplier<String> note) {
+        return note(note, DEFAULT_COLOR);
+    }
+
+    public StringSource note(Supplier<String> note, int color) {
+        this.note = note;
+        this.note_color = color;
+        return this;
     }
 
     @Override
@@ -28,6 +58,9 @@ public class StringSource implements IDrawable {
 
     @Override
     public void draw(PoseStack stack, MultiBufferSource buffers, Font fontRenderer) {
-        fontRenderer.drawInBatch(string.get(), Container.Style.BLOCK.indent, 0, color, false, stack.last().pose(), buffers, false, 0, LightTexture.FULL_BRIGHT);
+        fontRenderer.drawInBatch(main.get(), Container.Style.BLOCK.indent, 0, main_color, false, stack.last().pose(), buffers, false, 0, LightTexture.FULL_BRIGHT);
+        if(note != null){
+            fontRenderer.drawInBatch(note.get(), Container.PANEL_MIDDLE, 0, note_color, false, stack.last().pose(), buffers, false, 0, LightTexture.FULL_BRIGHT);
+        }
     }
 }
