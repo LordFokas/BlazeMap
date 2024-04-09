@@ -68,8 +68,8 @@ public class ClientConfig {
         MinimapConfig(Function<String, Builder> builder) {
             super(builder, MinimapRenderer.MIN_ZOOM, MinimapRenderer.MAX_ZOOM);
             this.enabled = builder.apply("enabled").comment("Enable the minimap?").define("enabled", true);
-            this.positionX = builder.apply("positionX").comment("Minimap horizontal position on screen").defineInRange("positionX", 0, 0, 16000);
-            this.positionY = builder.apply("positionY").comment("Minimap vertical position on screen").defineInRange("positionY", 0, 0, 9000);
+            this.positionX = builder.apply("positionX").comment("Minimap horizontal position on screen").defineInRange("positionX", 15, 0, 16000);
+            this.positionY = builder.apply("positionY").comment("Minimap vertical position on screen").defineInRange("positionY", 15, 0, 9000);
             this.width = builder.apply("width").comment("Minimap widget width").defineInRange("width", 256, 128, 1600);
             this.height = builder.apply("height").comment("Minimap widget height").defineInRange("height", 256, 128, 1600);
         }
