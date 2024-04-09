@@ -1,4 +1,4 @@
-package com.eerussianguy.blazemap.engine;
+package com.eerussianguy.blazemap.engine.cache;
 
 import java.util.Set;
 
@@ -6,15 +6,16 @@ import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
 import com.eerussianguy.blazemap.api.pipeline.DataType;
 import com.eerussianguy.blazemap.api.pipeline.MasterDatum;
 import com.eerussianguy.blazemap.api.util.IDataSource;
+import com.eerussianguy.blazemap.engine.UnsafeGenerics;
 
 @SuppressWarnings("rawtypes")
-public class MapView implements IDataSource {
+public class ChunkMDCacheView implements IDataSource {
     private ChunkMDCache source;
     private Set<Key<DataType>> filter;
 
-    public MapView() {}
+    public ChunkMDCacheView() {}
 
-    public MapView setSource(ChunkMDCache source) {
+    public ChunkMDCacheView setSource(ChunkMDCache source) {
         this.source = source;
         return this;
     }
