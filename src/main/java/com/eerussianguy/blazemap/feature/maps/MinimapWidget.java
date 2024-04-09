@@ -36,10 +36,20 @@ public class MinimapWidget {
     }
 
     public void render(PoseStack stack, MultiBufferSource buffers) {
-        int mcWidth = Minecraft.getInstance().getWindow().getWidth();
+        Window window = Minecraft.getInstance().getWindow();
+        int mcWidth = window.getWidth();
+        int mcHeight = window.getHeight();
+
         int width = config.width.get();
         int height = config.height.get();
-        stack.translate(mcWidth - width - config.positionX.get(), config.positionY.get(), 0); // BME-63 Invert X: x coord starts from right side
+        int posX = mcWidth - width - config.positionX.get(); // BME-63 Invert X: x coord starts from right side
+        int posY = config.positionY.get();
+
+        // BME-64: Keep minimap inside screen
+        posX = Helpers.clamp(0, posX, mcWidth - width);
+        posY = Helpers.clamp(0, posY, mcHeight - height);
+
+        stack.translate(posX, posY, 0);
 
         stack.pushPose();
         stack.translate(-BORDER_SIZE, -BORDER_SIZE, 0);
