@@ -71,7 +71,7 @@ public class RegionMDCache {
         }
     }
 
-    public final ChunkMDCache.Persisted getChunkCache(ChunkPos chunk) {
+    public final ChunkMDCache getChunkCache(ChunkPos chunk) {
         int x = chunk.getRegionLocalX();
         int z = chunk.getRegionLocalZ();
         int index = x * CHUNKS + z;
