@@ -98,6 +98,8 @@ public class MapRenderer implements AutoCloseable {
     private List<BlazeRegistry.Key<Layer>> disabled, visible;
     private final HashMap<BlazeRegistry.Key<MapType>, List<BlazeRegistry.Key<Layer>>> disabledLayers = new HashMap<>();
     private final List<Waypoint> waypoints = new ArrayList<>(16);
+    private final List<Waypoint> waypoints_on = new ArrayList<>(16);
+    private final List<Waypoint> waypoints_off = new ArrayList<>(16);
     private final List<MapLabel> labels = new ArrayList<>(16);
     private final List<MapLabel> labels_on = new ArrayList<>(16);
     private final List<MapLabel> labels_off = new ArrayList<>(16);
@@ -211,18 +213,25 @@ public class MapRenderer implements AutoCloseable {
         waypoints.clear();
         waypoints.addAll(waypointStorage.getAll().stream().filter(w -> inRange(w.getPosition())).collect(Collectors.toList()));
         debug.waypoints = waypoints.size();
+        waypoints.forEach(this::matchWaypoint);
+        pingSearchHost();
     }
 
     private void add(Waypoint waypoint) {
         if(inRange(waypoint.getPosition())) {
             waypoints.add(waypoint);
             debug.waypoints++;
+            matchWaypoint(waypoint);
+            pingSearchHost();
         }
     }
 
     private void remove(Waypoint waypoint) {
         if(waypoints.remove(waypoint)) {
             debug.waypoints--;
+            waypoints_on.remove(waypoint);
+            waypoints_off.remove(waypoint);
+            pingSearchHost();
         }
     }
 
@@ -296,22 +305,26 @@ public class MapRenderer implements AutoCloseable {
             for(MapLabel l : labels_off) {
                 renderObject(buffers, stack, l, SearchTargeting.MISS);
             }
+            for(Waypoint w : waypoints_off) {
+                renderMarker(buffers, stack, w.getPosition(), w.getIcon(), w.getColor(), 32, 32, w.getRotation(), false, renderNames ? w.getName() : null, SearchTargeting.MISS);
+            }
+            for(MapLabel l : labels_on) {
+                renderObject(buffers, stack, l, SearchTargeting.HIT);
+            }
+            for(Waypoint w : waypoints_on) {
+                renderMarker(buffers, stack, w.getPosition(), w.getIcon(), w.getColor(), 32, 32, w.getRotation(), false, renderNames ? w.getName() : null, SearchTargeting.HIT);
+            }
         }
         else {
             for(MapLabel l : labels) {
                 renderObject(buffers, stack, l, SearchTargeting.NONE);
             }
-        }
-        for(Waypoint w : waypoints) {
-            renderMarker(buffers, stack, w.getPosition(), w.getIcon(), w.getColor(), 32, 32, w.getRotation(), false, renderNames ? w.getName() : null);
-        }
-        if(hasActiveSearch) {
-            for(MapLabel l : labels_on) {
-                renderObject(buffers, stack, l, SearchTargeting.HIT);
+            for(Waypoint w : waypoints) {
+                renderMarker(buffers, stack, w.getPosition(), w.getIcon(), w.getColor(), 32, 32, w.getRotation(), false, renderNames ? w.getName() : null, SearchTargeting.NONE);
             }
         }
         LocalPlayer player = Helpers.getPlayer();
-        renderMarker(buffers, stack, player.blockPosition(), PLAYER, Colors.NO_TINT, 32, 32, player.getRotationVector().y, false, null);
+        renderMarker(buffers, stack, player.blockPosition(), PLAYER, Colors.NO_TINT, 32, 32, player.getRotationVector().y, false, null, SearchTargeting.NONE);
         stack.popPose();
 
         stack.popPose();
@@ -351,7 +364,7 @@ public class MapRenderer implements AutoCloseable {
                     return;
                 }
 
-                renderMarker(buffers, stack, pos, PLAYER, color, 32, 32, entity.getRotationVector().y, false, isPlayer ? entity.getName().getString() : null);
+                renderMarker(buffers, stack, pos, PLAYER, color, 32, 32, entity.getRotationVector().y, false, isPlayer ? entity.getName().getString() : null, SearchTargeting.NONE);
             }
         });
     }
@@ -426,7 +439,7 @@ public class MapRenderer implements AutoCloseable {
         }
     }
 
-    private void renderMarker(MultiBufferSource buffers, PoseStack stack, BlockPos position, ResourceLocation marker, int color, double width, double height, float rotation, boolean zoom, String name) {
+    private void renderMarker(MultiBufferSource buffers, PoseStack stack, BlockPos position, ResourceLocation marker, int color, double width, double height, float rotation, boolean zoom, String name, SearchTargeting search) {
         stack.pushPose();
         stack.scale((float) this.zoom, (float) this.zoom, 1);
         int dx = position.getX() - begin.getX();
@@ -441,13 +454,13 @@ public class MapRenderer implements AutoCloseable {
             stack.pushPose();
             stack.translate(-mc.font.width(name), (10 + (height / scale)), 0);
             stack.scale(scale, scale, 0);
-            mc.font.drawInBatch(name, 0, 0, color, true, stack.last().pose(), buffers, false, 0, LightTexture.FULL_BRIGHT);
+            mc.font.drawInBatch(name, 0, 0, search.color(color), true, stack.last().pose(), buffers, false, 0, LightTexture.FULL_BRIGHT);
             stack.popPose();
         }
         stack.mulPose(Vector3f.ZP.rotationDegrees(rotation));
         stack.translate(-width / 2, -height / 2, 0);
         VertexConsumer vertices = buffers.getBuffer(RenderType.text(marker));
-        RenderHelper.drawQuad(vertices, stack.last().pose(), (float) width, (float) height, color);
+        RenderHelper.drawQuad(vertices, stack.last().pose(), (float) width, (float) height, search.color(color));
         stack.popPose();
     }
 
@@ -471,6 +484,8 @@ public class MapRenderer implements AutoCloseable {
     public void setSearch(String search) {
         labels_off.clear();
         labels_on.clear();
+        waypoints_off.clear();
+        waypoints_on.clear();
         if(search == null || search.equals("")) {
             hasActiveSearch = false;
             matcher = null;
@@ -485,6 +500,7 @@ public class MapRenderer implements AutoCloseable {
         }
         hasActiveSearch = true;
         labels.forEach(this::matchLabel);
+        waypoints.forEach(this::matchWaypoint);
     }
 
     private void matchLabel(MapLabel label) {
@@ -498,13 +514,22 @@ public class MapRenderer implements AutoCloseable {
         labels_off.add(label);
     }
 
+    private void matchWaypoint(Waypoint waypoint) {
+        if(!hasActiveSearch) return;
+        if(matcher.test(waypoint.getName())) {
+            waypoints_on.add(waypoint);
+        } else {
+            waypoints_off.add(waypoint);
+        }
+    }
+
     public void setSearchHost(Consumer<Boolean> searchHost) {
         this.searchHost = searchHost;
     }
 
     public void pingSearchHost() {
         if(searchHost == null) return;
-        searchHost.accept(labels.size() > 0);
+        searchHost.accept(waypoints.size() + labels.size() > 0);
     }
 
 
