@@ -24,7 +24,7 @@ import static com.eerussianguy.blazemap.BlazeMap.MOD_ID;
  * We are free to use key binds to allow what is essentially config editing on the fly
  */
 public class ClientConfig {
-    public final BooleanValue enableDebug;
+    public final BooleanValue enableDebug, enableServerEngine;
     public final MapConfig worldMap;
     public final MinimapConfig minimap;
 
@@ -33,6 +33,7 @@ public class ClientConfig {
 
         innerBuilder.push("general");
         enableDebug = builder.apply("enableDebug").comment("Enable debug mode?").define("enableDebug", !FMLEnvironment.production);
+        enableServerEngine = builder.apply("enableServerEngine").comment("Enable Server Engine on the Integrated Server").define("enableServerEngine", true);
         innerBuilder.pop();
 
         innerBuilder.push("worldmap");
@@ -67,8 +68,8 @@ public class ClientConfig {
         MinimapConfig(Function<String, Builder> builder) {
             super(builder, MinimapRenderer.MIN_ZOOM, MinimapRenderer.MAX_ZOOM);
             this.enabled = builder.apply("enabled").comment("Enable the minimap?").define("enabled", true);
-            this.positionX = builder.apply("positionX").comment("Minimap horizontal position on screen").defineInRange("positionX", 0, 0, 16000);
-            this.positionY = builder.apply("positionY").comment("Minimap vertical position on screen").defineInRange("positionY", 0, 0, 9000);
+            this.positionX = builder.apply("positionX").comment("Minimap horizontal position on screen").defineInRange("positionX", 15, 0, 16000);
+            this.positionY = builder.apply("positionY").comment("Minimap vertical position on screen").defineInRange("positionY", 15, 0, 9000);
             this.width = builder.apply("width").comment("Minimap widget width").defineInRange("width", 256, 128, 1600);
             this.height = builder.apply("height").comment("Minimap widget height").defineInRange("height", 256, 128, 1600);
         }

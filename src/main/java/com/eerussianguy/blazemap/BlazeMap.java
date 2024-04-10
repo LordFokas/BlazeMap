@@ -53,13 +53,13 @@ public class BlazeMap {
         BlazeNetwork.init();
 
         if(FMLEnvironment.dist == Dist.CLIENT) {
-            // Server engine must always start after the client engine due to
-            // a dependency used to conserve resources in the integrated server
             BlazeMapClientEngine.init();
-            BlazeMapServerEngine.initForIntegrated();
+            if(BlazeMapConfig.CLIENT.enableServerEngine.get()){
+                BlazeMapServerEngine.init();
+            }
         }
         else {
-            BlazeMapServerEngine.initForDedicated();
+            BlazeMapServerEngine.init();
         }
 
         BlazeMapFeaturesCommon.initMapping();

@@ -53,6 +53,10 @@ public class Helpers {
         }
     }
 
+    public static boolean isIntegratedServerRunning() {
+        return Minecraft.getInstance().hasSingleplayerServer();
+    }
+
     /**
      * @return the client-side dir to store data for the currently connected server
      */

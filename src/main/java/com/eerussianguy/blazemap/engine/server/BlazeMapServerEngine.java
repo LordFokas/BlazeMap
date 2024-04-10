@@ -14,48 +14,23 @@ import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import com.eerussianguy.blazemap.api.BlazeMapAPI;
+import com.eerussianguy.blazemap.engine.BlazeMapAsync;
 import com.eerussianguy.blazemap.engine.Pipeline;
 import com.eerussianguy.blazemap.engine.RegistryController;
 import com.eerussianguy.blazemap.engine.StorageAccess;
-import com.eerussianguy.blazemap.engine.async.AsyncChainRoot;
-import com.eerussianguy.blazemap.engine.async.AsyncDataCruncher;
-import com.eerussianguy.blazemap.engine.async.DebouncingThread;
-import com.eerussianguy.blazemap.engine.client.BlazeMapClientEngine;
 
 public class BlazeMapServerEngine {
     private static final Map<ResourceKey<Level>, ServerPipeline> PIPELINES = new HashMap<>();
-    private static DebouncingThread debouncer;
-    private static AsyncChainRoot async;
-    private static AsyncDataCruncher cruncher;
     private static MinecraftServer server;
     private static boolean isRunning;
     private static StorageAccess.Internal storage;
     private static int numCollectors = 0, numProcessors = 0, numTransformers = 0;
 
-    // Initialize in a client side context.
-    // Some resources are shared with the client, there's no need to be greedy.
-    public static void initForIntegrated() {
-        cruncher = BlazeMapClientEngine.cruncher();
-        async = new AsyncChainRoot(cruncher, BlazeMapServerEngine::submit);
-        debouncer = BlazeMapClientEngine.debouncer();
-        init();
-    }
-
-    // Initialize in a dedicated server context.
-    // Since there is no client to share computing resources with, instantiate them all.
-    public static void initForDedicated() {
-        cruncher = new AsyncDataCruncher("Blaze Map (Server)");
-        async = new AsyncChainRoot(cruncher, BlazeMapServerEngine::submit);
-        debouncer = new DebouncingThread("Blaze Map (Server)");
-        init();
-    }
-
-    // Common context initialization routine.
-    private static void init() {
+    public static void init() {
         MinecraftForge.EVENT_BUS.register(BlazeMapServerEngine.class);
     }
 
-    private static void submit(Runnable task) {
+    public static void submit(Runnable task) {
         if(server == null) return;
         server.submit(task);
     }
@@ -82,9 +57,10 @@ public class BlazeMapServerEngine {
     }
 
     private static ServerPipeline getPipeline(ResourceKey<Level> dimension) {
+        BlazeMapAsync async = BlazeMapAsync.instance();
         return PIPELINES.computeIfAbsent(dimension, d -> {
             BlazeMapAPI.COLLECTORS.keys();
-            ServerPipeline pipeline = new ServerPipeline(async, debouncer, d, () -> server.getLevel(d), storage.internal(d.location()));
+            ServerPipeline pipeline = new ServerPipeline(async.serverChain, async.debouncer, d, () -> server.getLevel(d), storage.internal(d.location()));
             numCollectors = Math.max(numCollectors, pipeline.numCollectors);
             numTransformers = Math.max(numTransformers, pipeline.numTransformers);
             numProcessors = Math.max(numProcessors, pipeline.numProcessors);
@@ -94,18 +70,6 @@ public class BlazeMapServerEngine {
 
     public static boolean isRunning() {
         return isRunning;
-    }
-
-    public static DebouncingThread debouncer() {
-        return debouncer;
-    }
-
-    public static AsyncChainRoot async() {
-        return async;
-    }
-
-    public static AsyncDataCruncher cruncher() {
-        return cruncher;
     }
 
 

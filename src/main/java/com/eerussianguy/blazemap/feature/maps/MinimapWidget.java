@@ -36,9 +36,20 @@ public class MinimapWidget {
     }
 
     public void render(PoseStack stack, MultiBufferSource buffers) {
+        Window window = Minecraft.getInstance().getWindow();
+        int mcWidth = window.getWidth();
+        int mcHeight = window.getHeight();
+
         int width = config.width.get();
         int height = config.height.get();
-        stack.translate(config.positionX.get(), config.positionY.get(), 0);
+        int posX = mcWidth - width - config.positionX.get(); // BME-63 Invert X: x coord starts from right side
+        int posY = config.positionY.get();
+
+        // BME-64: Keep minimap inside screen
+        posX = Helpers.clamp(0, posX, mcWidth - width);
+        posY = Helpers.clamp(0, posY, mcHeight - height);
+
+        stack.translate(posX, posY, 0);
 
         stack.pushPose();
         stack.translate(-BORDER_SIZE, -BORDER_SIZE, 0);
@@ -49,9 +60,9 @@ public class MinimapWidget {
 
         if(editor){
             stack.pushPose();
-            stack.translate(width - HANDLE_SIZE - BORDER_SIZE, height - HANDLE_SIZE - BORDER_SIZE, 0);
+            stack.translate(0, height - HANDLE_SIZE - BORDER_SIZE, 0);
             RenderHelper.fillRect(buffers, stack.last().pose(), HANDLE_SIZE + BORDER_SIZE, HANDLE_SIZE + BORDER_SIZE, Colors.WIDGET_BACKGROUND);
-            stack.translate(BORDER_SIZE, BORDER_SIZE, 0.1);
+            stack.translate(0, BORDER_SIZE, 0.1);
             RenderHelper.fillRect(buffers, stack.last().pose(), HANDLE_SIZE, HANDLE_SIZE, 0xFFFF0000);
             stack.popPose();
         }
@@ -70,6 +81,8 @@ public class MinimapWidget {
     }
 
     public boolean mouseDragged(double mouseX, double mouseY, int button, double draggedX, double draggedY) {
+        Window window = Minecraft.getInstance().getWindow();
+
         int mapPosX = config.positionX.get();
         int mapPosY = config.positionY.get();
         int mapSizeX = config.width.get();
@@ -77,18 +90,22 @@ public class MinimapWidget {
         int mapEndX = mapPosX + mapSizeX;
         int mapEndY = mapPosY + mapSizeY;
 
+        // Make bounds checks against _previous_ mouse positions to avoid issues when mouse moves fast (BME-62)
+        mouseX -= draggedX;
+        mouseY -= draggedY;
+        mouseX = window.getWidth() - mouseX; // Invert X origin coordinate for BME-63
+
         // Check if the mouse is outside the minimap bounds, and ignore input if so.
         if(mouseX < mapPosX || mouseY < mapPosY || mouseX > mapEndX || mouseY > mapEndY) {
             return false; // We did not handle this input.
         }
 
         // Calculate window "end" distance from "map end"
-        Window window = Minecraft.getInstance().getWindow();
         int maxX = window.getWidth() - mapEndX;
         int maxY = window.getHeight() - mapEndY;
 
         // Used to smooth out subpixel movements
-        mouse.addMovement(draggedX, draggedY);
+        mouse.addMovement(-draggedX, draggedY); // draggedX negated for BME-63 Invert X
 
         try{
             // Check if outside the resize handle (red square) bounds
