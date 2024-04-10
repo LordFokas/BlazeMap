@@ -118,7 +118,9 @@ public class BlazeMapFeaturesClient {
         bus.addListener(MapRenderer::onWaypointAdded);
         bus.addListener(MapRenderer::onWaypointRemoved);
         bus.addListener(WorldMapMenu::trackWaypointStore);
-        WaypointRenderer.init();
+
+        // Disabling while feature incomplete. See BME-46
+        // WaypointRenderer.init();
 
         waypoints = true;
     }
