@@ -5,6 +5,7 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
@@ -13,6 +14,7 @@ import com.eerussianguy.blazemap.api.event.MapMenuSetupEvent;
 import com.eerussianguy.blazemap.api.event.MapMenuSetupEvent.*;
 import com.eerussianguy.blazemap.api.markers.IMarkerStorage;
 import com.eerussianguy.blazemap.api.markers.Waypoint;
+import com.eerussianguy.blazemap.engine.client.BlazeMapClientEngine;
 import com.eerussianguy.blazemap.util.Colors;
 import com.eerussianguy.blazemap.util.Helpers;
 
@@ -48,7 +50,9 @@ public class WorldMapMenu {
     }
 
     public static MenuFolder debug(int blockX, int blockZ, int chunkX, int chunkZ, int regionX, int regionZ) {
-        return makeFolder("debug", BLAZE_POWDER, -1, NOOP);
+        return makeFolder("debug", BLAZE_POWDER, -1,
+            makeAction("debug.redraw_chunk_md", null, () -> BlazeMapClientEngine.forceRedrawFromMD(new ChunkPos(chunkX, chunkZ)))
+        );
     }
 
     public static void trackWaypointStore(DimensionChangedEvent evt) {

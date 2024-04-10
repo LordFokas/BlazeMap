@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.eerussianguy.blazemap.api.BlazeMapAPI;
 import com.eerussianguy.blazemap.api.BlazeRegistry;
@@ -34,6 +35,10 @@ public class ChunkMDCache {
 
     public boolean isEmpty() {
         return data.isEmpty();
+    }
+
+    public Set<BlazeRegistry.Key<DataType>> keys() {
+        return data.keySet();
     }
 
     public List<MasterDatum> data() {

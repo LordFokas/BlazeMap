@@ -124,6 +124,11 @@ public class BlazeMapClientEngine {
         return PIPELINES.computeIfAbsent(dimension, d -> new ClientPipeline(async.clientChain, async.debouncer, d, storage.internal(d.location()), isClientSource() ? PipelineType.CLIENT_STANDALONE : PipelineType.CLIENT_AND_SERVER)).activate();
     }
 
+    public static void forceRedrawFromMD(ChunkPos pos) {
+        if(activePipeline == null) return;
+        BlazeMapAsync.instance().clientChain.runOnDataThread(() -> activePipeline.redrawFromMD(pos));
+    }
+
     public static void onChunkChanged(ChunkPos pos, String source) {
         if(isServerSource) {
             if(activePipeline != null) {
