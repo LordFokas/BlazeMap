@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.Connection;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
@@ -15,7 +16,7 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import com.eerussianguy.blazemap.BlazeMap;
-import com.eerussianguy.blazemap.BlazeMapConfig;
+import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.api.event.DimensionChangedEvent;
 import com.eerussianguy.blazemap.api.event.ServerJoinedEvent;
 import com.eerussianguy.blazemap.api.maps.LayerRegion;
@@ -49,6 +50,7 @@ public class BlazeMapClientEngine {
     private static String mdSource;
 
     public static void init() {
+        BlazeNetwork.initEngine();
         MinecraftForge.EVENT_BUS.register(BlazeMapClientEngine.class);
     }
 
@@ -59,16 +61,20 @@ public class BlazeMapClientEngine {
         if(player == null) return;
         serverID = Helpers.getServerID();
         storage = new StorageAccess.Internal(Helpers.getClientSideStorageDir());
-        if(Helpers.isIntegratedServerRunning()) {
-            isServerSource = BlazeMapConfig.CLIENT.enableServerEngine.get();
-        } else {
-            isServerSource = BlazeNetwork.ENGINE.isRemotePresent(event.getConnection());
-        }
+        isServerSource = detectRemote(event.getConnection());
         ServerJoinedEvent serverJoined = new ServerJoinedEvent(serverID, storage.addon(), isServerSource);
         MinecraftForge.EVENT_BUS.post(serverJoined);
         waypointStorageFactory = serverJoined.getWaypointStorageFactory();
         switchToPipeline(player.level.dimension());
         mdSource = "unknown";
+    }
+
+    private static boolean detectRemote(Connection connection) {
+        if(Helpers.isIntegratedServerRunning()) {
+            return BlazeMapConfig.COMMON.enableServerEngine.get();
+        } else {
+            return BlazeNetwork.engine().isRemotePresent(connection);
+        }
     }
 
     @SubscribeEvent

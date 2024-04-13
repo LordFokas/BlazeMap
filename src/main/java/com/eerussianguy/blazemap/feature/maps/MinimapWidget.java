@@ -7,8 +7,8 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.phys.Vec3;
 
 import com.eerussianguy.blazemap.BlazeMap;
-import com.eerussianguy.blazemap.BlazeMapConfig;
-import com.eerussianguy.blazemap.ClientConfig;
+import com.eerussianguy.blazemap.config.BlazeMapConfig;
+import com.eerussianguy.blazemap.config.ClientConfig;
 import com.eerussianguy.blazemap.gui.MouseSubpixelSmoother;
 import com.eerussianguy.blazemap.util.Colors;
 import com.eerussianguy.blazemap.util.Helpers;

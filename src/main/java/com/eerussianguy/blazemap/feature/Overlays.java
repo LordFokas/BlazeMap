@@ -5,7 +5,7 @@ import net.minecraftforge.client.gui.ForgeIngameGui;
 import net.minecraftforge.client.gui.IIngameOverlay;
 import net.minecraftforge.client.gui.OverlayRegistry;
 
-import com.eerussianguy.blazemap.BlazeMapConfig;
+import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.feature.maps.MinimapRenderer;
 import com.eerussianguy.blazemap.profiling.overlay.ProfilingRenderer;
 import com.mojang.blaze3d.vertex.PoseStack;

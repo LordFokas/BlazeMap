@@ -11,14 +11,13 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 
 import com.eerussianguy.blazemap.BlazeMap;
-import com.eerussianguy.blazemap.BlazeMapConfig;
+import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.api.BlazeMapAPI;
 import com.eerussianguy.blazemap.api.event.MapMenuSetupEvent;
 import com.eerussianguy.blazemap.feature.mapping.*;
 import com.eerussianguy.blazemap.feature.maps.*;
 import com.eerussianguy.blazemap.feature.waypoints.WaypointEditorGui;
 import com.eerussianguy.blazemap.feature.waypoints.WaypointManagerGui;
-import com.eerussianguy.blazemap.feature.waypoints.WaypointRenderer;
 import com.eerussianguy.blazemap.feature.waypoints.WaypointStore;
 import com.mojang.blaze3d.platform.InputConstants;
 

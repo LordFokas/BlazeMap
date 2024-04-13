@@ -1,6 +1,6 @@
 package com.eerussianguy.blazemap.feature.maps;
 
-import com.eerussianguy.blazemap.ClientConfig.MapConfig;
+import com.eerussianguy.blazemap.config.ClientConfig.MapConfig;
 import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
 import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.MapType;

@@ -1,23 +1,17 @@
 package com.eerussianguy.blazemap.feature.maps;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.gui.ForgeIngameGui;
 
-import com.eerussianguy.blazemap.BlazeMapConfig;
+import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.api.maps.IScreenSkipsMinimap;
 import com.eerussianguy.blazemap.api.maps.MapType;
 import com.eerussianguy.blazemap.util.Helpers;
 import com.eerussianguy.blazemap.profiling.Profilers;
-import com.eerussianguy.blazemap.util.RenderHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
 
 public class MinimapRenderer implements AutoCloseable {
     public static final MinimapRenderer INSTANCE = new MinimapRenderer();

@@ -32,7 +32,7 @@ public class PacketChunkMDUpdate {
     }
 
     public void send(LevelChunk chunk) {
-        BlazeNetwork.ENGINE.send(PacketDistributor.TRACKING_CHUNK.with(() -> chunk), this);
+        BlazeNetwork.engine().send(PacketDistributor.TRACKING_CHUNK.with(() -> chunk), this);
     }
 
     void handle(NetworkEvent.Context context) {

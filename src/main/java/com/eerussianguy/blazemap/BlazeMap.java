@@ -10,11 +10,12 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import com.eerussianguy.blazemap.api.BlazeMapAPI;
+import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.engine.client.BlazeMapClientEngine;
 import com.eerussianguy.blazemap.engine.server.BlazeMapServerEngine;
+import com.eerussianguy.blazemap.feature.BlazeMapCommandsClient;
 import com.eerussianguy.blazemap.feature.BlazeMapFeaturesClient;
 import com.eerussianguy.blazemap.feature.BlazeMapFeaturesCommon;
-import com.eerussianguy.blazemap.network.BlazeNetwork;
 import com.mojang.logging.LogUtils;
 import org.slf4j.Logger;
 
@@ -32,9 +33,10 @@ public class BlazeMap {
         final IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         bus.addListener(this::setup);
 
+        BlazeMapConfig.init();
+
         if(FMLEnvironment.dist == Dist.CLIENT) {
             FMLEventHandler.init();
-            BlazeMapConfig.init();
 
             // Enabling this will log when certain events happen in the world, allowing you
             // to crossreference what's happening on screen with what's happening in the logs.
@@ -50,20 +52,23 @@ public class BlazeMap {
     }
 
     public void setup(FMLCommonSetupEvent event) {
-        BlazeNetwork.init();
-
+        // We are client side, enable client engine. Required on client.
         if(FMLEnvironment.dist == Dist.CLIENT) {
             BlazeMapClientEngine.init();
-            if(BlazeMapConfig.CLIENT.enableServerEngine.get()){
-                BlazeMapServerEngine.init();
-            }
         }
-        else {
+
+        // Regardless of side, server engine is optional.
+        // This might be helpful later on, on server side, where we want the engine off but other features on.
+        // So removing the mod to disable the server engine will not be an option.
+        // For now, though, there are no other server features.
+        if(BlazeMapConfig.COMMON.enableServerEngine.get()){
             BlazeMapServerEngine.init();
         }
 
+        // Initialize common sided features
         BlazeMapFeaturesCommon.initMapping();
 
+        // Initialize client-only features
         if(FMLEnvironment.dist == Dist.CLIENT) {
             BlazeMapFeaturesClient.initMapping();
             BlazeMapFeaturesClient.initMaps();

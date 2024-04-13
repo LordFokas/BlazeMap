@@ -19,7 +19,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 
-import com.eerussianguy.blazemap.BlazeMapConfig;
+import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.api.BlazeMapAPI;
 import com.eerussianguy.blazemap.api.BlazeRegistry;
 import com.eerussianguy.blazemap.api.maps.IScreenSkipsMinimap;

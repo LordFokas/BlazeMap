@@ -1,4 +1,4 @@
-package com.eerussianguy.blazemap;
+package com.eerussianguy.blazemap.config;
 
 import java.util.List;
 import java.util.function.Function;
@@ -6,6 +6,7 @@ import java.util.function.Function;
 import net.minecraftforge.common.ForgeConfigSpec.*;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 
+import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
 import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
 import com.eerussianguy.blazemap.api.maps.Layer;
@@ -16,24 +17,21 @@ import com.eerussianguy.blazemap.util.IConfigAdapter;
 import com.eerussianguy.blazemap.util.LayerListAdapter;
 import com.eerussianguy.blazemap.util.MapTypeAdapter;
 
-import static com.eerussianguy.blazemap.BlazeMap.MOD_ID;
-
 /**
  * Forge configs happen to be a very simple way to serialize things across saves and hold data within a particular instance
  * It is not necessarily expected that the player will be editing the config
  * We are free to use key binds to allow what is essentially config editing on the fly
  */
 public class ClientConfig {
-    public final BooleanValue enableDebug, enableServerEngine;
+    public final BooleanValue enableDebug;
     public final MapConfig worldMap;
     public final MinimapConfig minimap;
 
     ClientConfig(Builder innerBuilder) {
-        Function<String, Builder> builder = name -> innerBuilder.translation(MOD_ID + ".config.client." + name);
+        Function<String, Builder> builder = name -> innerBuilder.translation(BlazeMap.MOD_ID + ".config.client." + name);
 
         innerBuilder.push("general");
         enableDebug = builder.apply("enableDebug").comment("Enable debug mode?").define("enableDebug", !FMLEnvironment.production);
-        enableServerEngine = builder.apply("enableServerEngine").comment("Enable Server Engine on the Integrated Server").define("enableServerEngine", true);
         innerBuilder.pop();
 
         innerBuilder.push("worldmap");

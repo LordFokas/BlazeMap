@@ -1,6 +1,6 @@
 package com.eerussianguy.blazemap.feature.maps;
 
-import com.eerussianguy.blazemap.ClientConfig.MinimapConfig;
+import com.eerussianguy.blazemap.config.ClientConfig.MinimapConfig;
 
 public class MinimapConfigSynchronizer extends MapConfigSynchronizer {
 

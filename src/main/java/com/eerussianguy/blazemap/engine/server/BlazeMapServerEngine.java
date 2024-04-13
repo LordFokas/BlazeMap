@@ -18,6 +18,7 @@ import com.eerussianguy.blazemap.engine.BlazeMapAsync;
 import com.eerussianguy.blazemap.engine.Pipeline;
 import com.eerussianguy.blazemap.engine.RegistryController;
 import com.eerussianguy.blazemap.engine.StorageAccess;
+import com.eerussianguy.blazemap.network.BlazeNetwork;
 
 public class BlazeMapServerEngine {
     private static final Map<ResourceKey<Level>, ServerPipeline> PIPELINES = new HashMap<>();
@@ -27,6 +28,7 @@ public class BlazeMapServerEngine {
     private static int numCollectors = 0, numProcessors = 0, numTransformers = 0;
 
     public static void init() {
+        BlazeNetwork.initEngine();
         MinecraftForge.EVENT_BUS.register(BlazeMapServerEngine.class);
     }
 
