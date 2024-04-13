@@ -1,4 +1,4 @@
-package com.eerussianguy.blazemap.api.event;
+package com.eerussianguy.blazemap.api.debug;
 
 import java.util.Set;
 

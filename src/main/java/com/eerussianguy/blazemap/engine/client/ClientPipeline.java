@@ -107,6 +107,40 @@ class ClientPipeline extends Pipeline {
             .execute();
     }
 
+    void redrawFromMD(ChunkPos pos) {
+        async.begin()
+            .thenOnDataThread($ -> deleteChunkTile(pos))
+            .thenDelay(500)
+            .thenOnDataThread($ -> regenChunkTile(pos))
+            .execute();
+    }
+
+    private Void regenChunkTile(ChunkPos pos) {
+        ChunkMDCache cache = mdCache.getChunkCache(pos);
+        ChunkMDCacheView view = CACHE_VIEWS.get().setSource(cache);
+        Set<Key<DataType>> diff = cache.keys();
+        onPipelineOutput(pos, diff, view, cache);
+        return null;
+    }
+
+    private Void deleteChunkTile(ChunkPos chunkPos) {
+        RegionPos regionPos = new RegionPos(chunkPos);
+        Set<LayerRegion> updates = new HashSet<>();
+        for(TileResolution resolution : TileResolution.values()) {
+            NativeImage layerChunkTile = new NativeImage(NativeImage.Format.RGBA, resolution.chunkWidth, resolution.chunkWidth, true);
+            for(Layer layer : layers) {
+                Key<Layer> layerID = layer.getID();
+                LayerRegionTile layerRegionTile = getLayerRegionTile(layerID, regionPos, resolution, false);
+                layerRegionTile.updateTile(layerChunkTile, chunkPos);
+                updates.add(new LayerRegion(layerID, regionPos));
+            }
+        }
+        if(updates.size() > 0) {
+            async.runOnGameThread(() -> sendMapUpdates(updates));
+        }
+        return null;
+    }
+
     // Redraw tiles based on MD changes
     // Check what MDs changed, mark dependent layers and processors as dirty
     // Ask layers to redraw tiles, if applicable:
