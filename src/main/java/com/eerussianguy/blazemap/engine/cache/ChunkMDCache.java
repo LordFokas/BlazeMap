@@ -1,10 +1,7 @@
 package com.eerussianguy.blazemap.engine.cache;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import com.eerussianguy.blazemap.api.BlazeMapAPI;
 import com.eerussianguy.blazemap.api.BlazeRegistry;
@@ -14,7 +11,7 @@ import com.eerussianguy.blazemap.api.util.MinecraftStreams;
 import com.eerussianguy.blazemap.engine.UnsafeGenerics;
 
 public class ChunkMDCache {
-    protected final Map<BlazeRegistry.Key<DataType>, MasterDatum> data = new HashMap<>(16);
+    protected final Map<BlazeRegistry.Key<DataType>, MasterDatum> data = new TreeMap<>(Comparator.comparing(o -> o.location));
 
     public MasterDatum get(BlazeRegistry.Key<DataType> key) {
         return data.get(key);

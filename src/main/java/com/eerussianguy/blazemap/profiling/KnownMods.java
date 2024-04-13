@@ -13,7 +13,7 @@ import net.minecraftforge.fml.ModList;
 import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.BlazeMapAPI;
 import com.eerussianguy.blazemap.api.BlazeRegistry;
-import com.eerussianguy.blazemap.api.event.ModAnnouncementEvent;
+import com.eerussianguy.blazemap.api.debug.ModAnnouncementEvent;
 import com.eerussianguy.blazemap.feature.ModIntegration.ModIDs;
 
 public class KnownMods {

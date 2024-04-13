@@ -135,6 +135,14 @@ public abstract class Pipeline {
         this.useMDCache = true;
     }
 
+    public boolean isMDCached() {
+        return this.useMDCache;
+    }
+
+    public LevelMDCache getMDCache() {
+        return mdCache;
+    }
+
 
     // =================================================================================================================
     // Pipeline execution steps

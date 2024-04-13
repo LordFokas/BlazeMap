@@ -2,6 +2,7 @@ package com.eerussianguy.blazemap.feature.maps;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.lwjgl.glfw.GLFW;
@@ -47,6 +48,12 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
 
     public static void open() {
         Minecraft.getInstance().setScreen(new WorldMapGui());
+    }
+
+    public static void apply(Consumer<WorldMapGui> function) {
+        if(Minecraft.getInstance().screen instanceof WorldMapGui gui) {
+            function.accept(gui);
+        }
     }
 
 
@@ -384,5 +391,10 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
     @Override
     public Minecraft getMinecraft() {
         return Minecraft.getInstance();
+    }
+
+    public void addInspector(MDInspectorWidget<?> widget) {
+        this.addRenderableWidget(widget);
+        widget.setDismisser(() -> this.removeWidget(widget));
     }
 }

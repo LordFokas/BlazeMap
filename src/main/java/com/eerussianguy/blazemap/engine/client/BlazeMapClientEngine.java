@@ -29,6 +29,7 @@ import com.eerussianguy.blazemap.api.util.IStorageAccess;
 import com.eerussianguy.blazemap.engine.BlazeMapAsync;
 import com.eerussianguy.blazemap.engine.RegistryController;
 import com.eerussianguy.blazemap.engine.StorageAccess;
+import com.eerussianguy.blazemap.engine.cache.ChunkMDCache;
 import com.eerussianguy.blazemap.network.BlazeNetwork;
 import com.eerussianguy.blazemap.util.Helpers;
 
@@ -122,6 +123,11 @@ public class BlazeMapClientEngine {
     private static ClientPipeline getPipeline(ResourceKey<Level> dimension) {
         BlazeMapAsync async = BlazeMapAsync.instance();
         return PIPELINES.computeIfAbsent(dimension, d -> new ClientPipeline(async.clientChain, async.debouncer, d, storage.internal(d.location()), isClientSource() ? PipelineType.CLIENT_STANDALONE : PipelineType.CLIENT_AND_SERVER)).activate();
+    }
+
+    public static ChunkMDCache getMDCache(ChunkPos pos) {
+        if(activePipeline == null || !activePipeline.isMDCached()) return null;
+        return activePipeline.getMDCache().getChunkCache(pos);
     }
 
     public static void forceRedrawFromMD(ChunkPos pos) {
