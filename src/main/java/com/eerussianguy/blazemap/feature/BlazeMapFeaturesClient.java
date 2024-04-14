@@ -11,12 +11,13 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 
 import com.eerussianguy.blazemap.BlazeMap;
+import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.api.BlazeMapAPI;
+import com.eerussianguy.blazemap.api.event.MapMenuSetupEvent;
 import com.eerussianguy.blazemap.feature.mapping.*;
 import com.eerussianguy.blazemap.feature.maps.*;
 import com.eerussianguy.blazemap.feature.waypoints.WaypointEditorGui;
 import com.eerussianguy.blazemap.feature.waypoints.WaypointManagerGui;
-import com.eerussianguy.blazemap.feature.waypoints.WaypointRenderer;
 import com.eerussianguy.blazemap.feature.waypoints.WaypointStore;
 import com.mojang.blaze3d.platform.InputConstants;
 
@@ -24,6 +25,14 @@ public class BlazeMapFeaturesClient {
     public static final KeyMapping KEY_MAPS = new KeyMapping("blazemap.key.maps", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_B, BlazeMap.MOD_NAME);
     public static final KeyMapping KEY_ZOOM = new KeyMapping("blazemap.key.zoom", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_LEFT_BRACKET, BlazeMap.MOD_NAME);
     public static final KeyMapping KEY_WAYPOINTS = new KeyMapping("blazemap.key.waypoints", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_N, BlazeMap.MOD_NAME);
+
+    private static boolean mapping = false;
+    private static boolean maps = false;
+    private static boolean waypoints = false;
+
+    public static boolean hasMapping() {
+        return mapping;
+    }
 
     public static void initMapping() {
         BlazeMapAPI.LAYERS.register(new TerrainHeightLayer());
@@ -35,6 +44,12 @@ public class BlazeMapFeaturesClient {
         BlazeMapAPI.MAPTYPES.register(new AerialViewMapType());
         BlazeMapAPI.MAPTYPES.register(new TopographyMapType());
         BlazeMapAPI.MAPTYPES.register(new NetherMapType());
+
+        mapping = true;
+    }
+
+    public static boolean hasMaps() {
+        return maps;
     }
 
     public static void initMaps() {
@@ -49,6 +64,9 @@ public class BlazeMapFeaturesClient {
         bus.addListener(MapRenderer::onMapLabelAdded);
         bus.addListener(MapRenderer::onMapLabelRemoved);
         bus.addListener(BlazeMapFeaturesClient::mapKeybinds);
+        bus.addListener(BlazeMapFeaturesClient::mapMenu);
+
+        maps = true;
     }
 
     private static void mapKeybinds(InputEvent.KeyInputEvent evt) {
@@ -78,6 +96,19 @@ public class BlazeMapFeaturesClient {
         }
     }
 
+    private static void mapMenu(MapMenuSetupEvent evt) {
+        if(hasWaypoints()){
+            evt.root.add(WorldMapMenu.waypoints(evt.blockPosX, evt.blockPosZ));
+        }
+        if(BlazeMapConfig.CLIENT.enableDebug.get()) {
+            evt.root.add(WorldMapMenu.debug(evt.blockPosX, evt.blockPosZ, evt.chunkPosX, evt.chunkPosZ, evt.regionPosX, evt.regionPosZ));
+        }
+    }
+
+    public static boolean hasWaypoints() {
+        return waypoints;
+    }
+
     public static void initWaypoints() {
         IEventBus bus = MinecraftForge.EVENT_BUS;
         bus.addListener(WaypointEditorGui::onDimensionChanged);
@@ -85,6 +116,11 @@ public class BlazeMapFeaturesClient {
         bus.addListener(EventPriority.HIGHEST, WaypointStore::onServerJoined);
         bus.addListener(MapRenderer::onWaypointAdded);
         bus.addListener(MapRenderer::onWaypointRemoved);
-        WaypointRenderer.init();
+        bus.addListener(WorldMapMenu::trackWaypointStore);
+
+        // Disabling while feature incomplete. See BME-46
+        // WaypointRenderer.init();
+
+        waypoints = true;
     }
 }

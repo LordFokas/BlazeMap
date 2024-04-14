@@ -1,4 +1,4 @@
-package com.eerussianguy.blazemap;
+package com.eerussianguy.blazemap.config;
 
 import java.util.List;
 import java.util.function.Function;
@@ -6,18 +6,16 @@ import java.util.function.Function;
 import net.minecraftforge.common.ForgeConfigSpec.*;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 
+import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
 import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
 import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.MapType;
 import com.eerussianguy.blazemap.feature.maps.MinimapRenderer;
-import com.eerussianguy.blazemap.feature.maps.MinimapSize;
 import com.eerussianguy.blazemap.feature.maps.WorldMapGui;
 import com.eerussianguy.blazemap.util.IConfigAdapter;
 import com.eerussianguy.blazemap.util.LayerListAdapter;
 import com.eerussianguy.blazemap.util.MapTypeAdapter;
-
-import static com.eerussianguy.blazemap.BlazeMap.MOD_ID;
 
 /**
  * Forge configs happen to be a very simple way to serialize things across saves and hold data within a particular instance
@@ -30,7 +28,7 @@ public class ClientConfig {
     public final MinimapConfig minimap;
 
     ClientConfig(Builder innerBuilder) {
-        Function<String, Builder> builder = name -> innerBuilder.translation(MOD_ID + ".config.client." + name);
+        Function<String, Builder> builder = name -> innerBuilder.translation(BlazeMap.MOD_ID + ".config.client." + name);
 
         innerBuilder.push("general");
         enableDebug = builder.apply("enableDebug").comment("Enable debug mode?").define("enableDebug", !FMLEnvironment.production);
@@ -60,22 +58,46 @@ public class ClientConfig {
         }
     }
 
-    public static class MinimapConfig extends MapConfig {
-        @Deprecated
-        public final EnumValue<MinimapSize> overlaySize;
-
+    public static class MinimapConfig extends MapConfig implements MinimapConfigFacade.IWidgetConfig {
         public final BooleanValue enabled;
         public final IntValue positionX, positionY;
         public final IntValue width, height;
 
+        private final MinimapConfigFacade.IntFacade _positionX, _positionY, _width, _height;
+
         MinimapConfig(Function<String, Builder> builder) {
             super(builder, MinimapRenderer.MIN_ZOOM, MinimapRenderer.MAX_ZOOM);
-            this.overlaySize = builder.apply("overlaySize").comment("Overlay size").defineEnum("overlaySize", MinimapSize.LARGE);
             this.enabled = builder.apply("enabled").comment("Enable the minimap?").define("enabled", true);
-            this.positionX = builder.apply("positionX").comment("Minimap horizontal position on screen").defineInRange("positionX", 0, 0, 16000);
-            this.positionY = builder.apply("positionY").comment("Minimap vertical position on screen").defineInRange("positionY", 0, 0, 9000);
+            this.positionX = builder.apply("positionX").comment("Minimap horizontal position on screen").defineInRange("positionX", 15, 0, 16000);
+            this.positionY = builder.apply("positionY").comment("Minimap vertical position on screen").defineInRange("positionY", 15, 0, 9000);
             this.width = builder.apply("width").comment("Minimap widget width").defineInRange("width", 256, 128, 1600);
             this.height = builder.apply("height").comment("Minimap widget height").defineInRange("height", 256, 128, 1600);
+
+            // Facade stuff for BME-54
+            this._positionX = new MinimapConfigFacade.IntFacade(positionX);
+            this._positionY = new MinimapConfigFacade.IntFacade(positionY);
+            this._width = new MinimapConfigFacade.IntFacade(width);
+            this._height = new MinimapConfigFacade.IntFacade(height);
+        }
+
+        @Override
+        public MinimapConfigFacade.IntFacade positionX() {
+            return _positionX;
+        }
+
+        @Override
+        public MinimapConfigFacade.IntFacade positionY() {
+            return _positionY;
+        }
+
+        @Override
+        public MinimapConfigFacade.IntFacade width() {
+            return _width;
+        }
+
+        @Override
+        public MinimapConfigFacade.IntFacade height() {
+            return _height;
         }
     }
 }

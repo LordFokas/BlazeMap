@@ -15,6 +15,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.storage.LevelResource;
 
 import com.eerussianguy.blazemap.BlazeMap;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.serialization.Codec;
 import org.jetbrains.annotations.Nullable;
 
@@ -39,8 +40,15 @@ public class Helpers {
     public static boolean isInRenderDistance(BlockPos pos) {
         Minecraft mc = Minecraft.getInstance();
         Entity entity = mc.cameraEntity;
-        double rd = mc.options.getEffectiveRenderDistance() * 16;
-        return entity != null && entity.blockPosition().distSqr(pos) < rd * rd;
+        double renderDist = mc.options.getEffectiveRenderDistance() * 16;
+        return entity != null && entity.blockPosition().distSqr(pos) < renderDist * renderDist;
+    }
+
+    public static boolean isInFogDistance(BlockPos pos) {
+        Minecraft mc = Minecraft.getInstance();
+        Entity entity = mc.cameraEntity;
+        double fogDist = RenderSystem.getShaderFogStart();
+        return entity != null && entity.blockPosition().distSqr(pos) < fogDist * fogDist;
     }
 
     public static String getServerID() {
@@ -51,6 +59,10 @@ public class Helpers {
         else {
             return mc.getCurrentServer().ip;
         }
+    }
+
+    public static boolean isIntegratedServerRunning() {
+        return Minecraft.getInstance().hasSingleplayerServer();
     }
 
     /**

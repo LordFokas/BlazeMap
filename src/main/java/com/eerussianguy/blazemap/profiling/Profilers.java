@@ -36,8 +36,8 @@ public class Profilers {
         public static class Mixin {
             public static final TimeProfilerSync RENDERCHUNK_TIME_PROFILER = new TimeProfilerSync(20);
             public static final LoadProfiler RENDERCHUNK_LOAD_PROFILER = new LoadProfiler(20, 50);
-            public static final TimeProfilerSync RUBIDIUM_TIME_PROFILER = new TimeProfilerSync(20);
-            public static final LoadProfiler RUBIDIUM_LOAD_PROFILER = new LoadProfiler(20, 50);
+            public static final TimeProfilerSync SODIUM_TIME_PROFILER = new TimeProfilerSync(20);
+            public static final LoadProfiler SODIUM_LOAD_PROFILER = new LoadProfiler(20, 50);
         }
     }
 

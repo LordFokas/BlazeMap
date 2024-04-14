@@ -21,6 +21,8 @@ import com.eerussianguy.blazemap.api.pipeline.*;
 import com.eerussianguy.blazemap.api.util.RegionPos;
 import com.eerussianguy.blazemap.engine.*;
 import com.eerussianguy.blazemap.engine.async.*;
+import com.eerussianguy.blazemap.engine.cache.ChunkMDCache;
+import com.eerussianguy.blazemap.engine.cache.ChunkMDCacheView;
 import com.eerussianguy.blazemap.util.Helpers;
 import com.mojang.blaze3d.platform.NativeImage;
 
@@ -37,8 +39,6 @@ class ClientPipeline extends Pipeline {
     );
 
 
-    private final StorageAccess.Internal storage;
-    public final StorageAccess addonStorage;
     public final Set<Key<MapType>> availableMapTypes;
     public final Set<Key<Layer>> availableLayers;
     private final Layer[] layers;
@@ -50,13 +50,11 @@ class ClientPipeline extends Pipeline {
 
     public ClientPipeline(AsyncChainRoot async, DebouncingThread debouncer, ResourceKey<Level> dimension, StorageAccess.Internal storage, PipelineType type) {
         super(
-            async, debouncer, CLIENT_PIPELINE_PROFILER, dimension, Helpers::levelOrThrow,
+            async, debouncer, CLIENT_PIPELINE_PROFILER, dimension, Helpers::levelOrThrow, storage,
             computeCollectorSet(dimension, type),
             BlazeMapAPI.TRANSFORMERS.keys().stream().filter(k -> k.value().shouldExecuteIn(dimension, type)).collect(Collectors.toUnmodifiableSet()),
             BlazeMapAPI.PROCESSORS.keys().stream().filter(k -> k.value().shouldExecuteIn(dimension, type)).collect(Collectors.toUnmodifiableSet())
         );
-        this.storage = storage;
-        this.addonStorage = storage.addon();
 
         // Set up views (immutable sets) for the available maps and layers.
         this.availableMapTypes = BlazeMapAPI.MAPTYPES.keys().stream().filter(m -> m.value().shouldRenderInDimension(dimension)).collect(Collectors.toUnmodifiableSet());
@@ -71,6 +69,8 @@ class ClientPipeline extends Pipeline {
             region.save();
             TILE_TIME_PROFILER.end();
         }), 2500, 30000);
+
+        this.useMDCache();
     }
 
     private static Set<Key<Collector<MasterDatum>>> computeCollectorSet(ResourceKey<Level> dimension, PipelineType type) {
@@ -107,6 +107,40 @@ class ClientPipeline extends Pipeline {
             .execute();
     }
 
+    void redrawFromMD(ChunkPos pos) {
+        async.begin()
+            .thenOnDataThread($ -> deleteChunkTile(pos))
+            .thenDelay(500)
+            .thenOnDataThread($ -> regenChunkTile(pos))
+            .execute();
+    }
+
+    private Void regenChunkTile(ChunkPos pos) {
+        ChunkMDCache cache = mdCache.getChunkCache(pos);
+        ChunkMDCacheView view = CACHE_VIEWS.get().setSource(cache);
+        Set<Key<DataType>> diff = cache.keys();
+        onPipelineOutput(pos, diff, view, cache);
+        return null;
+    }
+
+    private Void deleteChunkTile(ChunkPos chunkPos) {
+        RegionPos regionPos = new RegionPos(chunkPos);
+        Set<LayerRegion> updates = new HashSet<>();
+        for(TileResolution resolution : TileResolution.values()) {
+            NativeImage layerChunkTile = new NativeImage(NativeImage.Format.RGBA, resolution.chunkWidth, resolution.chunkWidth, true);
+            for(Layer layer : layers) {
+                Key<Layer> layerID = layer.getID();
+                LayerRegionTile layerRegionTile = getLayerRegionTile(layerID, regionPos, resolution, false);
+                layerRegionTile.updateTile(layerChunkTile, chunkPos);
+                updates.add(new LayerRegion(layerID, regionPos));
+            }
+        }
+        if(updates.size() > 0) {
+            async.runOnGameThread(() -> sendMapUpdates(updates));
+        }
+        return null;
+    }
+
     // Redraw tiles based on MD changes
     // Check what MDs changed, mark dependent layers and processors as dirty
     // Ask layers to redraw tiles, if applicable:
@@ -116,7 +150,7 @@ class ClientPipeline extends Pipeline {
     // -  - add LayerRegion to the list of updated images to send a notification for
     @Override
     @SuppressWarnings("rawtypes")
-    protected void onPipelineOutput(ChunkPos chunkPos, Set<Key<DataType>> diff, MapView view, ChunkMDCache cache) {
+    protected void onPipelineOutput(ChunkPos chunkPos, Set<Key<DataType>> diff, ChunkMDCacheView view, ChunkMDCache cache) {
         try {
             RegionPos regionPos = new RegionPos(chunkPos);
             Set<LayerRegion> updates = new HashSet<>();
@@ -209,6 +243,7 @@ class ClientPipeline extends Pipeline {
     public void shutdown() {
         active = false;
         dirtyChunks.clear();
+        mdCache.flush();
         dirtyTiles.finish();
         tiles.values().forEach(r -> r.forEach((lr, c) -> c.invalidateAll()));
         tiles.clear();

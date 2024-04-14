@@ -5,6 +5,7 @@ import java.io.IOException;
 import net.minecraft.network.FriendlyByteBuf;
 
 import com.eerussianguy.blazemap.api.BlazeRegistry;
+import com.eerussianguy.blazemap.api.debug.MDInspectionController;
 import com.eerussianguy.blazemap.api.util.MinecraftStreams;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.ByteBufOutputStream;
@@ -36,6 +37,11 @@ public interface DataType<T extends MasterDatum> extends BlazeRegistry.RegistryE
         catch(IOException e) {
             e.printStackTrace();
         }
+        return null;
+    }
+
+    // Debug utility. Optional.
+    default MDInspectionController<T> getInspectionController() {
         return null;
     }
 }

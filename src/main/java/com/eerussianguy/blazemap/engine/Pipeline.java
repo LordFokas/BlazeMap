@@ -13,6 +13,9 @@ import com.eerussianguy.blazemap.api.util.RegionPos;
 import com.eerussianguy.blazemap.engine.async.AsyncChainRoot;
 import com.eerussianguy.blazemap.engine.async.DebouncingDomain;
 import com.eerussianguy.blazemap.engine.async.DebouncingThread;
+import com.eerussianguy.blazemap.engine.cache.ChunkMDCache;
+import com.eerussianguy.blazemap.engine.cache.ChunkMDCacheView;
+import com.eerussianguy.blazemap.engine.cache.LevelMDCache;
 
 import static com.eerussianguy.blazemap.engine.UnsafeGenerics.*;
 
@@ -21,7 +24,8 @@ import static com.eerussianguy.blazemap.engine.UnsafeGenerics.*;
 // parameterizations every single line, it would be unreadable and hard to maintain.
 @SuppressWarnings({"rawtypes", "unchecked"})
 public abstract class Pipeline {
-    protected final ThreadLocal<MapView> MAP_VIEWS = ThreadLocal.withInitial(MapView::new);
+    protected final ThreadLocal<ChunkMDCacheView> CACHE_VIEWS = ThreadLocal.withInitial(ChunkMDCacheView::new);
+    protected final ThreadLocal<ChunkMDCache> PLACEHOLDER_CACHES = ThreadLocal.withInitial(ChunkMDCache::new);
 
     private final PipelineProfiler profiler;
     protected final AsyncChainRoot async;
@@ -35,11 +39,15 @@ public abstract class Pipeline {
     private final List<Transformer> transformers;
     private final List<Processor> processors;
     public final int numCollectors, numProcessors, numTransformers;
+    protected final StorageAccess.Internal storage;
+    public final StorageAccess addonStorage;
+    protected final LevelMDCache mdCache;
+    private boolean useMDCache = false;
 
 
     protected Pipeline(
         AsyncChainRoot async, DebouncingThread debouncer, PipelineProfiler profiler,
-        ResourceKey<Level> dimension, Supplier<Level> level,
+        ResourceKey<Level> dimension, Supplier<Level> level, StorageAccess.Internal storage,
         Set<Key<Collector<MasterDatum>>> availableCollectors,
         Set<Key<Transformer<MasterDatum>>> availableTransformers,
         Set<Key<Processor>> availableProcessors
@@ -62,6 +70,10 @@ public abstract class Pipeline {
         numCollectors = collectors.length;
         numTransformers = transformers.size();
         numProcessors = processors.size();
+
+        this.storage = storage;
+        this.addonStorage = storage.addon();
+        this.mdCache = new LevelMDCache(addonStorage, async);
     }
 
     public int getDirtyChunks() {
@@ -80,7 +92,7 @@ public abstract class Pipeline {
         async.runOnDataThread(() -> processMasterData(pos, data));
     }
 
-    protected abstract void onPipelineOutput(ChunkPos pos, Set<Key<DataType>> diff, MapView view, ChunkMDCache cache);
+    protected abstract void onPipelineOutput(ChunkPos pos, Set<Key<DataType>> diff, ChunkMDCacheView view, ChunkMDCache cache);
 
 
     // =================================================================================================================
@@ -94,8 +106,8 @@ public abstract class Pipeline {
     // TODO: figure out why void gives generic errors but null Void is OK. Does it have to be an Object?
     protected Void processMasterData(ChunkPos pos, List<MasterDatum> collectedData) {
         if(collectedData.size() == 0) return null;
-        ChunkMDCache cache = new ChunkMDCache(); // FIXME: load chunk MD cache from disk
-        MapView view = MAP_VIEWS.get().setSource(cache);
+        ChunkMDCache cache = useMDCache ? mdCache.getChunkCache(pos) : PLACEHOLDER_CACHES.get().clear();
+        ChunkMDCacheView view = CACHE_VIEWS.get().setSource(cache);
 
         // Diff collected data
         Set<Key<DataType>> diff = new HashSet<>();
@@ -106,9 +118,6 @@ public abstract class Pipeline {
         // Diff transformed data
         diffMD(transformedData, cache, diff);
 
-        // Cache MD
-        cache.persist(); // TODO: double check that persistence is done
-
         this.onPipelineOutput(pos, diff, view, cache);
         this.runProcessors(pos, diff, view);
         return null;
@@ -116,10 +125,22 @@ public abstract class Pipeline {
 
     private static void diffMD(List<MasterDatum> data, ChunkMDCache cache, Set<Key<DataType>> diff) {
         for(MasterDatum md : data) {
-            if(cache.diff(md)) {
+            if(cache.update(md)) {
                 diff.add(stripKey(md.getID()));
             }
         }
+    }
+
+    protected void useMDCache() {
+        this.useMDCache = true;
+    }
+
+    public boolean isMDCached() {
+        return this.useMDCache;
+    }
+
+    public LevelMDCache getMDCache() {
+        return mdCache;
     }
 
 
@@ -151,7 +172,7 @@ public abstract class Pipeline {
         }
     }
 
-    protected List<MasterDatum> runTransformers(Set<Key<DataType>> diff, MapView view) {
+    protected List<MasterDatum> runTransformers(Set<Key<DataType>> diff, ChunkMDCacheView view) {
         Transformer[] transformers = this.transformers.stream().filter(t -> !Collections.disjoint(t.getInputIDs(), diff)).toArray(Transformer[]::new);
         if(transformers.length == 0) return Collections.EMPTY_LIST;
 
@@ -170,7 +191,7 @@ public abstract class Pipeline {
         }
     }
 
-    protected void runProcessors(ChunkPos chunk, Set<Key<DataType>> diff, MapView view) {
+    protected void runProcessors(ChunkPos chunk, Set<Key<DataType>> diff, ChunkMDCacheView view) {
         Processor[] processors = this.processors.stream().filter(p -> !Collections.disjoint(p.getInputIDs(), diff)).toArray(Processor[]::new);
         if(processors.length == 0) return;
 

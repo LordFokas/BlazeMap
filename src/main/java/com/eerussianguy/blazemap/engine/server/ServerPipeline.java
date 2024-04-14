@@ -22,6 +22,8 @@ import com.eerussianguy.blazemap.api.pipeline.PipelineType;
 import com.eerussianguy.blazemap.engine.*;
 import com.eerussianguy.blazemap.engine.async.AsyncChainRoot;
 import com.eerussianguy.blazemap.engine.async.DebouncingThread;
+import com.eerussianguy.blazemap.engine.cache.ChunkMDCache;
+import com.eerussianguy.blazemap.engine.cache.ChunkMDCacheView;
 import com.eerussianguy.blazemap.network.PacketChunkMDUpdate;
 
 import static com.eerussianguy.blazemap.profiling.Profilers.Server.*;
@@ -36,20 +38,15 @@ class ServerPipeline extends Pipeline {
         PROCESSOR_LOAD_PROFILER
     );
 
-    private final StorageAccess.Internal storage;
-    private final StorageAccess addonStorage;
     private final MasterDataDispatcher dispatcher;
 
     public ServerPipeline(AsyncChainRoot async, DebouncingThread debouncer, ResourceKey<Level> dimension, Supplier<Level> level, StorageAccess.Internal storage) {
         super(
-            async, debouncer, SERVER_PIPELINE_PROFILER, dimension, level,
+            async, debouncer, SERVER_PIPELINE_PROFILER, dimension, level, storage,
             BlazeMapAPI.COLLECTORS.keys().stream().filter(k -> k.value().shouldExecuteIn(dimension, PipelineType.SERVER)).collect(Collectors.toUnmodifiableSet()),
             BlazeMapAPI.TRANSFORMERS.keys().stream().filter(k -> k.value().shouldExecuteIn(dimension, PipelineType.SERVER)).collect(Collectors.toUnmodifiableSet()),
             BlazeMapAPI.PROCESSORS.keys().stream().filter(k -> k.value().shouldExecuteIn(dimension, PipelineType.SERVER)).collect(Collectors.toUnmodifiableSet())
         );
-
-        this.storage = storage;
-        this.addonStorage = storage.addon();
 
         ServerPipelineInitEvent event = new ServerPipelineInitEvent(dimension, addonStorage, this::dispatch);
         MinecraftForge.EVENT_BUS.post(event);
@@ -58,7 +55,7 @@ class ServerPipeline extends Pipeline {
 
     @Override
     @SuppressWarnings("rawtypes")
-    protected void onPipelineOutput(ChunkPos pos, Set<Key<DataType>> diff, MapView view, ChunkMDCache cache) {
+    protected void onPipelineOutput(ChunkPos pos, Set<Key<DataType>> diff, ChunkMDCacheView view, ChunkMDCache cache) {
         dispatcher.dispatch(dimension, pos, cache.data(), UnsafeGenerics.mdKeys(diff), BlazeMapServerEngine.getMDSource(), level.get().getChunk(pos.x, pos.z));
     }
 

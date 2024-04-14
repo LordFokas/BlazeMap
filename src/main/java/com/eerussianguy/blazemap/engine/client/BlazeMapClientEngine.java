@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.Connection;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
@@ -15,6 +16,7 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import com.eerussianguy.blazemap.BlazeMap;
+import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.api.event.DimensionChangedEvent;
 import com.eerussianguy.blazemap.api.event.ServerJoinedEvent;
 import com.eerussianguy.blazemap.api.maps.LayerRegion;
@@ -25,11 +27,10 @@ import com.eerussianguy.blazemap.api.markers.Waypoint;
 import com.eerussianguy.blazemap.api.pipeline.MasterDatum;
 import com.eerussianguy.blazemap.api.pipeline.PipelineType;
 import com.eerussianguy.blazemap.api.util.IStorageAccess;
+import com.eerussianguy.blazemap.engine.BlazeMapAsync;
 import com.eerussianguy.blazemap.engine.RegistryController;
 import com.eerussianguy.blazemap.engine.StorageAccess;
-import com.eerussianguy.blazemap.engine.async.AsyncChainRoot;
-import com.eerussianguy.blazemap.engine.async.AsyncDataCruncher;
-import com.eerussianguy.blazemap.engine.async.DebouncingThread;
+import com.eerussianguy.blazemap.engine.cache.ChunkMDCache;
 import com.eerussianguy.blazemap.network.BlazeNetwork;
 import com.eerussianguy.blazemap.util.Helpers;
 
@@ -39,9 +40,6 @@ public class BlazeMapClientEngine {
     private static final Map<ResourceKey<Level>, IMarkerStorage<Waypoint>> WAYPOINTS = new HashMap<>();
     private static final ResourceLocation WAYPOINT_STORAGE = Helpers.identifier("waypoints.bin");
 
-    private static DebouncingThread debouncer;
-    private static AsyncDataCruncher dataCruncher;
-    private static AsyncChainRoot async;
     private static ClientPipeline activePipeline;
     private static IMarkerStorage.Layered<MapLabel> activeLabels;
     private static IMarkerStorage<Waypoint> activeWaypoints;
@@ -52,22 +50,8 @@ public class BlazeMapClientEngine {
     private static String mdSource;
 
     public static void init() {
+        BlazeNetwork.initEngine();
         MinecraftForge.EVENT_BUS.register(BlazeMapClientEngine.class);
-        dataCruncher = new AsyncDataCruncher("Blaze Map (Client)");
-        async = new AsyncChainRoot(dataCruncher, Helpers::runOnMainThread);
-        debouncer = new DebouncingThread("Blaze Map (Client)");
-    }
-
-    public static AsyncChainRoot async() {
-        return async;
-    }
-
-    public static AsyncDataCruncher cruncher() {
-        return dataCruncher;
-    }
-
-    public static DebouncingThread debouncer() {
-        return debouncer;
     }
 
     @SubscribeEvent
@@ -77,12 +61,20 @@ public class BlazeMapClientEngine {
         if(player == null) return;
         serverID = Helpers.getServerID();
         storage = new StorageAccess.Internal(Helpers.getClientSideStorageDir());
-        isServerSource = BlazeNetwork.ENGINE.isRemotePresent(event.getConnection());
+        isServerSource = detectRemote(event.getConnection());
         ServerJoinedEvent serverJoined = new ServerJoinedEvent(serverID, storage.addon(), isServerSource);
         MinecraftForge.EVENT_BUS.post(serverJoined);
         waypointStorageFactory = serverJoined.getWaypointStorageFactory();
         switchToPipeline(player.level.dimension());
         mdSource = "unknown";
+    }
+
+    private static boolean detectRemote(Connection connection) {
+        if(Helpers.isIntegratedServerRunning()) {
+            return BlazeMapConfig.COMMON.enableServerEngine.get();
+        } else {
+            return BlazeNetwork.engine().isRemotePresent(connection);
+        }
     }
 
     @SubscribeEvent
@@ -135,7 +127,18 @@ public class BlazeMapClientEngine {
     }
 
     private static ClientPipeline getPipeline(ResourceKey<Level> dimension) {
-        return PIPELINES.computeIfAbsent(dimension, d -> new ClientPipeline(async, debouncer, d, storage.internal(d.location()), isClientSource() ? PipelineType.CLIENT_STANDALONE : PipelineType.CLIENT_AND_SERVER)).activate();
+        BlazeMapAsync async = BlazeMapAsync.instance();
+        return PIPELINES.computeIfAbsent(dimension, d -> new ClientPipeline(async.clientChain, async.debouncer, d, storage.internal(d.location()), isClientSource() ? PipelineType.CLIENT_STANDALONE : PipelineType.CLIENT_AND_SERVER)).activate();
+    }
+
+    public static ChunkMDCache getMDCache(ChunkPos pos) {
+        if(activePipeline == null || !activePipeline.isMDCached()) return null;
+        return activePipeline.getMDCache().getChunkCache(pos);
+    }
+
+    public static void forceRedrawFromMD(ChunkPos pos) {
+        if(activePipeline == null) return;
+        BlazeMapAsync.instance().clientChain.runOnDataThread(() -> activePipeline.redrawFromMD(pos));
     }
 
     public static void onChunkChanged(ChunkPos pos, String source) {

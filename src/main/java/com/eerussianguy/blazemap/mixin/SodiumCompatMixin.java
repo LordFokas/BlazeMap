@@ -11,15 +11,15 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ChunkRenderList.class)
-public class RubidiumCompatMixin {
+public class SodiumCompatMixin {
 
     @Inject(method = "add", at = @At("HEAD"), remap = false)
     void onAdd(RenderSection render, CallbackInfo ci) {
-        Profilers.Client.Mixin.RUBIDIUM_LOAD_PROFILER.hit();
-        Profilers.Client.Mixin.RUBIDIUM_TIME_PROFILER.begin();
+        Profilers.Client.Mixin.SODIUM_LOAD_PROFILER.hit();
+        Profilers.Client.Mixin.SODIUM_TIME_PROFILER.begin();
 
-        BlazeMapClientEngine.onChunkChanged(render.getChunkPos().chunk(), MDSources.Client.RUBIDIUM);
+        BlazeMapClientEngine.onChunkChanged(render.getChunkPos().chunk(), MDSources.Client.SODIUM);
 
-        Profilers.Client.Mixin.RUBIDIUM_TIME_PROFILER.end();
+        Profilers.Client.Mixin.SODIUM_TIME_PROFILER.end();
     }
 }
