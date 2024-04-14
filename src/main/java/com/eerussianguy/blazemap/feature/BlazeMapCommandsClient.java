@@ -31,12 +31,10 @@ public class BlazeMapCommandsClient {
         return Commands.literal("debug")
             .then(Commands.literal("on").executes($ -> {
                 BlazeMapConfig.CLIENT.enableDebug.set(true);
-                // Overlays.reload();
                 return Command.SINGLE_SUCCESS;
             }))
             .then(Commands.literal("off").executes($ -> {
                 BlazeMapConfig.CLIENT.enableDebug.set(false);
-                // Overlays.reload();
                 return Command.SINGLE_SUCCESS;
             }));
     }
@@ -45,12 +43,10 @@ public class BlazeMapCommandsClient {
         return Commands.literal("minimap")
             .then(Commands.literal("on").executes($ -> {
                 BlazeMapConfig.CLIENT.minimap.enabled.set(true);
-                // Overlays.reload();
                 return Command.SINGLE_SUCCESS;
             }))
             .then(Commands.literal("off").executes($ -> {
                 BlazeMapConfig.CLIENT.minimap.enabled.set(false);
-                // Overlays.reload();
                 return Command.SINGLE_SUCCESS;
             }));
     }

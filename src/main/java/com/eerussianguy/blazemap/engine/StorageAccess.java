@@ -8,7 +8,6 @@ import java.util.Objects;
 
 import net.minecraft.resources.ResourceLocation;
 
-import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.maps.TileResolution;
 import com.eerussianguy.blazemap.api.util.IStorageAccess;
 import com.eerussianguy.blazemap.api.util.MinecraftStreams;
@@ -80,7 +79,6 @@ public class StorageAccess implements IStorageAccess {
 
         @Override
         public File getFile(ResourceLocation node) {
-
             Objects.requireNonNull(node);
             File file = new File(dir, String.format(PATTERN, node.getNamespace(), node.getPath()));
             file.getParentFile().mkdirs();

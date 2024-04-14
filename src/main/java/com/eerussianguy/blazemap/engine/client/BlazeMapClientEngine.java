@@ -168,17 +168,14 @@ public class BlazeMapClientEngine {
         // To avoid this, will wait until storage exists before submitting this MD
         while (storage == null) {
             try {
-                // BlazeMap.LOGGER.warn("666 tried to submitChanges but storage was null");
-                Thread.sleep(50);
+                Thread.sleep(50); // Approx 1 tick wait
             } catch (InterruptedException e) {
                 // This isn't supposed to happen, but I can't compile without it
                 e.printStackTrace();
             }
         }
 
-        // if (storage == null) {
         getPipeline(dimension).insertMasterData(pos, data);
-        // }
     }
 
     static void notifyLayerRegionChange(LayerRegion layerRegion) {
