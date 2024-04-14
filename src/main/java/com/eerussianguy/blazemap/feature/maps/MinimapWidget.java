@@ -7,8 +7,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.phys.Vec3;
 
 import com.eerussianguy.blazemap.BlazeMap;
-import com.eerussianguy.blazemap.config.BlazeMapConfig;
-import com.eerussianguy.blazemap.config.ClientConfig;
+import com.eerussianguy.blazemap.config.MinimapConfigFacade.IWidgetConfig;
 import com.eerussianguy.blazemap.gui.MouseSubpixelSmoother;
 import com.eerussianguy.blazemap.util.Colors;
 import com.eerussianguy.blazemap.util.Helpers;
@@ -22,15 +21,14 @@ public class MinimapWidget {
     private static final int BORDER_SIZE = 5; // size of the translucent black minimap border
     private static final int COORDS_BORDER = 3; // size of the background padding around the player coordinates
 
-    private final MinimapConfigSynchronizer synchronizer;
-    private final ClientConfig.MinimapConfig config = BlazeMapConfig.CLIENT.minimap;
+    private final IWidgetConfig config;
     private final MapRenderer map;
     private final boolean editor;
     private final MouseSubpixelSmoother mouse;
 
-    public MinimapWidget(MapRenderer map, MinimapConfigSynchronizer synchronizer, boolean editor){
+    public MinimapWidget(MapRenderer map, IWidgetConfig config, boolean editor){
         this.map = map;
-        this.synchronizer = synchronizer;
+        this.config = config;
         this.editor = editor;
         this.mouse = editor ? new MouseSubpixelSmoother() : null;
     }
@@ -40,10 +38,10 @@ public class MinimapWidget {
         int mcWidth = window.getWidth();
         int mcHeight = window.getHeight();
 
-        int width = config.width.get();
-        int height = config.height.get();
-        int posX = mcWidth - width - config.positionX.get(); // BME-63 Invert X: x coord starts from right side
-        int posY = config.positionY.get();
+        int width = config.width().get();
+        int height = config.height().get();
+        int posX = mcWidth - width - config.positionX().get(); // BME-63 Invert X: x coord starts from right side
+        int posY = config.positionY().get();
 
         // BME-64: Keep minimap inside screen
         posX = Helpers.clamp(0, posX, mcWidth - width);
@@ -83,10 +81,10 @@ public class MinimapWidget {
     public boolean mouseDragged(double mouseX, double mouseY, int button, double draggedX, double draggedY) {
         Window window = Minecraft.getInstance().getWindow();
 
-        int mapPosX = config.positionX.get();
-        int mapPosY = config.positionY.get();
-        int mapSizeX = config.width.get();
-        int mapSizeY = config.height.get();
+        int mapPosX = config.positionX().get();
+        int mapPosY = config.positionY().get();
+        int mapSizeX = config.width().get();
+        int mapSizeY = config.height().get();
         int mapEndX = mapPosX + mapSizeX;
         int mapEndY = mapPosY + mapSizeY;
 
@@ -113,12 +111,13 @@ public class MinimapWidget {
                 // Move map
                 int moveX = Helpers.clamp(-mapPosX, mouse.movementX(), maxX);
                 int moveY = Helpers.clamp(-mapPosY, mouse.movementY(), maxY);
-                synchronizer.move(moveX, moveY);
+                config.positionX().set(mapPosX + moveX);
+                config.positionY().set(mapPosY + moveY);
             } else {
                 // Resize map
                 int resizeX = Helpers.clamp(-mapSizeX, mouse.movementX(), maxX);
                 int resizeY = Helpers.clamp(-mapSizeY, mouse.movementY(), maxY);
-                synchronizer.resize(resizeX, resizeY);
+                config.resize(mapSizeX + resizeX, mapSizeY + resizeY);
             }
         }
         catch(WritingException we){ // FIXME: BME-54   The proper thing to do here is not to catch but debounce saving.

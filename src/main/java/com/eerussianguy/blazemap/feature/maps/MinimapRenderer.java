@@ -8,7 +8,6 @@ import net.minecraftforge.client.gui.ForgeIngameGui;
 
 import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.api.maps.IScreenSkipsMinimap;
-import com.eerussianguy.blazemap.api.maps.MapType;
 import com.eerussianguy.blazemap.util.Helpers;
 import com.eerussianguy.blazemap.profiling.Profilers;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -26,15 +25,7 @@ public class MinimapRenderer implements AutoCloseable {
         this.mapRenderer = new MapRenderer(0, 0, Helpers.identifier("dynamic/map/minimap"), MIN_ZOOM, MAX_ZOOM, true)
             .setProfilers(Profilers.Minimap.DRAW_TIME_PROFILER, Profilers.Minimap.TEXTURE_TIME_PROFILER);
         this.synchronizer = new MinimapConfigSynchronizer(mapRenderer, BlazeMapConfig.CLIENT.minimap);
-        this.minimap = new MinimapWidget(mapRenderer, synchronizer, false);
-    }
-
-    public void setMapType(MapType mapType) {
-        synchronizer.setMapType(mapType);
-    }
-
-    public MapType getMapType() {
-        return mapRenderer.getMapType();
+        this.minimap = new MinimapWidget(mapRenderer, BlazeMapConfig.CLIENT.minimap, false);
     }
 
     public void draw(PoseStack stack, MultiBufferSource buffers, ForgeIngameGui gui, int width, int height) {

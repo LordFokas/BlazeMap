@@ -58,10 +58,12 @@ public class ClientConfig {
         }
     }
 
-    public static class MinimapConfig extends MapConfig {
+    public static class MinimapConfig extends MapConfig implements MinimapConfigFacade.IWidgetConfig {
         public final BooleanValue enabled;
         public final IntValue positionX, positionY;
         public final IntValue width, height;
+
+        private final MinimapConfigFacade.IntFacade _positionX, _positionY, _width, _height;
 
         MinimapConfig(Function<String, Builder> builder) {
             super(builder, MinimapRenderer.MIN_ZOOM, MinimapRenderer.MAX_ZOOM);
@@ -70,6 +72,32 @@ public class ClientConfig {
             this.positionY = builder.apply("positionY").comment("Minimap vertical position on screen").defineInRange("positionY", 15, 0, 9000);
             this.width = builder.apply("width").comment("Minimap widget width").defineInRange("width", 256, 128, 1600);
             this.height = builder.apply("height").comment("Minimap widget height").defineInRange("height", 256, 128, 1600);
+
+            // Facade stuff for BME-54
+            this._positionX = new MinimapConfigFacade.IntFacade(positionX);
+            this._positionY = new MinimapConfigFacade.IntFacade(positionY);
+            this._width = new MinimapConfigFacade.IntFacade(width);
+            this._height = new MinimapConfigFacade.IntFacade(height);
+        }
+
+        @Override
+        public MinimapConfigFacade.IntFacade positionX() {
+            return _positionX;
+        }
+
+        @Override
+        public MinimapConfigFacade.IntFacade positionY() {
+            return _positionY;
+        }
+
+        @Override
+        public MinimapConfigFacade.IntFacade width() {
+            return _width;
+        }
+
+        @Override
+        public MinimapConfigFacade.IntFacade height() {
+            return _height;
         }
     }
 }
