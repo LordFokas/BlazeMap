@@ -12,6 +12,9 @@ import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
 import com.eerussianguy.blazemap.api.maps.IScreenSkipsMinimap;
 import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.MapType;
+import com.eerussianguy.blazemap.config.BlazeMapConfig;
+import com.eerussianguy.blazemap.config.ClientConfig;
+import com.eerussianguy.blazemap.config.MinimapConfigFacade;
 import com.eerussianguy.blazemap.gui.BlazeGui;
 import com.eerussianguy.blazemap.util.Helpers;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -27,7 +30,8 @@ public class MinimapOptionsGui extends BlazeGui implements IScreenSkipsMinimap, 
 
     private final MapRenderer mapRenderer = new MapRenderer(0, 0, Helpers.identifier("dynamic/map/minimap_preview"), MinimapRenderer.MIN_ZOOM, MinimapRenderer.MAX_ZOOM, false);
     private final MinimapConfigSynchronizer synchronizer = MinimapRenderer.INSTANCE.synchronizer;
-    private final MinimapWidget minimap = new MinimapWidget(mapRenderer, synchronizer, true);
+    private final WidgetConfigFacade configFacade = new WidgetConfigFacade(BlazeMapConfig.CLIENT.minimap, mapRenderer);
+    private final MinimapWidget minimap = new MinimapWidget(mapRenderer, configFacade, true);
 
     public MinimapOptionsGui() {
         super(Helpers.translate("blazemap.gui.minimap_options.title"), WIDTH, HEIGHT);
@@ -113,6 +117,7 @@ public class MinimapOptionsGui extends BlazeGui implements IScreenSkipsMinimap, 
     public void onClose() {
         super.onClose();
         mapRenderer.close();
+        configFacade.flush();
         synchronizer.save();
         synchronizer.clear();
     }
@@ -124,6 +129,62 @@ public class MinimapOptionsGui extends BlazeGui implements IScreenSkipsMinimap, 
             return true;
         }else{
             return super.mouseDragged(cx, cy, button, dx, dy);
+        }
+    }
+
+    public static class WidgetConfigFacade implements MinimapConfigFacade.IWidgetConfig {
+        private final MinimapConfigFacade.IntFacade positionX, positionY, width, height;
+        private final ClientConfig.MinimapConfig config;
+        private int _positionX, _positionY, _width, _height;
+        private final MapRenderer renderer;
+
+        public WidgetConfigFacade(ClientConfig.MinimapConfig config, MapRenderer renderer) {
+            this.config = config;
+            this.renderer = renderer;
+
+            _positionX = config.positionX.get();
+            _positionY = config.positionY.get();
+            _width = config.width.get();
+            _height = config.height.get();
+
+            positionX = new MinimapConfigFacade.IntFacade(() -> this._positionX, v -> this._positionX = v);
+            positionY = new MinimapConfigFacade.IntFacade(() -> this._positionY, v -> this._positionY = v);
+            width = new MinimapConfigFacade.IntFacade(() -> this._width, v -> this._width = v);
+            height = new MinimapConfigFacade.IntFacade(() -> this._height, v -> this._height = v);
+        }
+
+        @Override
+        public void resize(int width, int height) {
+            this._width = width;
+            this._height = height;
+            this.renderer.resize(_width, _height);
+        }
+
+        public void flush() {
+            config.positionX.set(_positionX);
+            config.positionY.set(_positionY);
+            config.width.set(_width);
+            config.height.set(_height);
+        }
+
+        @Override
+        public MinimapConfigFacade.IntFacade positionX() {
+            return positionX;
+        }
+
+        @Override
+        public MinimapConfigFacade.IntFacade positionY() {
+            return positionY;
+        }
+
+        @Override
+        public MinimapConfigFacade.IntFacade width() {
+            return width;
+        }
+
+        @Override
+        public MinimapConfigFacade.IntFacade height() {
+            return height;
         }
     }
 }

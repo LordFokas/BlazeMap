@@ -1,4 +1,4 @@
-package com.eerussianguy.blazemap;
+package com.eerussianguy.blazemap.feature;
 
 
 import net.minecraft.commands.CommandSourceStack;
@@ -7,7 +7,7 @@ import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 
-import com.eerussianguy.blazemap.feature.Overlays;
+import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 

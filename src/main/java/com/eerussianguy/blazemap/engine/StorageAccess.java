@@ -26,14 +26,28 @@ public class StorageAccess implements IStorageAccess {
     }
 
     @Override
+    public boolean exists(ResourceLocation node, String child) {
+        return getFile(node, child).exists();
+    }
+
+    @Override
     public MinecraftStreams.Input read(ResourceLocation node) throws IOException {
         return new MinecraftStreams.Input(new FileInputStream(getFile(node)));
     }
 
     @Override
+    public MinecraftStreams.Input read(ResourceLocation node, String child) throws IOException {
+        return new MinecraftStreams.Input(new FileInputStream(getFile(node, child)));
+    }
+
+    @Override
     public MinecraftStreams.Output write(ResourceLocation node) throws IOException {
-        File file = getFile(node);
-        return new MinecraftStreams.Output(new FileOutputStream(file));
+        return new MinecraftStreams.Output(new FileOutputStream(getFile(node)));
+    }
+
+    @Override
+    public MinecraftStreams.Output write(ResourceLocation node, String child) throws IOException {
+        return new MinecraftStreams.Output(new FileOutputStream(getFile(node, child)));
     }
 
     protected File getFile(ResourceLocation node) {
@@ -44,10 +58,16 @@ public class StorageAccess implements IStorageAccess {
         return file;
     }
 
+    protected File getFile(ResourceLocation node, String child) {
+        Objects.requireNonNull(node);
+        File dir = getFile(node);
+        dir.mkdirs();
+        return new File(dir, child);
+    }
+
     public static class Internal extends StorageAccess {
-        private static final String OLD_PATTERN = "%s+%s";
-        private static final String NEW_PATTERN = "[%s] %s";
-        private static final String NEW_PATTERN_MIP = "[%s] %s [%d]";
+        private static final String PATTERN = "[%s] %s";
+        private static final String PATTERN_MIP = "[%s] %s [%d]";
 
         public Internal(File dir, String child) {
             this(new File(dir, child));
@@ -62,21 +82,14 @@ public class StorageAccess implements IStorageAccess {
         public File getFile(ResourceLocation node) {
 
             Objects.requireNonNull(node);
-            File file = new File(dir, String.format(NEW_PATTERN, node.getNamespace(), node.getPath()));
+            File file = new File(dir, String.format(PATTERN, node.getNamespace(), node.getPath()));
             file.getParentFile().mkdirs();
             return file;
         }
 
-        public File getFile(ResourceLocation node, String file) {
-            Objects.requireNonNull(node);
-            File d = new File(dir, String.format(NEW_PATTERN, node.getNamespace(), node.getPath()));
-            d.mkdirs();
-            return new File(d, file);
-        }
-
         public File getMipmap(ResourceLocation node, String file, TileResolution resolution) {
             Objects.requireNonNull(node);
-            File d = new File(dir, String.format(NEW_PATTERN_MIP, node.getNamespace(), node.getPath(), resolution.pixelWidth));
+            File d = new File(dir, String.format(PATTERN_MIP, node.getNamespace(), node.getPath(), resolution.pixelWidth));
             d.mkdirs();
             return new File(d, file);
         }

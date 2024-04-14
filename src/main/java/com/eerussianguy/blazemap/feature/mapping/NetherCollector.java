@@ -1,11 +1,13 @@
 package com.eerussianguy.blazemap.feature.mapping;
 
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
 import com.eerussianguy.blazemap.api.builtin.TerrainHeightMD;
 import com.eerussianguy.blazemap.api.pipeline.Collector;
+import com.eerussianguy.blazemap.api.pipeline.PipelineType;
 
 public class NetherCollector extends Collector<TerrainHeightMD> {
     public NetherCollector() {
@@ -37,6 +39,11 @@ public class NetherCollector extends Collector<TerrainHeightMD> {
         }
 
         return new TerrainHeightMD(BlazeMapReferences.MasterData.NETHER, level.getMinBuildHeight(), level.getMaxBuildHeight(), level.getHeight(), level.getSeaLevel(), heightmap);
+    }
+
+    @Override
+    public boolean shouldExecuteIn(ResourceKey<Level> dimension, PipelineType pipeline) {
+        return dimension.equals(Level.NETHER) && super.shouldExecuteIn(dimension, pipeline);
     }
 
     private boolean isNotAir(Level level, int x, int y, int z) {

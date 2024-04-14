@@ -2,10 +2,12 @@ package com.eerussianguy.blazemap.feature.maps;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.lwjgl.glfw.GLFW;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -16,13 +18,13 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 
-import com.eerussianguy.blazemap.BlazeMapConfig;
+import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.api.BlazeMapAPI;
 import com.eerussianguy.blazemap.api.BlazeRegistry;
 import com.eerussianguy.blazemap.api.maps.IScreenSkipsMinimap;
 import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.MapType;
-import com.eerussianguy.blazemap.engine.client.BlazeMapClientEngine;
+import com.eerussianguy.blazemap.engine.BlazeMapAsync;
 import com.eerussianguy.blazemap.feature.BlazeMapFeaturesClient;
 import com.eerussianguy.blazemap.gui.Image;
 import com.eerussianguy.blazemap.gui.MouseSubpixelSmoother;
@@ -47,6 +49,12 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
         Minecraft.getInstance().setScreen(new WorldMapGui());
     }
 
+    public static void apply(Consumer<WorldMapGui> function) {
+        if(Minecraft.getInstance().screen instanceof WorldMapGui gui) {
+            function.accept(gui);
+        }
+    }
+
 
     // =================================================================================================================
 
@@ -60,6 +68,9 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
     private final MouseSubpixelSmoother mouse;
     private Widget legend;
     private EditBox search;
+    private final Coordination coordination = new Coordination();
+    private double rawMouseX = -1, rawMouseY = -1;
+    private WorldMapPopup contextMenu;
 
     public WorldMapGui() {
         super(EMPTY);
@@ -113,7 +124,7 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
     @Override
     protected void init() {
         double scale = getMinecraft().getWindow().getGuiScale();
-        mapRenderer.resize((int) (width * scale), (int) (height * scale));
+        mapRenderer.resize((int) (Math.ceil(width * scale / MAX_ZOOM) * MAX_ZOOM), (int) (Math.ceil(height * scale / MAX_ZOOM) * MAX_ZOOM));
 
         addRenderableOnly(new Image(ICON, 5, 5, 20, 20));
         addRenderableOnly(new Image(NAME, 30, 5, 110, 20));
@@ -148,10 +159,20 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double draggedX, double draggedY) {
-        double scale = getMinecraft().getWindow().getGuiScale();
-        mouse.addMovement(draggedX * scale / zoom, draggedY * scale / zoom);
-        mapRenderer.moveCenter(-mouse.movementX(), -mouse.movementY());
+        setMouse(mouseX, mouseY);
+        if(button == GLFW.GLFW_MOUSE_BUTTON_1) {
+            double scale = getMinecraft().getWindow().getGuiScale();
+            mouse.addMovement(draggedX * scale / zoom, draggedY * scale / zoom);
+            mapRenderer.moveCenter(-mouse.movementX(), -mouse.movementY());
+            return true;
+        }
         return super.mouseDragged(mouseX, mouseY, button, draggedX, draggedY);
+    }
+
+    @Override
+    public void mouseMoved(double mouseX, double mouseY) {
+        setMouse(mouseX, mouseY);
+        super.mouseMoved(mouseX, mouseY);
     }
 
     @Override
@@ -164,7 +185,45 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
             zoomed = synchronizer.zoomOut();
         }
         zoom = mapRenderer.getZoom();
+        setMouse(mouseX, mouseY);
         return zoomed;
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        setMouse(mouseX, mouseY);
+
+        if(contextMenu != null){ // On existing menu, pass into
+            var result = contextMenu.onClick((int) rawMouseX, (int) rawMouseY, button);
+            if(result.shouldDismiss) {
+                contextMenu = null;
+            }
+            if(result.wasHandled) {
+                return true;
+            }
+        }
+
+        if(super.mouseClicked(mouseX, mouseY, button)) { // If super handled, exit
+            return true;
+        }
+
+        if(button == GLFW.GLFW_MOUSE_BUTTON_2) { // If right click open new menu
+            int scale = (int) getMinecraft().getWindow().getGuiScale();
+            contextMenu = new WorldMapPopup(coordination, width * scale, height * scale, mapRenderer.getVisibleLayers());
+            return true;
+        }
+
+        return false;
+    }
+
+    private void setMouse(double mouseX, double mouseY) {
+        double scale = getMinecraft().getWindow().getGuiScale();
+        this.rawMouseX = mouseX * scale;
+        this.rawMouseY = mouseY * scale;
+        coordination.calculate((int) this.rawMouseX, (int) this.rawMouseY, mapRenderer.getBeginX(), mapRenderer.getBeginZ(), mapRenderer.getZoom());
+        if(contextMenu != null) {
+            contextMenu.setMouse(coordination.mousePixelX, coordination.mousePixelY);
+        }
     }
 
     @Override
@@ -177,6 +236,9 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
         var buffers = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
         mapRenderer.render(stack, buffers);
         buffers.endBatch();
+        if(contextMenu != null){
+            contextMenu.render(stack, i0, i1, f0);
+        }
         stack.popPose();
 
         if(legend != null) {
@@ -210,7 +272,43 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
             stack.pushPose();
             renderDebug(stack);
             stack.popPose();
+
+            stack.pushPose();
+            stack.scale(1F / scale, 1F / scale, 1);
+            renderCoordination(stack, scale);
+            stack.popPose();
         }
+    }
+
+    private void renderCoordination(PoseStack stack, float scale){
+        if(rawMouseX == -1 || rawMouseY == -1) return;
+
+        stack.pushPose();
+        stack.translate(coordination.regionPixelX, coordination.regionPixelY, 0.1);
+        RenderHelper.fillRect(stack.last().pose(), coordination.regionPixels, coordination.regionPixels, 0x400000FF);
+        stack.popPose();
+
+        stack.pushPose();
+        stack.translate(coordination.chunkPixelX, coordination.chunkPixelY, 0.2);
+        RenderHelper.fillRect(stack.last().pose(), coordination.chunkPixels, coordination.chunkPixels, 0x6000FF00);
+        stack.popPose();
+
+        stack.pushPose();
+        stack.translate(coordination.blockPixelX, coordination.blockPixelY, 0.3);
+        RenderHelper.fillRect(stack.last().pose(), coordination.blockPixels, coordination.blockPixels, 0x80FF0000);
+        stack.popPose();
+
+        stack.pushPose();
+        stack.translate(width * scale / 2, 10, 1);
+        stack.scale(3, 3, 0);
+        Font font = getMinecraft().font;
+        String region = String.format("Rg %d %d  |  px: %d %d", coordination.regionX, coordination.regionZ, coordination.regionPixelX, coordination.regionPixelY);
+        font.draw(stack, region, 0, 0, 0x0000FF);
+        String chunk = String.format("Ch %d %d  |  px: %d %d", coordination.chunkX, coordination.chunkZ, coordination.chunkPixelX, coordination.chunkPixelY);
+        font.draw(stack, chunk, 0, 10, 0x00FF00);
+        String block = String.format("Bl %d %d  |  px: %d %d", coordination.blockX, coordination.blockZ, coordination.blockPixelX, coordination.blockPixelY);
+        font.draw(stack, block, 0, 20, 0xFF0000);
+        stack.popPose();
     }
 
     private void renderDebug(PoseStack stack) {
@@ -236,7 +334,7 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
         font.draw(stack, String.format("Region Matrix: %d x %d", debug.ox, debug.oz), 0, y += 18, -1);
         font.draw(stack, String.format("Active Layers: %d", debug.layers), 0, y += 12, -1);
         font.draw(stack, String.format("Stitching: %s", debug.stitching), 0, y += 12, 0xFF0088FF);
-        font.draw(stack, String.format("Parallel Pool: %d", BlazeMapClientEngine.cruncher().poolSize()), 0, y += 12, 0xFFFFFF00);
+        font.draw(stack, String.format("Parallel Pool: %d", BlazeMapAsync.instance().cruncher.poolSize()), 0, y += 12, 0xFFFFFF00);
 
         font.draw(stack, String.format("Addon Labels: %d", debug.labels), 0, y += 18, -1);
         font.draw(stack, String.format("Player Waypoints: %d", debug.waypoints), 0, y += 12, -1);
@@ -292,5 +390,10 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
     @Override
     public Minecraft getMinecraft() {
         return Minecraft.getInstance();
+    }
+
+    public void addInspector(MDInspectorWidget<?> widget) {
+        this.addRenderableWidget(widget);
+        widget.setDismisser(() -> this.removeWidget(widget));
     }
 }

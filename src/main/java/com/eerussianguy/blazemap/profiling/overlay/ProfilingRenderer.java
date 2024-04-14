@@ -8,6 +8,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 
+import com.eerussianguy.blazemap.engine.BlazeMapAsync;
 import com.eerussianguy.blazemap.engine.client.BlazeMapClientEngine;
 import com.eerussianguy.blazemap.engine.client.LayerRegionTile;
 import com.eerussianguy.blazemap.engine.server.BlazeMapServerEngine;
@@ -23,7 +24,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 
 public class ProfilingRenderer {
-    private static final StringSource NO_MODS_FOUND = new StringSource("No mods found", 0x666666);
+    private static final StringSource NO_MODS_FOUND = new StringSource("No mods found", Colors.DISABLED);
     private static final StringSource NO_BAD_MODS_FOUND = new StringSource("No troublemakers found", 0xAAFFAA);
 
     public static final List<Container> PANELS = Arrays.asList(
@@ -38,7 +39,7 @@ public class ProfilingRenderer {
             ),
             new Container("Client Engine", Style.SECTION,
                 new StringSource(() -> String.format("MD Source: %s / %s", BlazeMapClientEngine.isClientSource() ? "Client" : "Server", BlazeMapClientEngine.getMDSource())),
-                new StringSource(() -> String.format("Parallel Pool: %d threads", BlazeMapClientEngine.cruncher().poolSize())),
+                new StringSource(() -> String.format("Parallel Pool: %d threads", BlazeMapAsync.instance().cruncher.poolSize())),
                 new StringSource(() -> {
                     double size = ((double) LayerRegionTile.getLoadedKb()) / 1024D;
                     int tiles = LayerRegionTile.getInstances();

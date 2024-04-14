@@ -9,12 +9,12 @@ version="${file.jarVersion}" #mandatory
 displayName="Blaze Map" #mandatory
 displayURL="https://www.curseforge.com/minecraft/mc-mods/blaze-map" #optional
 logoFile="blazemap_logo.png" #optional
-credits=" " #optional
-authors="EERussianguy, LordFokas" #optional
+credits="Respectable Username for the invaluable help" #optional
+authors="LordFokas, EERussianguy (former co-author)" #optional
 description='''
-A slim minimap mod.
-
+The open-source Forge map mod, made by modders for modders.
 '''
+
 [[dependencies.blazemap]]
     modId="minecraft"
     mandatory=true

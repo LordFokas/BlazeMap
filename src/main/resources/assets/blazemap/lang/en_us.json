@@ -19,5 +19,14 @@
   "blazemap.gui.waypoint_editor.save": "Save",
   "blazemap.gui.waypoint_manager.title": "Your Waypoints",
   "blazemap.gui.waypoint_manager.delete": "Delete",
-  "blazemap.gui.waypoint_manager.edit": "Edit"
+  "blazemap.gui.waypoint_manager.edit": "Edit",
+  "blazemap.gui.worldmap.menu.no_options": "No Options",
+  "blazemap.gui.worldmap.menu.waypoint": "Waypoints",
+  "blazemap.gui.worldmap.menu.waypoint.new": "Create New Waypoint",
+  "blazemap.gui.worldmap.menu.waypoint.edit": "Edit",
+  "blazemap.gui.worldmap.menu.waypoint.hide": "Hide",
+  "blazemap.gui.worldmap.menu.waypoint.delete": "Delete",
+  "blazemap.gui.worldmap.menu.debug": "Debug",
+  "blazemap.gui.worldmap.menu.debug.redraw_chunk_md": "Redraw Chunk from MD Cache",
+  "blazemap.gui.worldmap.menu.debug.inspect_chunk_md": "Inspect Chunk Master Data"
 }

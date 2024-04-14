@@ -1,4 +1,4 @@
-package com.eerussianguy.blazemap;
+package com.eerussianguy.blazemap.config;
 
 import java.util.function.Function;
 
@@ -8,13 +8,14 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
 
 public class BlazeMapConfig {
-    public static final ClientConfig CLIENT = register(ClientConfig::new);
+    public static final ClientConfig CLIENT = register(ClientConfig::new, ModConfig.Type.CLIENT);
+    public static final CommonConfig COMMON = register(CommonConfig::new, ModConfig.Type.COMMON);
 
     public static void init() {}
 
-    private static <C> C register(Function<ForgeConfigSpec.Builder, C> factory) {
+    private static <C> C register(Function<ForgeConfigSpec.Builder, C> factory, ModConfig.Type type) {
         Pair<C, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(factory);
-        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, specPair.getRight());
+        ModLoadingContext.get().registerConfig(type, specPair.getRight());
         return specPair.getLeft();
     }
 }

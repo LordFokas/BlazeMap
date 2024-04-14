@@ -4,7 +4,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
 import net.minecraftforge.client.gui.overlay.ForgeGui;
 
-import com.eerussianguy.blazemap.BlazeMapConfig;
+import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.feature.maps.MinimapRenderer;
 import com.eerussianguy.blazemap.profiling.overlay.ProfilingRenderer;
 import com.mojang.blaze3d.vertex.PoseStack;
