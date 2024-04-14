@@ -9,6 +9,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 
+import net.minecraftforge.fml.loading.FMLEnvironment;
+
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
 import com.eerussianguy.blazemap.api.builtin.BlockColorMD;
 import com.eerussianguy.blazemap.api.event.DimensionChangedEvent;
@@ -59,20 +61,20 @@ public class WorldMapMenu {
             makeAction("debug.redraw_chunk_md", null, () -> BlazeMapClientEngine.forceRedrawFromMD(chunkPos))
         );
 
-        /*
-        ChunkMDCache mdCache = BlazeMapClientEngine.getMDCache(chunkPos);
-        MenuFolder mdInspector = makeFolder("debug.inspect_chunk_md", null, -1);
-        if(mdCache != null) {
-            mdCache.data().forEach(md -> {
-                ResourceLocation key = md.getID().location;
-                mdInspector.add(
-                    makeAction("debug.inspect_chunk_md."+key.getNamespace()+"."+key.getPath(), null, new TextComponent(key.toString()),
-                        () -> WorldMapGui.apply(gui -> gui.addInspector(new MDInspectorWidget<>(md, chunkPos)))
-                    )
-                );
-            });
+        if(!FMLEnvironment.production) {
+            ChunkMDCache mdCache = BlazeMapClientEngine.getMDCache(chunkPos);
+            MenuFolder mdInspector = makeFolder("debug.inspect_chunk_md", null, -1);
+            if(mdCache != null) {
+                mdCache.data().forEach(md -> {
+                    ResourceLocation key = md.getID().location;
+                    mdInspector.add(
+                        makeAction("debug.inspect_chunk_md."+key.getNamespace()+"."+key.getPath(), null, new TextComponent(key.toString()),
+                            () -> WorldMapGui.apply(gui -> gui.addInspector(new MDInspectorWidget<>(md, chunkPos)))
+                        )
+                    );
+                });
+            }
         }
-        */
 
         return folder;
     }
