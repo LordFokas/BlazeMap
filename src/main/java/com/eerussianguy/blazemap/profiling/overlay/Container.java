@@ -8,7 +8,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 
 import com.eerussianguy.blazemap.util.RenderHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
+import org.joml.Matrix4f;
 
 public class Container implements IDrawable {
     public static final float PANEL_WIDTH = 250;
@@ -77,15 +77,15 @@ public class Container implements IDrawable {
 
     protected void drawHead(Matrix4f matrix, MultiBufferSource buffers, Font fontRenderer){
         if(style.isRoot){
-            fontRenderer.drawInBatch(name, style.indent, style.margin, style.header, false, matrix, buffers, false, 0, LightTexture.FULL_BRIGHT);
+            fontRenderer.drawInBatch(name, style.indent, style.margin, style.header, false, matrix, buffers, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
             if(metric != null){
-                fontRenderer.drawInBatch(metric.get(), PANEL_MIDDLE, style.margin, style.metric, false, matrix, buffers, false, 0, LightTexture.FULL_BRIGHT);
+                fontRenderer.drawInBatch(metric.get(), PANEL_MIDDLE, style.margin, style.metric, false, matrix, buffers, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
             }
         }else{
             if(metric == null){
-                fontRenderer.drawInBatch(name, style.indent, style.margin, style.header, false, matrix, buffers, false, 0, LightTexture.FULL_BRIGHT);
+                fontRenderer.drawInBatch(name, style.indent, style.margin, style.header, false, matrix, buffers, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
             }else{
-                fontRenderer.drawInBatch(String.format("%s : %s", name, metric.get()), style.indent, style.margin, style.header, false, matrix, buffers, false, 0, LightTexture.FULL_BRIGHT);
+                fontRenderer.drawInBatch(String.format("%s : %s", name, metric.get()), style.indent, style.margin, style.header, false, matrix, buffers, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
             }
         }
     }

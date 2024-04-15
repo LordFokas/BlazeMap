@@ -9,7 +9,7 @@ import org.lwjgl.glfw.GLFW;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.components.Widget;
+import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -66,7 +66,7 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
     private final List<MapType> mapTypes;
     private final int layersBegin;
     private final MouseSubpixelSmoother mouse;
-    private Widget legend;
+    private Renderable legend;
     private EditBox search;
     private final Coordination coordination = new Coordination();
     private double rawMouseX = -1, rawMouseY = -1;

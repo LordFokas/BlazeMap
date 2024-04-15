@@ -58,9 +58,9 @@ public class StringSource implements IDrawable {
 
     @Override
     public void draw(PoseStack stack, MultiBufferSource buffers, Font fontRenderer) {
-        fontRenderer.drawInBatch(main.get(), Container.Style.BLOCK.indent, 0, main_color, false, stack.last().pose(), buffers, false, 0, LightTexture.FULL_BRIGHT);
+        fontRenderer.drawInBatch(main.get(), Container.Style.BLOCK.indent, 0, main_color, false, stack.last().pose(), buffers, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
         if(note != null){
-            fontRenderer.drawInBatch(note.get(), Container.PANEL_MIDDLE, 0, note_color, false, stack.last().pose(), buffers, false, 0, LightTexture.FULL_BRIGHT);
+            fontRenderer.drawInBatch(note.get(), Container.PANEL_MIDDLE, 0, note_color, false, stack.last().pose(), buffers, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
         }
     }
 }

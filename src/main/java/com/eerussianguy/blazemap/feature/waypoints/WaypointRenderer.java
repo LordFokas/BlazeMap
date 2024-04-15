@@ -1,6 +1,7 @@
 package com.eerussianguy.blazemap.feature.waypoints;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -24,8 +25,9 @@ import com.eerussianguy.blazemap.util.RenderHelper;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
+
+import org.joml.Matrix4f;
 
 public class WaypointRenderer {
 
@@ -81,7 +83,7 @@ public class WaypointRenderer {
                             .scale(toEdgeOfRenderView)
                             .add(playerCamera.position());
 
-                        final AABB fakerAABB = new AABB(new BlockPos(fakePos)).setMinY(level.getMinBuildHeight()).setMaxY(level.getMaxBuildHeight());
+                        final AABB fakerAABB = new AABB(BlockPos.containing(fakePos)).setMinY(level.getMinBuildHeight()).setMaxY(level.getMaxBuildHeight());
                         if (event.getFrustum().isVisible(fakerAABB)) {
                             renderWaypoint(mc, stack, buffers, w, fakePos, playerCamera, partialTick);
                         }
@@ -100,6 +102,7 @@ public class WaypointRenderer {
         final Vec3 lowestPos = new Vec3(pos.x(), minYHeight, pos.z());
 
         stack.pushPose();
+
         translateFromCameraToPos(stack, lowestPos);
 
         final float[] colors = Colors.decomposeRGB(w.getColor());
@@ -109,6 +112,7 @@ public class WaypointRenderer {
 
         // Labels
         stack.pushPose();
+
         renderLabel(mc, stack, buffers, w, pos);
 
         stack.popPose();
@@ -120,29 +124,38 @@ public class WaypointRenderer {
      */
     private static void renderLabel(Minecraft mc, PoseStack stack, MultiBufferSource.BufferSource buffers, Waypoint w, Vec3 pos) {
         stack.pushPose();
+
         float width = 32;
         float height = 32;
+
         translateFromCameraToPos(stack, pos);
-        stack.mulPoseMatrix(new Matrix4f(mc.gameRenderer.getMainCamera().rotation()));
+        stack.mulPose(mc.gameRenderer.getMainCamera().rotation());
+
         Vec3 cam = mc.gameRenderer.getMainCamera().getPosition();
         double dist = cam.distanceToSqr(pos);
+
         float scale = Mth.clampedMap((float) dist, 0f, 128f * 128f, 0f, 1f);
         scale = (float) ((-6.92782E-10 * scale * scale) + (0.0000172555 * scale) + 0.0204091);
         scale *= 4f;
         stack.scale(scale, scale, scale);
-        stack.mulPose(Vector3f.ZP.rotationDegrees(180f));
+        stack.mulPose(Axis.ZP.rotationDegrees(180f));
         stack.translate(0f, 0f, -20f);
+
         String name = w.getName();
         if(name != null) {
             stack.pushPose();
+
             stack.translate(-mc.font.width(name), (-60 + (height / 2)), 0);
             stack.scale(2, 2, 0);
-            mc.font.drawInBatch(name, 0, 0, w.getColor(), true, stack.last().pose(), buffers, false, 0, LightTexture.FULL_BRIGHT);
+            mc.font.drawInBatch(name, 0, 0, w.getColor(), true, stack.last().pose(), buffers, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
+
             stack.popPose();
         }
+
         stack.translate(-width / 2, -height / 2, 0);
         VertexConsumer vertices = buffers.getBuffer(RenderType.text(w.getIcon()));
         RenderHelper.drawQuad(vertices, stack.last().pose(), width, height, w.getColor());
+
         stack.popPose();
     }
 

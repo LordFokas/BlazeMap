@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import net.minecraft.client.gui.components.Widget;
+import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -95,7 +95,7 @@ public abstract class Layer implements RegistryEntry, Consumer {
      * This only applies to opaque (bottom) layers, which are the first layer of the current map type,
      * however not all such layers must have one and returning null is the default action.
      */
-    public Widget getLegendWidget() {
+    public Renderable getLegendWidget() {
         return null;
     }
 

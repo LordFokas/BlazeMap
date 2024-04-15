@@ -1,13 +1,13 @@
 package com.eerussianguy.blazemap.feature.maps;
 
 import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.components.Tooltip;
 
 import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
 import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.MapType;
 import com.eerussianguy.blazemap.util.Colors;
 import com.eerussianguy.blazemap.util.RenderHelper;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 public class LayerButton extends ImageButton {
@@ -19,10 +19,13 @@ public class LayerButton extends ImageButton {
         super(px, py, w, h, 0, 0, 0, key.value().getIcon(), w, h, button -> {
             host.toggleLayer(key);
         }, key.value().getName());
+
         this.key = key;
         this.parent = parent;
         this.host = host;
+
         checkVisible();
+        setTooltip(Tooltip.create(key.value().getName()));
     }
 
     @Override
@@ -33,12 +36,6 @@ public class LayerButton extends ImageButton {
             RenderHelper.setShaderColor(Colors.NO_TINT);
         super.render(stack, mx, my, partial);
         RenderHelper.setShaderColor(Colors.NO_TINT);
-    }
-
-    @Override
-    public void renderToolTip(PoseStack stack, int x, int y) {
-        RenderSystem.setShaderColor(1, 1, 1, 1);
-        host.drawTooltip(stack, key.value().getName(), x, y);
     }
 
     public void checkVisible() {

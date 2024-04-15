@@ -1,6 +1,8 @@
 package com.eerussianguy.blazemap.engine.client;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
 import net.minecraft.client.Minecraft;
@@ -8,7 +10,6 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.Connection;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.monster.Blaze;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
@@ -34,11 +35,10 @@ import com.eerussianguy.blazemap.engine.StorageAccess;
 import com.eerussianguy.blazemap.engine.cache.ChunkMDCache;
 import com.eerussianguy.blazemap.network.BlazeNetwork;
 import com.eerussianguy.blazemap.util.Helpers;
-import com.ibm.icu.impl.duration.TimeUnit;
 
 public class BlazeMapClientEngine {
     private static final Set<Consumer<LayerRegion>> TILE_CHANGE_LISTENERS = new HashSet<>();
-    private static final Map<ResourceKey<Level>, ClientPipeline> PIPELINES = new HashMap<>();
+    private static final Map<ResourceKey<Level>, ClientPipeline> PIPELINES = new ConcurrentHashMap<>();
     private static final Map<ResourceKey<Level>, IMarkerStorage<Waypoint>> WAYPOINTS = new HashMap<>();
     private static final ResourceLocation WAYPOINT_STORAGE = Helpers.identifier("waypoints.bin");
 
@@ -50,6 +50,7 @@ public class BlazeMapClientEngine {
     private static StorageAccess.Internal storage;
     private static boolean isServerSource;
     private static String mdSource;
+    private static Queue<ChangeEventStore> changeEventQueue = new ConcurrentLinkedQueue<ChangeEventStore>();
 
     public static void init() {
         BlazeNetwork.initEngine();
@@ -159,23 +160,39 @@ public class BlazeMapClientEngine {
         activePipeline.onChunkChanged(pos);
     }
 
+    // This exists only as a temporary store of change events that fire before the client engine is ready to process them.
+    // This will likely be removed and replaced by a better system as part of BME-74
+    private static class ChangeEventStore {
+        public ResourceKey<Level> dimension;
+        public ChunkPos pos;
+        public List<MasterDatum> data;
+
+        ChangeEventStore(ResourceKey<Level> dimension, ChunkPos pos, List<MasterDatum> data) {
+            this.dimension = dimension;
+            this.pos = pos;
+            this.data = data;
+        }
+    }
+
     public static void submitChanges(ResourceKey<Level> dimension, ChunkPos pos, List<MasterDatum> data, String source) {
         isServerSource = true;
         mdSource = source;
 
-        // If the storage hasn't been set, that means the player login event hasn't been received yet
-        // and getPipeline will throw a NullPointerException that crashes the game.
-        // To avoid this, will wait until storage exists before submitting this MD
-        while (storage == null) {
-            try {
-                Thread.sleep(50); // Approx 1 tick wait
-            } catch (InterruptedException e) {
-                // This isn't supposed to happen, but I can't compile without it
-                e.printStackTrace();
+        // If the storage hasn't been set, that means the player login event hasn't been received yet and
+        // attempting to getPipeline will throw a NullPointerException that crashes the game.
+        // To avoid this, will store the changes until the storage has been initialised and then submit any
+        // previously saved events before submitting the current one.
+        // To be refactored in BME-74.
+        if (storage == null) {
+                BlazeMapClientEngine.changeEventQueue.add(new ChangeEventStore(dimension, pos, data));
+        } else {
+            while (changeEventQueue.peek() != null) {
+                ChangeEventStore changeEvent = changeEventQueue.remove();
+                getPipeline(changeEvent.dimension).insertMasterData(changeEvent.pos, changeEvent.data);
             }
-        }
 
-        getPipeline(dimension).insertMasterData(pos, data);
+            getPipeline(dimension).insertMasterData(pos, data);
+        }
     }
 
     static void notifyLayerRegionChange(LayerRegion layerRegion) {

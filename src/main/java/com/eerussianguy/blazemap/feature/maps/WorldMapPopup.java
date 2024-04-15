@@ -6,7 +6,7 @@ import java.util.function.Consumer;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.components.Widget;
+import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
@@ -21,7 +21,7 @@ import com.eerussianguy.blazemap.util.IntHolder;
 import com.eerussianguy.blazemap.util.RenderHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
 
-public class WorldMapPopup implements Widget {
+public class WorldMapPopup implements Renderable {
     private static final ResourceLocation MENU_ROOT = Helpers.identifier("map.menu");
     private static final Component MENU_ROOT_TEXT = Component.literal("");
     private static final int MIN_WIDTH = 160;

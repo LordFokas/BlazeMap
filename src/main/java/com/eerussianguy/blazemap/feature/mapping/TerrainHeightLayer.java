@@ -2,7 +2,7 @@ package com.eerussianguy.blazemap.feature.mapping;
 
 import java.awt.*;
 
-import net.minecraft.client.gui.components.Widget;
+import net.minecraft.client.gui.components.Renderable;
 
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
 import com.eerussianguy.blazemap.api.builtin.TerrainHeightMD;
@@ -69,7 +69,7 @@ public class TerrainHeightLayer extends Layer {
     }
 
     @Override
-    public Widget getLegendWidget() {
+    public Renderable getLegendWidget() {
         return new TerrainHeightLegendWidget();
     }
 
