@@ -2,7 +2,7 @@
 modLoader="javafml" #mandatory
 loaderVersion="[43,44)"
 license="MIT License"
-issueTrackerURL="https://github.com/eerussianguy/BlazeMap/issues" #optional
+issueTrackerURL="https://github.com/LordFokas/BlazeMap/issues" #optional
 [[mods]] #mandatory
 modId="blazemap" #mandatory
 version="${file.jarVersion}" #mandatory
