@@ -8,6 +8,7 @@ modId="blazemap" #mandatory
 version="${file.jarVersion}" #mandatory
 displayName="Blaze Map" #mandatory
 displayURL="https://www.curseforge.com/minecraft/mc-mods/blaze-map" #optional
+updateJSONURL="https://raw.githubusercontent.com/LordFokas/ModVersions/master/BlazeMap.json"
 logoFile="blazemap_logo.png" #optional
 credits="Respectable Username for the invaluable help" #optional
 authors="LordFokas, EERussianguy (former co-author)" #optional
