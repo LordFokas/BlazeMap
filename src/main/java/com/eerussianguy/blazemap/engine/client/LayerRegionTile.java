@@ -70,11 +70,6 @@ public class LayerRegionTile {
             // FIXME: this needs to hook into a reporting mechanism
             BlazeMap.LOGGER.error("Error saving LayerRegionTile buffer: {}", buffer, e);
         }
-        catch(NullPointerException e) {
-            e.printStackTrace();
-            // FIXME: this needs to hook into a reporting mechanism
-            BlazeMap.LOGGER.error("Error saving LayerRegionTile buffer: {}", buffer, e);
-        }
         finally {
             lock.unlock();
         }
