@@ -1,13 +1,14 @@
 
 modLoader="javafml" #mandatory
-loaderVersion="[40,)"
+loaderVersion="[43,44)"
 license="MIT License"
-issueTrackerURL="https://github.com/eerussianguy/BlazeMap/issues" #optional
+issueTrackerURL="https://github.com/LordFokas/BlazeMap/issues" #optional
 [[mods]] #mandatory
 modId="blazemap" #mandatory
 version="${file.jarVersion}" #mandatory
 displayName="Blaze Map" #mandatory
 displayURL="https://www.curseforge.com/minecraft/mc-mods/blaze-map" #optional
+updateJSONURL="https://raw.githubusercontent.com/LordFokas/ModVersions/master/BlazeMap.json"
 logoFile="blazemap_logo.png" #optional
 credits="Respectable Username for the invaluable help" #optional
 authors="LordFokas, EERussianguy (former co-author)" #optional
@@ -18,6 +19,6 @@ The open-source Forge map mod, made by modders for modders.
 [[dependencies.blazemap]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.18.2,1.19)"
+    versionRange="[1.19.2,1.19.3)"
     ordering="NONE"
     side="BOTH"

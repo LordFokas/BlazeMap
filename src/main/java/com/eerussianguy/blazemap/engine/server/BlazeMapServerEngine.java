@@ -1,7 +1,7 @@
 package com.eerussianguy.blazemap.engine.server;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -21,7 +21,7 @@ import com.eerussianguy.blazemap.engine.StorageAccess;
 import com.eerussianguy.blazemap.network.BlazeNetwork;
 
 public class BlazeMapServerEngine {
-    private static final Map<ResourceKey<Level>, ServerPipeline> PIPELINES = new HashMap<>();
+    private static final Map<ResourceKey<Level>, ServerPipeline> PIPELINES = new ConcurrentHashMap<>();
     private static MinecraftServer server;
     private static boolean isRunning;
     private static StorageAccess.Internal storage;

@@ -9,7 +9,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.storage.LevelResource;
@@ -91,8 +91,8 @@ public class Helpers {
         return codec.parse(NbtOps.INSTANCE, tag.get(field)).getOrThrow(false, BlazeMap.LOGGER::error);
     }
 
-    public static TranslatableComponent translate(String key) {
-        return new TranslatableComponent(key);
+    public static Component translate(String key) {
+        return Component.translatable(key);
     }
 
     public static int clamp(int min, int var, int max) {

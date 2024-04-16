@@ -4,9 +4,9 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.world.ExplosionEvent;
-import net.minecraftforge.event.world.PistonEvent;
-import net.minecraftforge.event.world.BlockEvent;
+import net.minecraftforge.event.level.ExplosionEvent;
+import net.minecraftforge.event.level.PistonEvent;
+import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -38,21 +38,21 @@ public class DebuggingEventHandler {
         forgeEventBus.addListener(DebuggingEventHandler::logExplosion);
     }
 
-    private static void logLogin(ClientPlayerNetworkEvent.LoggedInEvent event) {
+    private static void logLogin(ClientPlayerNetworkEvent.LoggingIn event) {
         BlazeMap.LOGGER.info("999 Captured login event: {}", event.getPlayer());
     }
 
 
     // Keys and clicks
-    private static void logRawMouse(InputEvent.RawMouseEvent event) {
+    private static void logRawMouse(InputEvent.MouseButton.Pre event) {
         BlazeMap.LOGGER.info("000 Captured raw mouse: {} {} {}", event.getButton(), event.getAction(), event.getModifiers());
     }
 
-    private static void logMouseInput(InputEvent.MouseInputEvent event) {
+    private static void logMouseInput(InputEvent.MouseButton.Post event) {
         BlazeMap.LOGGER.info("000 Captured mouse input: {} {} {}", event.getButton(), event.getAction(), event.getModifiers());
     }
-    
-    private static void logKeyboardInput(InputEvent.KeyInputEvent event) {
+
+    private static void logKeyboardInput(InputEvent.Key event) {
         BlazeMap.LOGGER.info("000 Captured keyboard input: {} {} {}", event.getKey(), event.getAction(), event.getModifiers());
     }
 
@@ -82,13 +82,13 @@ public class DebuggingEventHandler {
     // World loading
     private static void logBlockChange(BlockEvent event) {
         if (!(event instanceof BlockEvent.CropGrowEvent.Pre || event instanceof BlockEvent.NeighborNotifyEvent || event instanceof PistonEvent.Post)) {
-            Level currentLevel = (Level)event.getWorld();
+            Level currentLevel = (Level)event.getLevel();
             BlazeMap.LOGGER.info("555 {}: {} {} {}, Chunk: {}", event.getClass().getName(), event.getState(), event.getPos(), currentLevel.dimension(), currentLevel.getChunk(event.getPos()).getPos());
         }
     }
 
     private static void logExplosion(ExplosionEvent.Detonate event) {
-        BlazeMap.LOGGER.info("555 {}: {} {} {}, Chunk: {}", event.getClass().getName(), event.getExplosion().getExploder(), event.getExplosion().getPosition(), event.getWorld().dimension());
+        BlazeMap.LOGGER.info("555 {}: {} {} {}, Chunk: {}", event.getClass().getName(), event.getExplosion().getExploder(), event.getExplosion().getPosition(), event.getLevel().dimension());
     }
 
 }
