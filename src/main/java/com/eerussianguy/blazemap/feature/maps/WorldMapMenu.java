@@ -70,6 +70,7 @@ public class WorldMapMenu {
                     );
                 });
             }
+            folder.add(mdInspector);
         }
 
         return folder;
