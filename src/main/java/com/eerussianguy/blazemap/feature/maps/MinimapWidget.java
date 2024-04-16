@@ -74,7 +74,7 @@ public class MinimapWidget {
         int length = font.width(coords);
         stack.translate(-COORDS_BORDER - ((float)length) / 2F, 0, 0);
         RenderHelper.fillRect(buffers, stack.last().pose(), length + COORDS_BORDER*2, font.lineHeight - 2 + COORDS_BORDER*2, Colors.WIDGET_BACKGROUND);
-        font.drawInBatch(coords, COORDS_BORDER, COORDS_BORDER, Colors.WHITE, false, stack.last().pose(), buffers, false, 0, LightTexture.FULL_BRIGHT);
+        font.drawInBatch(coords, COORDS_BORDER, COORDS_BORDER, Colors.WHITE, false, stack.last().pose(), buffers, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
         stack.popPose();
     }
 

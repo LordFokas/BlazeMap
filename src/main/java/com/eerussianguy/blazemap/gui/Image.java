@@ -1,13 +1,13 @@
 package com.eerussianguy.blazemap.gui;
 
-import net.minecraft.client.gui.components.Widget;
+import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.resources.ResourceLocation;
 
 import com.eerussianguy.blazemap.util.Colors;
 import com.eerussianguy.blazemap.util.RenderHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
 
-public class Image implements Widget {
+public class Image implements Renderable {
     private final int posX, posY, width, height;
     private final ResourceLocation image;
     private int color = Colors.NO_TINT;

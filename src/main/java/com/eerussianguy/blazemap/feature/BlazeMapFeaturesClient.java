@@ -19,6 +19,7 @@ import com.eerussianguy.blazemap.feature.mapping.*;
 import com.eerussianguy.blazemap.feature.maps.*;
 import com.eerussianguy.blazemap.feature.waypoints.WaypointEditorGui;
 import com.eerussianguy.blazemap.feature.waypoints.WaypointManagerGui;
+import com.eerussianguy.blazemap.feature.waypoints.WaypointRenderer;
 import com.eerussianguy.blazemap.feature.waypoints.WaypointStore;
 import com.mojang.blaze3d.platform.InputConstants;
 

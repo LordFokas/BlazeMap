@@ -3,6 +3,7 @@ package com.eerussianguy.blazemap.gui;
 import javax.annotation.Nonnull;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -89,7 +90,7 @@ public abstract class BlazeGui extends Screen {
     protected abstract void renderComponents(PoseStack stack, MultiBufferSource buffers);
 
     protected void renderLabel(PoseStack stack, MultiBufferSource buffers, Component text, int x, int y, boolean shadow) {
-        this.font.drawInBatch(text, x, y, shadow ? Colors.WHITE : Colors.LABEL_COLOR, shadow, stack.last().pose(), buffers, false, 0, LightTexture.FULL_BRIGHT);
+        this.font.drawInBatch(text, x, y, shadow ? Colors.WHITE : Colors.LABEL_COLOR, shadow, stack.last().pose(), buffers, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
     }
 
     protected void renderSlot(PoseStack stack, MultiBufferSource buffers, int x, int y, int width, int height) {

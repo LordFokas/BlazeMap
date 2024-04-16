@@ -1,14 +1,13 @@
 package com.eerussianguy.blazemap.feature.maps;
 
 import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.network.chat.Component;
 
 import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
 import com.eerussianguy.blazemap.api.maps.MapType;
 import com.eerussianguy.blazemap.util.Colors;
 import com.eerussianguy.blazemap.util.RenderHelper;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 public class MapTypeButton extends ImageButton {
@@ -27,13 +26,8 @@ public class MapTypeButton extends ImageButton {
 
         this.host = host;
         this.key = key;
-    }
 
-    @Override
-    public void renderToolTip(PoseStack stack, int x, int y) {
-        RenderSystem.setShaderColor(1, 1, 1, 1);
-        Component component = key.value().getName();
-        host.drawTooltip(stack, component, x, y);
+        setTooltip(Tooltip.create(key.value().getName()));
     }
 
     @Override

@@ -2,7 +2,7 @@ package com.eerussianguy.blazemap.feature.maps;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.components.Widget;
+import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -16,7 +16,7 @@ import com.eerussianguy.blazemap.util.RenderHelper;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
 
-public class MDInspectorWidget<MD extends MasterDatum> implements Widget, GuiEventListener, NarratableEntry {
+public class MDInspectorWidget<MD extends MasterDatum> implements Renderable, GuiEventListener, NarratableEntry {
     private static final int WIDGET_SCALE = 2;
 
     protected final MD datum;
@@ -26,6 +26,7 @@ public class MDInspectorWidget<MD extends MasterDatum> implements Widget, GuiEve
     protected final MDInspectionController<MD> controller;
     protected final Font font;
     protected Runnable dismisser;
+    protected boolean focused;
 
     public MDInspectorWidget(MD datum, ChunkPos pos) {
         this.datum = datum;
@@ -131,4 +132,15 @@ public class MDInspectorWidget<MD extends MasterDatum> implements Widget, GuiEve
         this.posY += dY;
         return GuiEventListener.super.mouseDragged(mouseX, mouseY, button, dX, dY);
     }
+
+    @Override
+    public boolean isFocused() {
+        return focused;
+    }
+
+    @Override
+    public void setFocused(boolean focused) {
+        this.focused = focused;
+   }
+
 }

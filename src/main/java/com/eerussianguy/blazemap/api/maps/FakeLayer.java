@@ -1,6 +1,6 @@
 package com.eerussianguy.blazemap.api.maps;
 
-import net.minecraft.client.gui.components.Widget;
+import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
@@ -32,7 +32,7 @@ public class FakeLayer extends Layer {
     }
 
     @Override // can't have a legend
-    public final Widget getLegendWidget() {
+    public final Renderable getLegendWidget() {
         return null;
     }
 }

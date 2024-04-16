@@ -1,7 +1,8 @@
 package com.eerussianguy.blazemap.feature.mapping;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.Widget;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -16,7 +17,7 @@ import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 
-public class TerrainHeightLegendWidget implements Widget {
+public class TerrainHeightLegendWidget implements Renderable {
     private static NativeImage legend;
     private static RenderType type;
     private static int min;
@@ -61,7 +62,7 @@ public class TerrainHeightLegendWidget implements Widget {
             String label = String.valueOf(y);
             stack.pushPose();
             stack.translate(28 - font.width(label), 0, 0);
-            font.drawInBatch(label, 0, 0, Colors.WHITE, false, stack.last().pose(), buffers, false, 0, LightTexture.FULL_BRIGHT);
+            font.drawInBatch(label, 0, 0, Colors.WHITE, false, stack.last().pose(), buffers, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
             stack.popPose();
             stack.translate(0, 32, 0);
         }

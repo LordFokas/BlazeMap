@@ -21,7 +21,7 @@ import com.eerussianguy.blazemap.profiling.overlay.Container.Style;
 import com.eerussianguy.blazemap.util.Colors;
 import com.eerussianguy.blazemap.util.Helpers;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
+import org.joml.Matrix4f;
 
 public class ProfilingRenderer {
     private static final StringSource NO_MODS_FOUND = new StringSource("No mods found", Colors.DISABLED);
@@ -132,8 +132,8 @@ public class ProfilingRenderer {
     public static final int LOAD_COLOR = 0xAAAAFF;
     public static final int IMPACT_COLOR = 0xFFAAAA;
     public static void drawSubsystem(Profiler.LoadProfiler load, Profiler.TimeProfiler time, String label, String roll, String type, Style style, Font fontRenderer, Matrix4f matrix, MultiBufferSource buffers) {
-        fontRenderer.drawInBatch(label, style.indent, 0, style.header, false, matrix, buffers, false, 0, LightTexture.FULL_BRIGHT);
-        fontRenderer.drawInBatch(roll, Container.PANEL_MIDDLE, 0, style.metric, false, matrix, buffers, false, 0, LightTexture.FULL_BRIGHT);
+        fontRenderer.drawInBatch(label, style.indent, 0, style.header, false, matrix, buffers, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
+        fontRenderer.drawInBatch(roll, Container.PANEL_MIDDLE, 0, style.metric, false, matrix, buffers, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
         drawTimeProfiler(time, 10, "\u0394 ", style, fontRenderer, matrix, buffers);
         drawLoadProfiler(load, 20, "# ", style, fontRenderer, matrix, buffers);
         drawSubsystemLoad(load, time, 30, "\u03C1 ", type, style, fontRenderer, matrix, buffers);
@@ -161,16 +161,16 @@ public class ProfilingRenderer {
         }
         String avg = String.format("%s : %.2f%ss", label, at, au);
         String dst = String.format("[ %.1f%ss - %.1f%ss ]", nt, nu, xt, xu);
-        fontRenderer.drawInBatch(avg, style.indent, y, TIME_COLOR, false, matrix, buffers, false, 0, LightTexture.FULL_BRIGHT);
-        fontRenderer.drawInBatch(dst, Container.PANEL_MIDDLE, y, TIME_COLOR, false, matrix, buffers, false, 0, LightTexture.FULL_BRIGHT);
+        fontRenderer.drawInBatch(avg, style.indent, y, TIME_COLOR, false, matrix, buffers, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
+        fontRenderer.drawInBatch(dst, Container.PANEL_MIDDLE, y, TIME_COLOR, false, matrix, buffers, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
     }
 
     public static void drawLoadProfiler(Profiler.LoadProfiler profiler, float y, String label, Style style, Font fontRenderer, Matrix4f matrix, MultiBufferSource buffers) {
         String u = profiler.unit;
         String avg = String.format("%s : %.2f\u0394/%s", label, profiler.getAvg(), u);
         String dst = String.format("[ %.0f\u0394/%s - %.0f\u0394/%s ]", profiler.getMin(), u, profiler.getMax(), u);
-        fontRenderer.drawInBatch(avg, style.indent, y, LOAD_COLOR, false, matrix, buffers, false, 0, LightTexture.FULL_BRIGHT);
-        fontRenderer.drawInBatch(dst, Container.PANEL_MIDDLE, y, LOAD_COLOR, false, matrix, buffers, false, 0, LightTexture.FULL_BRIGHT);
+        fontRenderer.drawInBatch(avg, style.indent, y, LOAD_COLOR, false, matrix, buffers, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
+        fontRenderer.drawInBatch(dst, Container.PANEL_MIDDLE, y, LOAD_COLOR, false, matrix, buffers, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
     }
 
     public static void drawSubsystemLoad(Profiler.LoadProfiler load, Profiler.TimeProfiler time, float y, String label, String type, Style style, Font fontRenderer, Matrix4f matrix, MultiBufferSource buffers) {
@@ -185,7 +185,7 @@ public class ProfilingRenderer {
         }
         String con = String.format("%s : %.2f%ss/%s", label, w, u, load.unit);
         String pct = String.format("%.3f%% %s", p, type);
-        fontRenderer.drawInBatch(con, style.indent, y, IMPACT_COLOR, false, matrix, buffers, false, 0, LightTexture.FULL_BRIGHT);
-        fontRenderer.drawInBatch(pct, Container.PANEL_MIDDLE, y, IMPACT_COLOR, false, matrix, buffers, false, 0, LightTexture.FULL_BRIGHT);
+        fontRenderer.drawInBatch(con, style.indent, y, IMPACT_COLOR, false, matrix, buffers, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
+        fontRenderer.drawInBatch(pct, Container.PANEL_MIDDLE, y, IMPACT_COLOR, false, matrix, buffers, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
     }
 }

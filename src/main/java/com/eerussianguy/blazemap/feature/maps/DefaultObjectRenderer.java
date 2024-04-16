@@ -11,7 +11,7 @@ import com.eerussianguy.blazemap.api.markers.SearchTargeting;
 import com.eerussianguy.blazemap.util.RenderHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 
 public class DefaultObjectRenderer implements ObjectRenderer<MapLabel> {
 
@@ -25,7 +25,7 @@ public class DefaultObjectRenderer implements ObjectRenderer<MapLabel> {
         if(!label.getUsesZoom()) {
             stack.scale(1F / (float) zoom, 1F / (float) zoom, 1);
         }
-        stack.mulPose(Vector3f.ZP.rotationDegrees(label.getRotation()));
+        stack.mulPose(Axis.ZP.rotationDegrees(label.getRotation()));
         int width = label.getWidth();
         int height = label.getHeight();
         stack.translate(-width / 2, -height / 2, 0);

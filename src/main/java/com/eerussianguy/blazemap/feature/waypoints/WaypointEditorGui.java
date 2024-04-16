@@ -141,8 +141,16 @@ public class WaypointEditorGui extends BlazeGui {
             .setSelected(icon)
             .setResponder(this::onSelect);
 
-        addRenderableWidget(new Button(left + 12, top + 170, 126, 20, Helpers.translate("blazemap.gui.waypoint_editor.random"), b -> randomColor()));
-        save = addRenderableWidget(new Button(left + 150, top + 170, 50, 20, Helpers.translate("blazemap.gui.waypoint_editor.save"), b -> createWaypoint()));
+        addRenderableWidget(
+            Button.builder(Helpers.translate("blazemap.gui.waypoint_editor.random"), b -> randomColor())
+                .pos(left + 12, top + 170)
+                .size(126, 20)
+                .build());
+        save = addRenderableWidget(
+            Button.builder(Helpers.translate("blazemap.gui.waypoint_editor.save"), b -> createWaypoint())
+                .pos(left + 150, top + 170)
+                .size(50, 20)
+                .build());
 
         fname.setValue(name);
         fx.setValue(String.valueOf(x));

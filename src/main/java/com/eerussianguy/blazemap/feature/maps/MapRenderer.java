@@ -11,6 +11,7 @@ import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -47,8 +48,9 @@ import com.eerussianguy.blazemap.util.RenderHelper;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
+
+import org.joml.Matrix4f;
 
 public class MapRenderer implements AutoCloseable {
     private static final ResourceLocation PLAYER = Helpers.identifier("textures/player.png");
@@ -454,10 +456,10 @@ public class MapRenderer implements AutoCloseable {
             stack.pushPose();
             stack.translate(-mc.font.width(name), (10 + (height / scale)), 0);
             stack.scale(scale, scale, 0);
-            mc.font.drawInBatch(name, 0, 0, search.color(color), true, stack.last().pose(), buffers, false, 0, LightTexture.FULL_BRIGHT);
+            mc.font.drawInBatch(name, 0, 0, search.color(color), true, stack.last().pose(), buffers, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
             stack.popPose();
         }
-        stack.mulPose(Vector3f.ZP.rotationDegrees(rotation));
+        stack.mulPose(Axis.ZP.rotationDegrees(rotation));
         stack.translate(-width / 2, -height / 2, 0);
         VertexConsumer vertices = buffers.getBuffer(RenderType.text(marker));
         RenderHelper.drawQuad(vertices, stack.last().pose(), (float) width, (float) height, search.color(color));

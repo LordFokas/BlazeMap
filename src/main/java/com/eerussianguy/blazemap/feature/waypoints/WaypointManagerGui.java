@@ -36,8 +36,16 @@ public class WaypointManagerGui extends BlazeGui {
     protected void init() {
         super.init();
 
-        delete = addRenderableWidget(new Button(left + 12, top + 192, 80, 20, Helpers.translate("blazemap.gui.waypoint_manager.delete"), this::onDelete));
-        edit = addRenderableWidget(new Button(left + 98, top + 192, 80, 20, Helpers.translate("blazemap.gui.waypoint_manager.edit"), this::onEdit));
+        delete = addRenderableWidget(
+            Button.builder(Helpers.translate("blazemap.gui.waypoint_manager.delete"), this::onDelete)
+                .pos(left + 12, top + 192)
+                .size(80, 20)
+                .build());
+        edit = addRenderableWidget(
+            Button.builder(Helpers.translate("blazemap.gui.waypoint_manager.edit"), this::onEdit)
+            .pos(left + 98, top + 192)
+            .size(80, 20)
+            .build());
         list = addRenderableWidget(new SelectionList<>(left + 12, top + 25, 166, 162, 20, this::renderWaypoint)).setResponder(this::onSelected).setItems(waypointStorage.getAll().stream().toList());
         updateButtons();
     }

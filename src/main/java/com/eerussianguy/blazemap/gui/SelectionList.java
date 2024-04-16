@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-import net.minecraft.client.gui.components.Widget;
+import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -19,7 +19,7 @@ import com.mojang.blaze3d.vertex.Tesselator;
 
 import net.minecraft.client.gui.narration.NarratableEntry.NarrationPriority;
 
-public class SelectionList<T> implements Widget, GuiEventListener, NarratableEntry {
+public class SelectionList<T> implements Renderable, GuiEventListener, NarratableEntry {
     private final int x, y, w, h, rh, iw, ih, bx, by;
     private final EntryRenderer<T> renderer;
     private Consumer<T> responder = w -> {};
@@ -28,6 +28,7 @@ public class SelectionList<T> implements Widget, GuiEventListener, NarratableEnt
     private int selected = -1, begin = 0;
     private int maxDisplay, maxBegin;
     private float scroll = 0F;
+    private boolean focused;
 
     public SelectionList(int x, int y, int w, int h, int rh, EntryRenderer<T> renderer) {
         this.x = x;
@@ -146,4 +147,15 @@ public class SelectionList<T> implements Widget, GuiEventListener, NarratableEnt
     public interface EntryRenderer<T> {
         void render(PoseStack stack, T item);
     }
+
+    @Override
+    public boolean isFocused() {
+        return focused;
+    }
+
+    @Override
+    public void setFocused(boolean focused) {
+        this.focused = focused;
+   }
+
 }

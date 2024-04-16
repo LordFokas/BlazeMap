@@ -3,7 +3,7 @@ package com.eerussianguy.blazemap.gui;
 import java.awt.*;
 import java.util.function.BiConsumer;
 
-import net.minecraft.client.gui.components.Widget;
+import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -15,14 +15,16 @@ import com.eerussianguy.blazemap.util.RenderHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix4f;
+import org.joml.Matrix4f;
 
 import net.minecraft.client.gui.narration.NarratableEntry.NarrationPriority;
 
-public class SaturationBrightnessSelector implements Widget, GuiEventListener, NarratableEntry {
+public class SaturationBrightnessSelector implements Renderable, GuiEventListener, NarratableEntry {
     private final int x, y, w, h;
     private float hue, s, b;
     private BiConsumer<Float, Float> responder;
+
+    private boolean focused;
 
     public SaturationBrightnessSelector(int x, int y, int w, int h) {
         this.x = x;
@@ -85,4 +87,14 @@ public class SaturationBrightnessSelector implements Widget, GuiEventListener, N
 
     @Override
     public void updateNarration(NarrationElementOutput p_169152_) {}
+
+    @Override
+    public boolean isFocused() {
+        return focused;
+    }
+
+    @Override
+    public void setFocused(boolean focused) {
+        this.focused = focused;
+   }
 }
