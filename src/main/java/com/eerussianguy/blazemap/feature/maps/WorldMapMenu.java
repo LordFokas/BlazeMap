@@ -2,8 +2,6 @@ package com.eerussianguy.blazemap.feature.maps;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
@@ -12,13 +10,11 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
-import com.eerussianguy.blazemap.api.builtin.BlockColorMD;
 import com.eerussianguy.blazemap.api.event.DimensionChangedEvent;
 import com.eerussianguy.blazemap.api.event.MapMenuSetupEvent;
 import com.eerussianguy.blazemap.api.event.MapMenuSetupEvent.*;
 import com.eerussianguy.blazemap.api.markers.IMarkerStorage;
 import com.eerussianguy.blazemap.api.markers.Waypoint;
-import com.eerussianguy.blazemap.api.pipeline.MasterDatum;
 import com.eerussianguy.blazemap.engine.cache.ChunkMDCache;
 import com.eerussianguy.blazemap.engine.client.BlazeMapClientEngine;
 import com.eerussianguy.blazemap.util.Colors;
@@ -30,7 +26,7 @@ public class WorldMapMenu {
     private static final ResourceLocation BLAZE_POWDER = new ResourceLocation("minecraft", "textures/item/blaze_powder.png");
 
     private static final ResourceLocation MENU_NOOP = Helpers.identifier("map.menu.noop");
-    private static final TranslatableComponent NOOP_TEXT = Helpers.translate("blazemap.gui.worldmap.menu.no_options");
+    private static final Component NOOP_TEXT = Helpers.translate("blazemap.gui.worldmap.menu.no_options");
     public static final MapMenuSetupEvent.MenuAction NOOP = new MapMenuSetupEvent.MenuAction(MENU_NOOP, null, NOOP_TEXT, null);
 
     private static IMarkerStorage<Waypoint> waypointStore;
@@ -68,12 +64,13 @@ public class WorldMapMenu {
                 mdCache.data().forEach(md -> {
                     ResourceLocation key = md.getID().location;
                     mdInspector.add(
-                        makeAction("debug.inspect_chunk_md."+key.getNamespace()+"."+key.getPath(), null, new TextComponent(key.toString()),
+                        makeAction("debug.inspect_chunk_md."+key.getNamespace()+"."+key.getPath(), null, Component.literal(key.toString()),
                             () -> WorldMapGui.apply(gui -> gui.addInspector(new MDInspectorWidget<>(md, chunkPos)))
                         )
                     );
                 });
             }
+            folder.add(mdInspector);
         }
 
         return folder;
@@ -93,7 +90,7 @@ public class WorldMapMenu {
     }
 
     private static MenuFolder makeFolder(String id, ResourceLocation icon, int tint, String name, MenuItem ... children){
-        return new MenuFolder(Helpers.identifier(BASE_PATH + id), icon, tint, new TextComponent(name), children);
+        return new MenuFolder(Helpers.identifier(BASE_PATH + id), icon, tint, Component.literal(name), children);
     }
 
     private static MenuFolder makeFolder(String id, ResourceLocation icon, int tint, MenuItem ... children){

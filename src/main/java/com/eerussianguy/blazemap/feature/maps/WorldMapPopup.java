@@ -8,8 +8,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 
 import net.minecraftforge.common.MinecraftForge;
@@ -25,7 +23,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 public class WorldMapPopup implements Widget {
     private static final ResourceLocation MENU_ROOT = Helpers.identifier("map.menu");
-    private static final TextComponent MENU_ROOT_TEXT = new TextComponent("");
+    private static final Component MENU_ROOT_TEXT = Component.literal("");
     private static final int MIN_WIDTH = 160;
 
     private final int sizeX, sizeY, middleY;

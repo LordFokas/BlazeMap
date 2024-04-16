@@ -1,9 +1,8 @@
 package com.eerussianguy.blazemap.feature;
 
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraftforge.client.gui.ForgeIngameGui;
-import net.minecraftforge.client.gui.IIngameOverlay;
-import net.minecraftforge.client.gui.OverlayRegistry;
+import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
+import net.minecraftforge.client.gui.overlay.ForgeGui;
 
 import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.feature.maps.MinimapRenderer;
@@ -14,27 +13,32 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import static com.eerussianguy.blazemap.BlazeMap.MOD_NAME;
 
 public class Overlays {
-    public static final IIngameOverlay MINIMAP = OverlayRegistry.registerOverlayTop(MOD_NAME + " Minimap", Overlays::renderMinimap);
-    public static final IIngameOverlay PROFILER = OverlayRegistry.registerOverlayTop(MOD_NAME + " Profiler", Overlays::renderProfiler);
+    private static final String NORMALISED_MOD_NAME = MOD_NAME.replaceAll("\\s", "_").toLowerCase();
+    private static final String MINIMAP_ID = String.format("%s_minimap", NORMALISED_MOD_NAME);
+    private static final String PROFILER_ID = String.format("%s_profiler", NORMALISED_MOD_NAME);
 
-    public static void reload() {
-        OverlayRegistry.enableOverlay(MINIMAP, BlazeMapConfig.CLIENT.minimap.enabled.get());
-        OverlayRegistry.enableOverlay(PROFILER, BlazeMapConfig.CLIENT.enableDebug.get());
+    public static void onRegisterOverlays(RegisterGuiOverlaysEvent event) {
+        event.registerAboveAll(MINIMAP_ID, Overlays::renderMinimap);
+        event.registerAboveAll(PROFILER_ID, Overlays::renderProfiler);
     }
 
-    public static void renderMinimap(ForgeIngameGui gui, PoseStack stack, float partialTicks, int width, int height) {
-        stack.pushPose();
-        var buffers = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-        MinimapRenderer.INSTANCE.draw(stack, buffers, gui, width, height);
-        buffers.endBatch();
-        stack.popPose();
+    public static void renderMinimap(ForgeGui gui, PoseStack stack, float partialTicks, int width, int height) {
+        if (BlazeMapConfig.CLIENT.minimap.enabled.get()) {
+            stack.pushPose();
+            var buffers = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+            MinimapRenderer.INSTANCE.draw(stack, buffers, gui, width, height);
+            buffers.endBatch();
+            stack.popPose();
+        }
     }
 
-    public static void renderProfiler(ForgeIngameGui gui, PoseStack stack, float partialTicks, int width, int height) {
-        stack.pushPose();
-        var buffers = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-        ProfilingRenderer.INSTANCE.draw(stack, buffers);
-        buffers.endBatch();
-        stack.popPose();
+    public static void renderProfiler(ForgeGui gui, PoseStack stack, float partialTicks, int width, int height) {
+        if (BlazeMapConfig.CLIENT.enableDebug.get()) {
+            stack.pushPose();
+            var buffers = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+            ProfilingRenderer.INSTANCE.draw(stack, buffers);
+            buffers.endBatch();
+            stack.popPose();
+        }
     }
 }

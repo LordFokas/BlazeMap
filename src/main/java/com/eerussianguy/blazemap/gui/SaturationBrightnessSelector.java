@@ -17,6 +17,8 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix4f;
 
+import net.minecraft.client.gui.narration.NarratableEntry.NarrationPriority;
+
 public class SaturationBrightnessSelector implements Widget, GuiEventListener, NarratableEntry {
     private final int x, y, w, h;
     private float hue, s, b;

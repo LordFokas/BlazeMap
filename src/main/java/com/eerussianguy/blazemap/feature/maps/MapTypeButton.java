@@ -2,7 +2,7 @@ package com.eerussianguy.blazemap.feature.maps;
 
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 
 import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
 import com.eerussianguy.blazemap.api.maps.MapType;
@@ -32,7 +32,7 @@ public class MapTypeButton extends ImageButton {
     @Override
     public void renderToolTip(PoseStack stack, int x, int y) {
         RenderSystem.setShaderColor(1, 1, 1, 1);
-        TranslatableComponent component = key.value().getName();
+        Component component = key.value().getName();
         host.drawTooltip(stack, component, x, y);
     }
 
