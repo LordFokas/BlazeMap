@@ -1,6 +1,7 @@
 package com.eerussianguy.blazemap.api.pipeline;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -29,13 +30,17 @@ import com.eerussianguy.blazemap.api.util.RegionPos;
 public abstract class Processor implements RegistryEntry, PipelineComponent, Consumer {
     private final Key<Processor> id;
     private final Set<Key<DataType<MasterDatum>>> inputs;
+    public final ExecutionMode executionMode;
 
+    /** Do not extend directly, use Processor.Direct or Processor.Differential. */
     @SafeVarargs
-    public Processor(Key<Processor> id, Key<DataType<MasterDatum>>... inputs) {
+    private Processor(Key<Processor> id, ExecutionMode executionMode, Key<DataType<MasterDatum>>... inputs) {
         this.id = id;
+        this.executionMode = Objects.requireNonNull(executionMode);
         this.inputs = Arrays.stream(inputs).collect(Collectors.toUnmodifiableSet());
     }
 
+    @Override
     public Key<Processor> getID() {
         return id;
     }
@@ -45,5 +50,46 @@ public abstract class Processor implements RegistryEntry, PipelineComponent, Con
         return inputs;
     }
 
-    public abstract boolean execute(ResourceKey<Level> dimension, RegionPos region, ChunkPos chunk, IDataSource data);
+    /** Called for ExecutionMode.DIRECT, more performant */
+    public abstract void execute(ResourceKey<Level> dimension, RegionPos region, ChunkPos chunk, IDataSource data);
+
+    /** Called for ExecutionMode.DIFFERENTIAL, more powerful */
+    public abstract void execute(ResourceKey<Level> dimension, RegionPos region, ChunkPos chunk, IDataSource current, IDataSource old);
+
+
+    /**
+     * Processor subclass set up to run in Direct mode.
+     * When in doubt this is the Processor type you should extend.
+     */
+    public static abstract class Direct extends Processor {
+
+        @SafeVarargs
+        public Direct(Key<Processor> id, Key<DataType<MasterDatum>>... inputs) {
+            super(id, ExecutionMode.DIRECT, inputs);
+        }
+
+        @Override
+        public final void execute(ResourceKey<Level> dimension, RegionPos region, ChunkPos chunk, IDataSource current, IDataSource old) {
+            throw new RuntimeException("Cannot execute differential mode on direct processor");
+        }
+    }
+
+
+    /**
+     * Processor subclass set up to run in Differential mode.
+     * This is more powerful but inflicts some performance penalties.
+     * Unless you are building some very advanced features, you should never need these.
+     */
+    public static abstract class Differential extends Processor {
+
+        @SafeVarargs
+        public Differential(Key<Processor> id, Key<DataType<MasterDatum>>... inputs) {
+            super(id, ExecutionMode.DIFFERENTIAL, inputs);
+        }
+
+        @Override
+        public final void execute(ResourceKey<Level> dimension, RegionPos region, ChunkPos chunk, IDataSource data) {
+            throw new RuntimeException("Cannot execute direct mode on differential processor");
+        }
+    }
 }

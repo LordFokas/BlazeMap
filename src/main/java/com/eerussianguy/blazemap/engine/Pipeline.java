@@ -7,6 +7,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 
+import com.eerussianguy.blazemap.api.BlazeRegistry;
 import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
 import com.eerussianguy.blazemap.api.pipeline.*;
 import com.eerussianguy.blazemap.api.util.RegionPos;
@@ -25,7 +26,9 @@ import static com.eerussianguy.blazemap.engine.UnsafeGenerics.*;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public abstract class Pipeline {
     protected final ThreadLocal<ChunkMDCacheView> CACHE_VIEWS = ThreadLocal.withInitial(ChunkMDCacheView::new);
+    protected final ThreadLocal<ChunkMDCacheView> DIFF_VIEWS = ThreadLocal.withInitial(ChunkMDCacheView::new);
     protected final ThreadLocal<ChunkMDCache> PLACEHOLDER_CACHES = ThreadLocal.withInitial(ChunkMDCache::new);
+    protected final ThreadLocal<ChunkMDCache> DIFFERENTIAL_CACHES = ThreadLocal.withInitial(ChunkMDCache::new);
 
     private final PipelineProfiler profiler;
     protected final AsyncChainRoot async;
@@ -35,6 +38,7 @@ public abstract class Pipeline {
     protected final Set<Key<Collector>> availableCollectors;
     protected final Set<Key<Transformer>> availableTransformers;
     protected final Set<Key<Processor>> availableProcessors;
+    protected final boolean differentialExecution;
     private final Collector<MasterDatum>[] collectors;
     private final List<Transformer> transformers;
     private final List<Processor> processors;
@@ -66,6 +70,12 @@ public abstract class Pipeline {
         collectors = availableCollectors.stream().map(Key::value).toArray(Collector[]::new);
         transformers = this.availableTransformers.stream().map(Key::value).toList();
         processors = this.availableProcessors.stream().map(Key::value).toList();
+
+        boolean differentialExecution = false;
+        for(Processor processor : processors) {
+            differentialExecution = differentialExecution || processor.executionMode == ExecutionMode.DIFFERENTIAL;
+        }
+        this.differentialExecution = differentialExecution;
 
         numCollectors = collectors.length;
         numTransformers = transformers.size();
@@ -106,8 +116,10 @@ public abstract class Pipeline {
     // TODO: figure out why void gives generic errors but null Void is OK. Does it have to be an Object?
     protected Void processMasterData(ChunkPos pos, List<MasterDatum> collectedData) {
         if(collectedData.size() == 0) return null;
+
         ChunkMDCache cache = useMDCache ? mdCache.getChunkCache(pos) : PLACEHOLDER_CACHES.get().clear();
         ChunkMDCacheView view = CACHE_VIEWS.get().setSource(cache);
+        ChunkMDCacheView old = differentialExecution ? DIFF_VIEWS.get().setSource(cache.copyInto(DIFFERENTIAL_CACHES.get())) : null;
 
         // Diff collected data
         Set<Key<DataType>> diff = new HashSet<>();
@@ -119,7 +131,7 @@ public abstract class Pipeline {
         diffMD(transformedData, cache, diff);
 
         this.onPipelineOutput(pos, diff, view, cache);
-        this.runProcessors(pos, diff, view);
+        this.runProcessors(pos, diff, view, old);
         return null;
     }
 
@@ -191,7 +203,7 @@ public abstract class Pipeline {
         }
     }
 
-    protected void runProcessors(ChunkPos chunk, Set<Key<DataType>> diff, ChunkMDCacheView view) {
+    protected void runProcessors(ChunkPos chunk, Set<Key<DataType>> diff, ChunkMDCacheView current, ChunkMDCacheView old) {
         Processor[] processors = this.processors.stream().filter(p -> !Collections.disjoint(p.getInputIDs(), diff)).toArray(Processor[]::new);
         if(processors.length == 0) return;
 
@@ -200,8 +212,14 @@ public abstract class Pipeline {
             profiler.processorTime.begin();
             RegionPos region = new RegionPos(chunk);
             for(Processor processor : processors) {
-                view.setFilter(stripKeys(processor.getInputIDs()));
-                processor.execute(dimension, region, chunk, view);
+                Set<BlazeRegistry.Key<DataType>> keys = stripKeys(processor.getInputIDs());
+                current.setFilter(keys);
+                if(differentialExecution && processor.executionMode == ExecutionMode.DIFFERENTIAL) {
+                    old.setFilter(keys);
+                    processor.execute(dimension, region, chunk, current, old);
+                } else {
+                    processor.execute(dimension, region, chunk, current);
+                }
             }
         }
         finally {
