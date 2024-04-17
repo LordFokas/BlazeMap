@@ -1,6 +1,6 @@
 
 modLoader="javafml" #mandatory
-loaderVersion="[45,46)"
+loaderVersion="[47,48)"
 license="MIT License"
 issueTrackerURL="https://github.com/LordFokas/BlazeMap/issues" #optional
 [[mods]] #mandatory
@@ -19,6 +19,6 @@ The open-source Forge map mod, made by modders for modders.
 [[dependencies.blazemap]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.19.4,1.20)"
+    versionRange="[1.20,1.20.2)"
     ordering="NONE"
     side="BOTH"
