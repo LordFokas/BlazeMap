@@ -1,10 +1,9 @@
 package com.eerussianguy.blazemap.api.pipeline;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nonnull;
 
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.ChunkPos;
@@ -14,7 +13,6 @@ import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
 import com.eerussianguy.blazemap.api.BlazeRegistry.RegistryEntry;
 import com.eerussianguy.blazemap.api.util.IDataSource;
 import com.eerussianguy.blazemap.api.util.RegionPos;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Like Layers, Processors consume one or more MasterDatum objects for a given chunk, however
@@ -32,13 +30,17 @@ import org.jetbrains.annotations.NotNull;
 public abstract class Processor implements RegistryEntry, PipelineComponent, Consumer {
     private final Key<Processor> id;
     private final Set<Key<DataType<MasterDatum>>> inputs;
+    public final ExecutionMode executionMode;
 
+    /** Do not extend directly, use Processor.Direct or Processor.Differential. */
     @SafeVarargs
-    public Processor(Key<Processor> id, Key<DataType<MasterDatum>>... inputs) {
+    private Processor(Key<Processor> id, ExecutionMode executionMode, Key<DataType<MasterDatum>>... inputs) {
         this.id = id;
+        this.executionMode = Objects.requireNonNull(executionMode);
         this.inputs = Arrays.stream(inputs).collect(Collectors.toUnmodifiableSet());
     }
 
+    @Override
     public Key<Processor> getID() {
         return id;
     }
@@ -48,14 +50,11 @@ public abstract class Processor implements RegistryEntry, PipelineComponent, Con
         return inputs;
     }
 
-    @Nonnull
-    public abstract ExecutionMode getExecutionMode();
-
     /** Called for ExecutionMode.DIRECT, more performant */
-    public abstract boolean execute(ResourceKey<Level> dimension, RegionPos region, ChunkPos chunk, IDataSource data);
+    public abstract void execute(ResourceKey<Level> dimension, RegionPos region, ChunkPos chunk, IDataSource data);
 
     /** Called for ExecutionMode.DIFFERENTIAL, more powerful */
-    public abstract boolean execute(ResourceKey<Level> dimension, RegionPos region, ChunkPos chunk, IDataSource current, IDataSource old);
+    public abstract void execute(ResourceKey<Level> dimension, RegionPos region, ChunkPos chunk, IDataSource current, IDataSource old);
 
 
     /**
@@ -66,17 +65,12 @@ public abstract class Processor implements RegistryEntry, PipelineComponent, Con
 
         @SafeVarargs
         public Direct(Key<Processor> id, Key<DataType<MasterDatum>>... inputs) {
-            super(id, inputs);
-        }
-
-        @Override @NotNull
-        public final ExecutionMode getExecutionMode() {
-            return ExecutionMode.DIRECT;
+            super(id, ExecutionMode.DIRECT, inputs);
         }
 
         @Override
-        public final boolean execute(ResourceKey<Level> dimension, RegionPos region, ChunkPos chunk, IDataSource current, IDataSource old) {
-            return false;
+        public final void execute(ResourceKey<Level> dimension, RegionPos region, ChunkPos chunk, IDataSource current, IDataSource old) {
+            throw new RuntimeException("Cannot execute differential mode on direct processor");
         }
     }
 
@@ -90,17 +84,12 @@ public abstract class Processor implements RegistryEntry, PipelineComponent, Con
 
         @SafeVarargs
         public Differential(Key<Processor> id, Key<DataType<MasterDatum>>... inputs) {
-            super(id, inputs);
-        }
-
-        @Override @NotNull
-        public final ExecutionMode getExecutionMode() {
-            return ExecutionMode.DIFFERENTIAL;
+            super(id, ExecutionMode.DIFFERENTIAL, inputs);
         }
 
         @Override
-        public final boolean execute(ResourceKey<Level> dimension, RegionPos region, ChunkPos chunk, IDataSource data) {
-            return false;
+        public final void execute(ResourceKey<Level> dimension, RegionPos region, ChunkPos chunk, IDataSource data) {
+            throw new RuntimeException("Cannot execute direct mode on differential processor");
         }
     }
 }
