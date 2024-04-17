@@ -6,5 +6,17 @@ public abstract class MasterDatum {
 
     public abstract BlazeRegistry.Key<DataType<MasterDatum>> getID();
 
-    public abstract boolean equals(Object other);
+    @Override
+    public final boolean equals(Object other) {
+        if(this == other) return true;
+        if(other == null) return false;
+        if(other.getClass() != this.getClass()) return false;
+
+        MasterDatum md = (MasterDatum) other;
+        if(!md.getID().equals(this.getID())) return false;
+
+        return equalsMD(md);
+    }
+
+    public abstract boolean equalsMD(MasterDatum md);
 }

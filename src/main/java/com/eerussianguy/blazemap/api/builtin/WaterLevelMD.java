@@ -1,5 +1,7 @@
 package com.eerussianguy.blazemap.api.builtin;
 
+import java.util.Arrays;
+
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
 import com.eerussianguy.blazemap.api.BlazeRegistry;
 import com.eerussianguy.blazemap.api.pipeline.DataType;
@@ -20,7 +22,8 @@ public class WaterLevelMD extends MasterDatum {
     }
 
     @Override
-    public boolean equals(Object other) {
-        return false;
+    public boolean equalsMD(MasterDatum md) {
+        WaterLevelMD other = (WaterLevelMD) md;
+        return Arrays.equals(this.level, other.level, Arrays::compare);
     }
 }
