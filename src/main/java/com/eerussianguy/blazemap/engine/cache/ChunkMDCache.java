@@ -47,6 +47,16 @@ public class ChunkMDCache {
         return this;
     }
 
+    public ChunkMDCache copy() {
+        return copyInto(new ChunkMDCache());
+    }
+
+    public ChunkMDCache copyInto(ChunkMDCache clone) {
+        clone.data.clear();
+        clone.data.putAll(data);
+        return clone;
+    }
+
     static class Persisted extends ChunkMDCache {
         private final RegionMDCache parent;
 

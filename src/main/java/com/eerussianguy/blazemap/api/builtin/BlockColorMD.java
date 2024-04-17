@@ -1,5 +1,7 @@
 package com.eerussianguy.blazemap.api.builtin;
 
+import java.util.Arrays;
+
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
 import com.eerussianguy.blazemap.api.BlazeRegistry;
 import com.eerussianguy.blazemap.api.pipeline.DataType;
@@ -18,7 +20,8 @@ public class BlockColorMD extends MasterDatum {
     }
 
     @Override
-    public boolean equals(Object other) {
-        return false;
+    public boolean equalsMD(MasterDatum md) {
+        BlockColorMD other = (BlockColorMD) md;
+        return Arrays.equals(this.colors, other.colors, Arrays::compare);
     }
 }
