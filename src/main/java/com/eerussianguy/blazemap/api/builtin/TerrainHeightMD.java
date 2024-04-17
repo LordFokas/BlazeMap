@@ -1,5 +1,7 @@
 package com.eerussianguy.blazemap.api.builtin;
 
+import java.util.Arrays;
+
 import com.eerussianguy.blazemap.api.BlazeRegistry;
 import com.eerussianguy.blazemap.api.pipeline.DataType;
 import com.eerussianguy.blazemap.api.pipeline.MasterDatum;
@@ -25,7 +27,8 @@ public class TerrainHeightMD extends MasterDatum {
     }
 
     @Override
-    public boolean equals(Object other) {
-        return false;
+    public boolean equalsMD(MasterDatum md) {
+        TerrainHeightMD other = (TerrainHeightMD) md;
+        return Arrays.equals(this.heightmap, other.heightmap, Arrays::compare);
     }
 }
