@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.lwjgl.glfw.GLFW;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -112,8 +113,8 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
     }
 
     @Override
-    public void drawTooltip(PoseStack stack, Component component, int x, int y) {
-        renderTooltip(stack, component, x, y);
+    public void drawTooltip(GuiGraphics graphics, Component component, int x, int y) {
+        graphics.renderTooltip(font, component, x, y);
     }
 
     @Override
@@ -227,24 +228,26 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
     }
 
     @Override
-    public void render(PoseStack stack, int i0, int i1, float f0) {
+    public void render(GuiGraphics graphics, int i0, int i1, float f0) {
         float scale = (float) getMinecraft().getWindow().getGuiScale();
-        fillGradient(stack, 0, 0, this.width, this.height, 0xFF333333, 0xFF333333);
+        graphics.fillGradient(0, 0, this.width, this.height, 0xFF333333, 0xFF333333);
+
+        PoseStack stack = graphics.pose();
 
         stack.pushPose();
         stack.scale(1F / scale, 1F / scale, 1);
         var buffers = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-        mapRenderer.render(stack, buffers);
+        mapRenderer.render(graphics, buffers);
         buffers.endBatch();
         if(contextMenu != null){
-            contextMenu.render(stack, i0, i1, f0);
+            contextMenu.render(graphics, i0, i1, f0);
         }
         stack.popPose();
 
         if(legend != null) {
             stack.pushPose();
             stack.translate(width - 5, height - 5, 0);
-            legend.render(stack, -1, -1, 0);
+            legend.render(graphics, -1, -1, 0);
             stack.popPose();
         }
 
@@ -264,25 +267,26 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
                 stack.popPose();
             }
             stack.pushPose();
-            super.render(stack, i0, i1, f0);
+            super.render(graphics, i0, i1, f0);
             stack.popPose();
         }
 
         if(renderDebug) {
             stack.pushPose();
-            renderDebug(stack);
+            renderDebug(graphics);
             stack.popPose();
 
             stack.pushPose();
             stack.scale(1F / scale, 1F / scale, 1);
-            renderCoordination(stack, scale);
+            renderCoordination(graphics, scale);
             stack.popPose();
         }
     }
 
-    private void renderCoordination(PoseStack stack, float scale){
+    private void renderCoordination(GuiGraphics graphics, float scale){
         if(rawMouseX == -1 || rawMouseY == -1) return;
 
+        PoseStack stack = graphics.pose();
         stack.pushPose();
         stack.translate(coordination.regionPixelX, coordination.regionPixelY, 0.1);
         RenderHelper.fillRect(stack.last().pose(), coordination.regionPixels, coordination.regionPixels, 0x400000FF);
@@ -303,22 +307,23 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
         stack.scale(3, 3, 0);
         Font font = getMinecraft().font;
         String region = String.format("Rg %d %d  |  px: %d %d", coordination.regionX, coordination.regionZ, coordination.regionPixelX, coordination.regionPixelY);
-        font.draw(stack, region, 0, 0, 0x0000FF);
+        graphics.drawString(font, region, 0, 0, 0x0000FF);
         String chunk = String.format("Ch %d %d  |  px: %d %d", coordination.chunkX, coordination.chunkZ, coordination.chunkPixelX, coordination.chunkPixelY);
-        font.draw(stack, chunk, 0, 10, 0x00FF00);
+        graphics.drawString(font, chunk, 0, 10, 0x00FF00);
         String block = String.format("Bl %d %d  |  px: %d %d", coordination.blockX, coordination.blockZ, coordination.blockPixelX, coordination.blockPixelY);
-        font.draw(stack, block, 0, 20, 0xFF0000);
+        graphics.drawString(font, block, 0, 20, 0xFF0000);
         stack.popPose();
     }
 
-    private void renderDebug(PoseStack stack) {
+    private void renderDebug(GuiGraphics graphics) {
+        PoseStack stack = graphics.pose();
         stack.translate(32, 25, 0);
         RenderHelper.fillRect(stack.last().pose(), 135, 110, 0x80000000);
-        font.draw(stack, "Debug Info", 5, 5, 0xFFFF0000);
+        graphics.drawString(font, "Debug Info", 5, 5, 0xFFFF0000);
         stack.translate(5, 20, 0);
         stack.scale(0.5F, 0.5F, 1);
 
-        font.draw(stack, "Atlas Time Profiling:", 0, 0, -1);
+        graphics.drawString(font, "Atlas Time Profiling:", 0, 0, -1);
         var buffers = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
         ProfilingRenderer.drawTimeProfiler(renderTime, 12, "Render", font, stack.last().pose(), buffers);
         ProfilingRenderer.drawTimeProfiler(uploadTime, 24, "Upload", font, stack.last().pose(), buffers);
@@ -326,18 +331,18 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
 
         MapRenderer.DebugInfo debug = mapRenderer.debug;
         int y = 30;
-        font.draw(stack, String.format("Renderer Size: %d x %d", debug.rw, debug.rh), 0, y += 12, -1);
-        font.draw(stack, String.format("Renderer Zoom: %sx", debug.zoom), 0, y += 12, -1);
-        font.draw(stack, String.format("Atlas Size: %d x %d", debug.mw, debug.mh), 0, y += 12, -1);
-        font.draw(stack, String.format("Atlas Frustum: [%d , %d] to [%d , %d]", debug.bx, debug.bz, debug.ex, debug.ez), 0, y += 12, -1);
+        graphics.drawString(font, String.format("Renderer Size: %d x %d", debug.rw, debug.rh), 0, y += 12, -1);
+        graphics.drawString(font, String.format("Renderer Zoom: %sx", debug.zoom), 0, y += 12, -1);
+        graphics.drawString(font, String.format("Atlas Size: %d x %d", debug.mw, debug.mh), 0, y += 12, -1);
+        graphics.drawString(font, String.format("Atlas Frustum: [%d , %d] to [%d , %d]", debug.bx, debug.bz, debug.ex, debug.ez), 0, y += 12, -1);
 
-        font.draw(stack, String.format("Region Matrix: %d x %d", debug.ox, debug.oz), 0, y += 18, -1);
-        font.draw(stack, String.format("Active Layers: %d", debug.layers), 0, y += 12, -1);
-        font.draw(stack, String.format("Stitching: %s", debug.stitching), 0, y += 12, 0xFF0088FF);
-        font.draw(stack, String.format("Parallel Pool: %d", BlazeMapAsync.instance().cruncher.poolSize()), 0, y += 12, 0xFFFFFF00);
+        graphics.drawString(font, String.format("Region Matrix: %d x %d", debug.ox, debug.oz), 0, y += 18, -1);
+        graphics.drawString(font, String.format("Active Layers: %d", debug.layers), 0, y += 12, -1);
+        graphics.drawString(font, String.format("Stitching: %s", debug.stitching), 0, y += 12, 0xFF0088FF);
+        graphics.drawString(font, String.format("Parallel Pool: %d", BlazeMapAsync.instance().cruncher.poolSize()), 0, y += 12, 0xFFFFFF00);
 
-        font.draw(stack, String.format("Addon Labels: %d", debug.labels), 0, y += 18, -1);
-        font.draw(stack, String.format("Player Waypoints: %d", debug.waypoints), 0, y += 12, -1);
+        graphics.drawString(font, String.format("Addon Labels: %d", debug.labels), 0, y += 18, -1);
+        graphics.drawString(font, String.format("Player Waypoints: %d", debug.waypoints), 0, y += 12, -1);
     }
 
     @Override

@@ -52,6 +52,7 @@ public class NetherCollector extends Collector<TerrainHeightMD> {
 
     private boolean isNotBaseStone(Level level, int x, int y, int z) {
         BlockState state = level.getBlockState(POS.set(x, y, z));
-        return !state.getMaterial().isSolid();
+        // TODO: Replace with non-deprecated function call
+        return !state.isSolid();
     }
 }

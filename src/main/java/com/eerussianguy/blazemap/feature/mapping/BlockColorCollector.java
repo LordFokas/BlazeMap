@@ -5,7 +5,7 @@ import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.material.MaterialColor;
+import net.minecraft.world.level.material.MapColor;
 
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
 import com.eerussianguy.blazemap.api.builtin.BlockColorMD;
@@ -36,8 +36,8 @@ public class BlockColorCollector extends ClientOnlyCollector<BlockColorMD> {
                     final BlockState state = level.getBlockState(POS);
                     color = blockColors.getColor(state, level, POS, 0);
                     if(color <= 0) {
-                        MaterialColor mapColor = state.getMapColor(level, POS);
-                        if(mapColor != MaterialColor.NONE) {
+                        MapColor mapColor = state.getMapColor(level, POS);
+                        if(mapColor != MapColor.NONE) {
                             color = mapColor.col;
                         }
                     }

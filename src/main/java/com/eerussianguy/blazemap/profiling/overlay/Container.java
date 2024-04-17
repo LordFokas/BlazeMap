@@ -3,6 +3,7 @@ package com.eerussianguy.blazemap.profiling.overlay;
 import java.util.function.Supplier;
 
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 
@@ -56,7 +57,8 @@ public class Container implements IDrawable {
     }
 
     @Override
-    public void draw(PoseStack stack, MultiBufferSource buffers, Font fontRenderer) {
+    public void draw(GuiGraphics graphics, MultiBufferSource buffers, Font fontRenderer) {
+        PoseStack stack = graphics.pose();
         Matrix4f matrix = stack.last().pose();
 
         if(style.isRoot){
@@ -69,7 +71,7 @@ public class Container implements IDrawable {
         for(IDrawable element : children){
             if(element.isDisabled()) continue;
             stack.pushPose();
-            element.draw(stack, buffers, fontRenderer);
+            element.draw(graphics, buffers, fontRenderer);
             stack.popPose();
             stack.translate(0, element.getHeight(), 0);
         }

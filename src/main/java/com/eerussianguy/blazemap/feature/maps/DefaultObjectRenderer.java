@@ -1,5 +1,6 @@
 package com.eerussianguy.blazemap.feature.maps;
 
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 
@@ -21,7 +22,8 @@ public class DefaultObjectRenderer implements ObjectRenderer<MapLabel> {
     }
 
     @Override
-    public void render(MapLabel label, PoseStack stack, MultiBufferSource buffers, double zoom, SearchTargeting search) {
+    public void render(MapLabel label, GuiGraphics graphics, MultiBufferSource buffers, double zoom, SearchTargeting search) {
+        PoseStack stack = graphics.pose();
         if(!label.getUsesZoom()) {
             stack.scale(1F / (float) zoom, 1F / (float) zoom, 1);
         }

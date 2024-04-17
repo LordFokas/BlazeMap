@@ -45,6 +45,6 @@ public class TerrainHeightCollector extends Collector<TerrainHeightMD> {
 
     protected static boolean isSkippableAfterLeaves(Level level, int x, int y, int z) {
         BlockState state = level.getBlockState(POS.set(x, y, z));
-        return state.is(BlockTags.LEAVES) || state.isAir() || state.is(BlockTags.LOGS) || state.getMaterial().isReplaceable();
+        return state.is(BlockTags.LEAVES) || state.isAir() || state.is(BlockTags.LOGS) || state.canBeReplaced();
     }
 }

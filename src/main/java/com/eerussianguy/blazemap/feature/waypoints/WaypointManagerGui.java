@@ -1,6 +1,7 @@
 package com.eerussianguy.blazemap.feature.waypoints;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.renderer.MultiBufferSource;
 
@@ -51,11 +52,11 @@ public class WaypointManagerGui extends BlazeGui {
     }
 
     @Override
-    protected void renderComponents(PoseStack stack, MultiBufferSource buffers) {}
+    protected void renderComponents(GuiGraphics graphics, MultiBufferSource buffers) {}
 
-    private void renderWaypoint(PoseStack stack, Waypoint waypoint) {
-        RenderHelper.drawTexturedQuad(waypoint.getIcon(), waypoint.getColor(), stack, 2, 2, 16, 16);
-        font.draw(stack, waypoint.getName(), 20, 6, waypoint.getColor());
+    private void renderWaypoint(GuiGraphics graphics, Waypoint waypoint) {
+        RenderHelper.drawTexturedQuad(waypoint.getIcon(), waypoint.getColor(), graphics, 2, 2, 16, 16);
+        graphics.drawString(font, waypoint.getName(), 20, 6, waypoint.getColor());
     }
 
     private void onSelected(Waypoint waypoint) {

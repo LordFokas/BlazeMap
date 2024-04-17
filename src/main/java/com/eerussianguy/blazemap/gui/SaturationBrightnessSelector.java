@@ -3,6 +3,7 @@ package com.eerussianguy.blazemap.gui;
 import java.awt.*;
 import java.util.function.BiConsumer;
 
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -34,12 +35,14 @@ public class SaturationBrightnessSelector implements Renderable, GuiEventListene
     }
 
     @Override
-    public void render(PoseStack stack, int mx, int my, float p) {
+    public void render(GuiGraphics graphics, int mx, int my, float p) {
+        PoseStack stack = graphics.pose();
+
         stack.pushPose();
         stack.translate(x, y, 0);
         var buffers = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
         VertexConsumer slot = buffers.getBuffer(RenderType.text(BlazeGui.SLOT));
-        RenderHelper.drawFrame(slot, stack, w, h, 1);
+        RenderHelper.drawFrame(slot, graphics, w, h, 1);
 
         Matrix4f matrix = stack.last().pose();
         VertexConsumer vertices = buffers.getBuffer(RenderHelper.SOLID);

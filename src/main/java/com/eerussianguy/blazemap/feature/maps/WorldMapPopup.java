@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -184,7 +185,8 @@ public class WorldMapPopup implements Renderable {
     }
 
     @Override
-    public void render(PoseStack stack, int i0, int i1, float f0) {
+    public void render(GuiGraphics graphics, int i0, int i1, float f0) {
+        PoseStack stack = graphics.pose();
         stack.pushPose();
 
         stack.translate(posX, posY, 1);
@@ -192,7 +194,7 @@ public class WorldMapPopup implements Renderable {
         RenderHelper.fillRect(stack.last().pose(), sizeX, sizeY, Colors.WIDGET_BACKGROUND);
         for(PopupItem item : items) {
             stack.pushPose();
-            item.render(stack, sizeX, item == lastClicked, item == hovered);
+            item.render(graphics, sizeX, item == lastClicked, item == hovered);
             stack.popPose();
             stack.translate(0, PopupItem.HEIGHT, 0);
         }
@@ -200,7 +202,7 @@ public class WorldMapPopup implements Renderable {
         stack.popPose();
 
         if(activeChild != null) {
-            activeChild.render(stack, i0, i1, f0);
+            activeChild.render(graphics, i0, i1, f0);
         }
     }
 
@@ -239,18 +241,19 @@ public class WorldMapPopup implements Renderable {
             this.function = function;
         }
 
-        public void render(PoseStack stack, int width, boolean active, boolean hovered) {
-            if(hovered) {
+        public void render(GuiGraphics graphics, int width, boolean active, boolean hovered) {
+        PoseStack stack = graphics.pose();
+        if(hovered) {
                 RenderHelper.fillRect(stack.last().pose(), width, HEIGHT, 0x40808080);
             }
 
             int color = enabled ? (active ? 0xFFDD00 : Colors.WHITE) : Colors.DISABLED;
-            if(icon != null) RenderHelper.drawTexturedQuad(icon, enabled ? iconTint : color, stack, 2,4, 16, 16);
+            if(icon != null) RenderHelper.drawTexturedQuad(icon, enabled ? iconTint : color, graphics, 2,4, 16, 16);
 
             stack.pushPose();
             stack.scale(2, 2, 1);
-            font.draw(stack, text, 10, 3, color);
-            if(folder) font.draw(stack, ">", (width/2) - 8, 3, color);
+            graphics.drawString(font, text, 10, 3, color);
+            if(folder) graphics.drawString(font, ">", (width/2) - 8, 3, color);
             stack.popPose();
         }
 

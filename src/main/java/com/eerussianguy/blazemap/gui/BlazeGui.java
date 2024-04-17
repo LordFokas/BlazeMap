@@ -4,6 +4,7 @@ import javax.annotation.Nonnull;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -47,24 +48,26 @@ public abstract class BlazeGui extends Screen {
     }
 
     @Override
-    public void render(PoseStack stack, int i0, int i1, float f0) {
-        renderBackground(stack);
+    public void render(GuiGraphics graphics, int i0, int i1, float f0) {
+        PoseStack stack = graphics.pose();
+        
+        renderBackground(graphics);
 
         var buffers = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-        renderFrame(stack, buffers);
+        renderFrame(graphics, buffers);
 
         stack.pushPose();
         stack.translate(left, top, 0.05F);
         if(title != EMPTY) {
-            renderLabel(stack, buffers, title, 12, 12, true);
+            renderLabel(graphics, buffers, title, 12, 12, true);
         }
-        renderComponents(stack, buffers);
+        renderComponents(graphics, buffers);
         stack.popPose();
         buffers.endBatch();
 
         stack.pushPose();
         stack.translate(0, 0, 0.1F);
-        super.render(stack, i0, i1, f0);
+        super.render(graphics, i0, i1, f0);
         stack.popPose();
 
         stack.pushPose();
@@ -73,30 +76,35 @@ public abstract class BlazeGui extends Screen {
         stack.scale(unscale, unscale, 1);
         stack.translate(0, 0, 0.5F);
         buffers = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-        renderAbsolute(stack, buffers, scale);
+        renderAbsolute(graphics, buffers, scale);
         buffers.endBatch();
         stack.popPose();
     }
 
-    protected void renderAbsolute(PoseStack stack, MultiBufferSource buffers, float scale){}
+    protected void renderAbsolute(GuiGraphics graphics, MultiBufferSource buffers, float scale){}
 
-    protected void renderFrame(PoseStack stack, MultiBufferSource buffers) {
+    protected void renderFrame(GuiGraphics graphics, MultiBufferSource buffers) {
+        PoseStack stack = graphics.pose();
+
         stack.pushPose();
         stack.translate(left, top, 0);
-        RenderHelper.drawFrame(buffers.getBuffer(background), stack, guiWidth, guiHeight, 8);
+        RenderHelper.drawFrame(buffers.getBuffer(background), graphics, guiWidth, guiHeight, 8);
         stack.popPose();
     }
 
-    protected abstract void renderComponents(PoseStack stack, MultiBufferSource buffers);
+    protected abstract void renderComponents(GuiGraphics graphics, MultiBufferSource buffers);
 
-    protected void renderLabel(PoseStack stack, MultiBufferSource buffers, Component text, int x, int y, boolean shadow) {
+    protected void renderLabel(GuiGraphics graphics, MultiBufferSource buffers, Component text, int x, int y, boolean shadow) {
+        PoseStack stack = graphics.pose();
         this.font.drawInBatch(text, x, y, shadow ? Colors.WHITE : Colors.LABEL_COLOR, shadow, stack.last().pose(), buffers, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
     }
 
-    protected void renderSlot(PoseStack stack, MultiBufferSource buffers, int x, int y, int width, int height) {
+    protected void renderSlot(GuiGraphics graphics, MultiBufferSource buffers, int x, int y, int width, int height) {
+        PoseStack stack = graphics.pose();
+
         stack.pushPose();
         stack.translate(x, y, 0);
-        RenderHelper.drawFrame(buffers.getBuffer(slot), stack, width, height, 1);
+        RenderHelper.drawFrame(buffers.getBuffer(slot), graphics, width, height, 1);
         stack.popPose();
     }
 }
