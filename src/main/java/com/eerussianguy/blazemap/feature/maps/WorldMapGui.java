@@ -360,7 +360,7 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
         }
 
         if(!search.isFocused()) {
-            if(key == BlazeMapFeaturesClient.KEY_MAPS.getKey().getValue()) {
+            if(key == BlazeMapFeaturesClient.KEY_MAPS.get().getKey().getValue()) {
                 this.onClose();
                 return true;
             }
