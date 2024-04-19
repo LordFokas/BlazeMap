@@ -3,6 +3,7 @@ package com.eerussianguy.blazemap.feature.waypoints;
 import java.awt.*;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -193,15 +194,16 @@ public class WaypointEditorGui extends BlazeGui {
         this.iconRender = RenderType.text(icon);
     }
 
-    private void renderIcon(PoseStack stack, ResourceLocation icon) {
-        RenderHelper.drawTexturedQuad(icon, -1, stack, 2, 1, 16, 16);
+    private void renderIcon(GuiGraphics graphics, ResourceLocation icon) {
+        RenderHelper.drawTexturedQuad(icon, -1, graphics, 2, 1, 16, 16);
         String[] path = icon.getPath().split("/");
-        font.draw(stack, path[path.length - 1].split("\\.")[0], 20, 5, -1);
+        graphics.drawString(font, path[path.length - 1].split("\\.")[0], 20, 5, -1);
     }
 
     @Override
-    protected void renderComponents(PoseStack stack, MultiBufferSource buffers) {
-        renderSlot(stack, buffers, 150, 25, 50, 50);
+    protected void renderComponents(GuiGraphics graphics, MultiBufferSource buffers) {
+        renderSlot(graphics, buffers, 150, 25, 50, 50);
+        PoseStack stack = graphics.pose();
         stack.pushPose();
         stack.translate(159, 34, 0);
         RenderHelper.drawQuad(buffers.getBuffer(iconRender), stack.last().pose(), 32, 32, color);

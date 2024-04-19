@@ -3,6 +3,7 @@ package com.eerussianguy.blazemap.profiling.overlay;
 import java.util.function.Supplier;
 
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 
@@ -57,7 +58,8 @@ public class StringSource implements IDrawable {
     }
 
     @Override
-    public void draw(PoseStack stack, MultiBufferSource buffers, Font fontRenderer) {
+    public void draw(GuiGraphics graphics, MultiBufferSource buffers, Font fontRenderer) {
+        PoseStack stack = graphics.pose();
         fontRenderer.drawInBatch(main.get(), Container.Style.BLOCK.indent, 0, main_color, false, stack.last().pose(), buffers, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
         if(note != null){
             fontRenderer.drawInBatch(note.get(), Container.PANEL_MIDDLE, 0, note_color, false, stack.last().pose(), buffers, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);

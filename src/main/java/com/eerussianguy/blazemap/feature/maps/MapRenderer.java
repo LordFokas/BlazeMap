@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -289,7 +290,9 @@ public class MapRenderer implements AutoCloseable {
     // =================================================================================================================
 
 
-    public void render(PoseStack stack, MultiBufferSource buffers) {
+    public void render(GuiGraphics graphics, MultiBufferSource buffers) {
+        PoseStack stack = graphics.pose();
+
         if(needsUpdate) updateTexture();
 
         stack.pushPose();
@@ -299,40 +302,40 @@ public class MapRenderer implements AutoCloseable {
         RenderHelper.drawQuad(buffers.getBuffer(renderType), matrix, width, height);
 
         stack.pushPose();
-        renderEntities(stack, buffers);
+        renderEntities(graphics, buffers);
         stack.popPose();
 
         stack.pushPose();
         if(hasActiveSearch) {
             for(MapLabel l : labels_off) {
-                renderObject(buffers, stack, l, SearchTargeting.MISS);
+                renderObject(buffers, graphics, l, SearchTargeting.MISS);
             }
             for(Waypoint w : waypoints_off) {
-                renderMarker(buffers, stack, w.getPosition(), w.getIcon(), w.getColor(), 32, 32, w.getRotation(), false, renderNames ? w.getName() : null, SearchTargeting.MISS);
+                renderMarker(buffers, graphics, w.getPosition(), w.getIcon(), w.getColor(), 32, 32, w.getRotation(), false, renderNames ? w.getName() : null, SearchTargeting.MISS);
             }
             for(MapLabel l : labels_on) {
-                renderObject(buffers, stack, l, SearchTargeting.HIT);
+                renderObject(buffers, graphics, l, SearchTargeting.HIT);
             }
             for(Waypoint w : waypoints_on) {
-                renderMarker(buffers, stack, w.getPosition(), w.getIcon(), w.getColor(), 32, 32, w.getRotation(), false, renderNames ? w.getName() : null, SearchTargeting.HIT);
+                renderMarker(buffers, graphics, w.getPosition(), w.getIcon(), w.getColor(), 32, 32, w.getRotation(), false, renderNames ? w.getName() : null, SearchTargeting.HIT);
             }
         }
         else {
             for(MapLabel l : labels) {
-                renderObject(buffers, stack, l, SearchTargeting.NONE);
+                renderObject(buffers, graphics, l, SearchTargeting.NONE);
             }
             for(Waypoint w : waypoints) {
-                renderMarker(buffers, stack, w.getPosition(), w.getIcon(), w.getColor(), 32, 32, w.getRotation(), false, renderNames ? w.getName() : null, SearchTargeting.NONE);
+                renderMarker(buffers, graphics, w.getPosition(), w.getIcon(), w.getColor(), 32, 32, w.getRotation(), false, renderNames ? w.getName() : null, SearchTargeting.NONE);
             }
         }
         LocalPlayer player = Helpers.getPlayer();
-        renderMarker(buffers, stack, player.blockPosition(), PLAYER, Colors.NO_TINT, 32, 32, player.getRotationVector().y, false, null, SearchTargeting.NONE);
+        renderMarker(buffers, graphics, player.blockPosition(), PLAYER, Colors.NO_TINT, 32, 32, player.getRotationVector().y, false, null, SearchTargeting.NONE);
         stack.popPose();
 
         stack.popPose();
     }
 
-    private void renderEntities(PoseStack stack, MultiBufferSource buffers) {
+    private void renderEntities(GuiGraphics graphics, MultiBufferSource buffers) {
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
         mc.level.entitiesForRendering().forEach(entity -> {
@@ -366,7 +369,7 @@ public class MapRenderer implements AutoCloseable {
                     return;
                 }
 
-                renderMarker(buffers, stack, pos, PLAYER, color, 32, 32, entity.getRotationVector().y, false, isPlayer ? entity.getName().getString() : null, SearchTargeting.NONE);
+                renderMarker(buffers, graphics, pos, PLAYER, color, 32, 32, entity.getRotationVector().y, false, isPlayer ? entity.getName().getString() : null, SearchTargeting.NONE);
             }
         });
     }
@@ -441,7 +444,9 @@ public class MapRenderer implements AutoCloseable {
         }
     }
 
-    private void renderMarker(MultiBufferSource buffers, PoseStack stack, BlockPos position, ResourceLocation marker, int color, double width, double height, float rotation, boolean zoom, String name, SearchTargeting search) {
+    private void renderMarker(MultiBufferSource buffers, GuiGraphics graphics, BlockPos position, ResourceLocation marker, int color, double width, double height, float rotation, boolean zoom, String name, SearchTargeting search) {
+        PoseStack stack = graphics.pose();
+
         stack.pushPose();
         stack.scale((float) this.zoom, (float) this.zoom, 1);
         int dx = position.getX() - begin.getX();
@@ -466,7 +471,9 @@ public class MapRenderer implements AutoCloseable {
         stack.popPose();
     }
 
-    private void renderObject(MultiBufferSource buffers, PoseStack stack, MapLabel label, SearchTargeting search) {
+    private void renderObject(MultiBufferSource buffers, GuiGraphics graphics, MapLabel label, SearchTargeting search) {
+        PoseStack stack = graphics.pose();
+
         stack.pushPose();
         stack.scale((float) this.zoom, (float) this.zoom, 1);
         BlockPos position = label.getPosition();
@@ -474,7 +481,7 @@ public class MapRenderer implements AutoCloseable {
         int dy = position.getZ() - begin.getZ();
         stack.translate(dx, dy, 0);
 
-        ((ObjectRenderer<MapLabel>) label.getRenderer().value()).render(label, stack, buffers, this.zoom, search);
+        ((ObjectRenderer<MapLabel>) label.getRenderer().value()).render(label, graphics, buffers, this.zoom, search);
 
         stack.popPose();
     }

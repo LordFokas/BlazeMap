@@ -1,6 +1,7 @@
 package com.eerussianguy.blazemap.feature.maps;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.BlockPos;
@@ -28,7 +29,7 @@ public class MinimapRenderer implements AutoCloseable {
         this.minimap = new MinimapWidget(mapRenderer, BlazeMapConfig.CLIENT.minimap, false);
     }
 
-    public void draw(PoseStack stack, MultiBufferSource buffers, ForgeGui gui, int width, int height) {
+    public void draw(GuiGraphics graphics, MultiBufferSource buffers, ForgeGui gui, int width, int height) {
         Minecraft mc = Minecraft.getInstance();
         if(mc.screen instanceof IScreenSkipsMinimap) return;
 
@@ -43,10 +44,11 @@ public class MinimapRenderer implements AutoCloseable {
 
         // Prepare to render minimap
         Profilers.Minimap.DRAW_TIME_PROFILER.begin();
+        PoseStack stack = graphics.pose();
         stack.pushPose();
         float scale = (float) (1F / mc.getWindow().getGuiScale());
         stack.scale(scale, scale, 1);
-        minimap.render(stack, buffers);
+        minimap.render(graphics, buffers);
         stack.popPose();
         Profilers.Minimap.DRAW_TIME_PROFILER.end();
     }

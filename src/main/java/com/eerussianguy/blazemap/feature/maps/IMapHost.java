@@ -1,15 +1,15 @@
 package com.eerussianguy.blazemap.feature.maps;
 
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
 
 import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
 import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.MapType;
-import com.mojang.blaze3d.vertex.PoseStack;
 
 public interface IMapHost {
-    void drawTooltip(PoseStack stack, Component component, int x, int y);
+    void drawTooltip(GuiGraphics graphics, Component component, int x, int y);
 
     boolean isLayerVisible(Key<Layer> layerID);
 

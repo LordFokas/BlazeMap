@@ -16,8 +16,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ClientboundLevelChunkWithLightPacket.class)
 public class ClientboundChunkLightPacketMixin {
 
-    @Inject(method = "<init>(Lnet/minecraft/world/level/chunk/LevelChunk;Lnet/minecraft/world/level/lighting/LevelLightEngine;Ljava/util/BitSet;Ljava/util/BitSet;Z)V", at = @At("RETURN"))
-    private void constructor(LevelChunk chunk, LevelLightEngine light, BitSet b1, BitSet b2, boolean bool, CallbackInfo ci) {
+    @Inject(method = "<init>(Lnet/minecraft/world/level/chunk/LevelChunk;Lnet/minecraft/world/level/lighting/LevelLightEngine;Ljava/util/BitSet;Ljava/util/BitSet;)V", at = @At("RETURN"))
+    private void constructor(LevelChunk chunk, LevelLightEngine light, BitSet b1, BitSet b2, CallbackInfo ci) {
         Profilers.Server.Mixin.CHUNKPACKET_LOAD_PROFILER.hit();
         Profilers.Server.Mixin.CHUNKPACKET_TIME_PROFILER.begin();
 

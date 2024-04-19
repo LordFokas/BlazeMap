@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -79,12 +80,14 @@ public class SelectionList<T> implements Renderable, GuiEventListener, Narratabl
     }
 
     @Override
-    public void render(PoseStack stack, int mx, int my, float p) {
+    public void render(GuiGraphics graphics, int mx, int my, float p) {
+        PoseStack stack = graphics.pose();
+
         stack.pushPose();
         stack.translate(x, y, 0);
 
         var buffers = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-        RenderHelper.drawFrame(buffers.getBuffer(RenderType.text(BlazeGui.SLOT)), stack, w, h, 1);
+        RenderHelper.drawFrame(buffers.getBuffer(RenderType.text(BlazeGui.SLOT)), graphics, w, h, 1);
 
         stack.pushPose();
         stack.translate(1 + iw, 1, 0);
@@ -106,7 +109,7 @@ public class SelectionList<T> implements Renderable, GuiEventListener, Narratabl
             if(idx == selected) {
                 RenderHelper.fillRect(stack.last().pose(), iw, rh, 0x40000000);
             }
-            renderer.render(stack, item);
+            renderer.render(graphics, item);
             stack.popPose();
             stack.translate(0, rh, 0);
         }
@@ -145,7 +148,7 @@ public class SelectionList<T> implements Renderable, GuiEventListener, Narratabl
 
     @FunctionalInterface
     public interface EntryRenderer<T> {
-        void render(PoseStack stack, T item);
+        void render(GuiGraphics graphics, T item);
     }
 
     @Override

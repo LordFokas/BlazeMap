@@ -45,6 +45,6 @@ public abstract class Collector<T extends MasterDatum> implements RegistryEntry,
 
     protected static boolean isLeavesOrReplaceable(Level level, int x, int y, int z) {
         BlockState state = level.getBlockState(POS.set(x, y, z));
-        return state.is(BlockTags.LEAVES) || state.isAir() || state.getMaterial().isReplaceable();
+        return state.is(BlockTags.LEAVES) || state.isAir() || state.canBeReplaced();
     }
 }

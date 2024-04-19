@@ -1,6 +1,6 @@
 package com.eerussianguy.blazemap.util;
 
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -16,11 +16,11 @@ import org.joml.Matrix4f;
 public class RenderHelper {
     public static final RenderType SOLID = RenderType.text(Helpers.identifier("textures/solid.png"));
 
-    public static void drawTexturedQuad(ResourceLocation texture, int color, PoseStack stack, int px, int py, int w, int h) {
+    public static void drawTexturedQuad(ResourceLocation texture, int color, GuiGraphics graphics, int px, int py, int w, int h) {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         setShaderColor(color);
         RenderSystem.setShaderTexture(0, texture);
-        GuiComponent.blit(stack, px, py, 0, 0, 0, w, h, w, h);
+        graphics.blit(texture, px, py, 0, 0, 0, w, h, w, h);
     }
 
     public static void setShaderColor(int color) {
@@ -60,11 +60,12 @@ public class RenderHelper {
         buffers.endBatch();
     }
 
-    public static void drawFrame(VertexConsumer vertices, PoseStack stack, int width, int height, int border) {
-        drawFrame(vertices, stack, width, height, border, Colors.NO_TINT);
+    public static void drawFrame(VertexConsumer vertices, GuiGraphics graphics, int width, int height, int border) {
+        drawFrame(vertices, graphics, width, height, border, Colors.NO_TINT);
     }
 
-    public static void drawFrame(VertexConsumer vertices, PoseStack stack, int width, int height, int border, int color) {
+    public static void drawFrame(VertexConsumer vertices, GuiGraphics graphics, int width, int height, int border, int color) {
+        PoseStack stack = graphics.pose();
         stack.pushPose();
 
         drawQuad(vertices, stack.last().pose(), border, border, color, 0F, 0.25F, 0F, 0.25F);

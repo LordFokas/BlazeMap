@@ -2,6 +2,7 @@ package com.eerussianguy.blazemap.feature.maps;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.phys.Vec3;
@@ -33,7 +34,7 @@ public class MinimapWidget {
         this.mouse = editor ? new MouseSubpixelSmoother() : null;
     }
 
-    public void render(PoseStack stack, MultiBufferSource buffers) {
+    public void render(GuiGraphics graphics, MultiBufferSource buffers) {
         Window window = Minecraft.getInstance().getWindow();
         int mcWidth = window.getWidth();
         int mcHeight = window.getHeight();
@@ -47,6 +48,7 @@ public class MinimapWidget {
         posX = Helpers.clamp(0, posX, mcWidth - width);
         posY = Helpers.clamp(0, posY, mcHeight - height);
 
+        PoseStack stack = graphics.pose();
         stack.translate(posX, posY, 0);
 
         stack.pushPose();
@@ -54,7 +56,7 @@ public class MinimapWidget {
         RenderHelper.fillRect(stack.last().pose(), width + BORDER_SIZE*2, height + BORDER_SIZE*2, Colors.WIDGET_BACKGROUND);
         stack.popPose();
 
-        map.render(stack, buffers);
+        map.render(graphics, buffers);
 
         if(editor){
             stack.pushPose();

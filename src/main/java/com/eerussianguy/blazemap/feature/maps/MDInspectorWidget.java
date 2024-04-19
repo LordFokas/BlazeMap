@@ -2,6 +2,7 @@ package com.eerussianguy.blazemap.feature.maps;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -49,7 +50,9 @@ public class MDInspectorWidget<MD extends MasterDatum> implements Renderable, Gu
     }
 
     @Override
-    public void render(PoseStack stack, int i0, int i1, float f0) {
+    public void render(GuiGraphics graphics, int i0, int i1, float f0) {
+        PoseStack stack = graphics.pose();
+
         stack.pushPose();
         Window window = Minecraft.getInstance().getWindow();
         float scale = 1F / (float) window.getGuiScale();
@@ -60,36 +63,39 @@ public class MDInspectorWidget<MD extends MasterDatum> implements Renderable, Gu
         stack.translate(-sizeX / 2, -sizeY / 2, 0);
 
         RenderHelper.fillRect(stack.last().pose(), sizeX, sizeY, Colors.WIDGET_BACKGROUND);
-        renderTitleBar(stack);
+        renderTitleBar(graphics);
         stack.translate(0, 15, 0);
         if(controller == null) {
-            font.draw(stack, "No MDInspectionController found!", 7, 7, 0xFFFFAAAA);
+            graphics.drawString(font, "No MDInspectionController found!", 7, 7, 0xFFFFAAAA);
         } else {
-            renderMD(stack);
+            renderMD(graphics);
         }
 
         stack.popPose();
     }
 
-    private void renderTitleBar(PoseStack stack) {
+    private void renderTitleBar(GuiGraphics graphics) {
+        PoseStack stack = graphics.pose();
+
         stack.pushPose();
         RenderHelper.fillRect(stack.last().pose(), sizeX, 13, Colors.WIDGET_BACKGROUND);
-        font.draw(stack, String.format("%s [%d, %d]", datum.getID().location, chunkPos.x, chunkPos.z), 2, 4, Colors.WHITE);
+        graphics.drawString(font, String.format("%s [%d, %d]", datum.getID().location, chunkPos.x, chunkPos.z), 2, 4, Colors.WHITE);
         stack.translate(sizeX - 13, 0, 0);
         RenderHelper.fillRect(stack.last().pose(), 13, 13, 0xFFFF0000);
         stack.popPose();
     }
 
-    private void renderMD(PoseStack stack) {
+    private void renderMD(GuiGraphics graphics) {
+        PoseStack stack = graphics.pose();
         for(int line = 0; line < controller.getNumLines(datum); line++){
             String string = controller.getLine(datum, line);
-            font.draw(stack, string, 2, 0, Colors.WHITE);
+            graphics.drawString(font, string, 2, 0, Colors.WHITE);
             stack.translate(0, 10, 0);
         }
         stack.translate(2, 0, 0);
         for(int grid = 0; grid < controller.getNumGrids(datum); grid++) {
             stack.translate(0, 12, 0);
-            font.draw(stack, controller.getGridName(datum, grid), 0, -10, Colors.WHITE);
+            graphics.drawString(font, controller.getGridName(datum, grid), 0, -10, Colors.WHITE);
             for(int z = 0; z < 16; z++) {
                 stack.pushPose();
                 for(int x = 0; x < 16; x++) {
@@ -98,7 +104,7 @@ public class MDInspectorWidget<MD extends MasterDatum> implements Renderable, Gu
                     if(icon == null) {
                         RenderHelper.fillRect(stack.last().pose(), 16, 16, tint);
                     } else {
-                        RenderHelper.drawTexturedQuad(icon, tint, stack, 0, 0, 16, 16);
+                        RenderHelper.drawTexturedQuad(icon, tint, graphics, 0, 0, 16, 16);
                     }
                     stack.translate(16, 0, 0);
                 }

@@ -1,6 +1,7 @@
 package com.eerussianguy.blazemap.profiling.overlay;
 
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.MultiBufferSource;
 
 import com.eerussianguy.blazemap.profiling.Profiler;
@@ -21,7 +22,8 @@ public class TimeProfile implements IDrawable {
     }
 
     @Override
-    public void draw(PoseStack stack, MultiBufferSource buffers, Font fontRenderer) {
+    public void draw(GuiGraphics graphics, MultiBufferSource buffers, Font fontRenderer) {
+        PoseStack stack = graphics.pose();
         ProfilingRenderer.drawTimeProfiler(time, 0, label, Container.Style.BLOCK, fontRenderer, stack.last().pose(), buffers);
     }
 }

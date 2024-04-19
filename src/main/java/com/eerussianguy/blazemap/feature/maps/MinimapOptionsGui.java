@@ -1,6 +1,7 @@
 package com.eerussianguy.blazemap.feature.maps;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
@@ -17,7 +18,6 @@ import com.eerussianguy.blazemap.config.ClientConfig;
 import com.eerussianguy.blazemap.config.MinimapConfigFacade;
 import com.eerussianguy.blazemap.gui.BlazeGui;
 import com.eerussianguy.blazemap.util.Helpers;
-import com.mojang.blaze3d.vertex.PoseStack;
 
 public class MinimapOptionsGui extends BlazeGui implements IScreenSkipsMinimap, IMapHost {
     private static final Component MAP_TYPES = Helpers.translate("blazemap.gui.minimap_options.map_types");
@@ -58,8 +58,8 @@ public class MinimapOptionsGui extends BlazeGui implements IScreenSkipsMinimap, 
     }
 
     @Override
-    public void drawTooltip(PoseStack stack, Component component, int x, int y) {
-        renderTooltip(stack, component, x, y);
+    public void drawTooltip(GuiGraphics graphics, Component component, int x, int y) {
+        graphics.renderTooltip(font, component, x, y);
     }
 
     @Override
@@ -100,17 +100,17 @@ public class MinimapOptionsGui extends BlazeGui implements IScreenSkipsMinimap, 
     }
 
     @Override
-    protected void renderComponents(PoseStack stack, MultiBufferSource buffers) {
-        renderLabel(stack, buffers, MAP_TYPES, 12, 25, false);
-        renderSlot(stack, buffers, 12, 36, 104, 45);
+    protected void renderComponents(GuiGraphics graphics, MultiBufferSource buffers) {
+        renderLabel(graphics, buffers, MAP_TYPES, 12, 25, false);
+        renderSlot(graphics, buffers, 12, 36, 104, 45);
 
-        renderLabel(stack, buffers, LAYERS, 12, 86, false);
-        renderSlot(stack, buffers, 12, 97, 104, 45);
+        renderLabel(graphics, buffers, LAYERS, 12, 86, false);
+        renderSlot(graphics, buffers, 12, 97, 104, 45);
     }
 
     @Override
-    protected void renderAbsolute(PoseStack stack, MultiBufferSource buffers, float scale) {
-        minimap.render(stack, buffers);
+    protected void renderAbsolute(GuiGraphics graphics, MultiBufferSource buffers, float scale) {
+        minimap.render(graphics, buffers);
     }
 
     @Override

@@ -52,7 +52,7 @@ public class WaypointRenderer {
             float partialTick = event.getPartialTick();
 
             if(playerCamera != null) {
-                Level level = playerCamera.level;
+                Level level = playerCamera.level();
 
                 waypointStorage.getAll().forEach(w -> {
                     final BlockPos pos = w.getPosition();
@@ -94,7 +94,7 @@ public class WaypointRenderer {
     }
 
     private static void renderWaypoint(Minecraft mc, PoseStack stack, MultiBufferSource.BufferSource buffers, Waypoint w, Vec3 pos, Entity playerCamera, float partialTick) {
-        Level level = playerCamera.level;
+        Level level = playerCamera.level();
         long gameTime = level.getGameTime();
         int minYHeight = level.getMinBuildHeight();
 

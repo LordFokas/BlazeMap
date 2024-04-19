@@ -5,6 +5,7 @@ import java.util.List;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 
@@ -98,30 +99,32 @@ public class ProfilingRenderer {
 
     private ProfilingRenderer() {}
 
-    public void draw(PoseStack stack, MultiBufferSource buffers) {
+    public void draw(GuiGraphics graphics, MultiBufferSource buffers) {
         Minecraft mc = Minecraft.getInstance();
         if(mc.screen instanceof WorldMapGui) return;
         if(Helpers.getPlayer() == null) return;
 
         Profilers.DEBUG_TIME_PROFILER.begin();
 
+        PoseStack stack = graphics.pose();
         stack.pushPose();
         double guiScale = mc.getWindow().getGuiScale();
         if(guiScale > DEBUG_SCALE){
             stack.scale((float)(DEBUG_SCALE / guiScale), (float)(DEBUG_SCALE / guiScale), 1);
         }
         stack.translate(5, 5, 0);
-        drawPanels(stack, buffers, mc.font);
+        drawPanels(graphics, buffers, mc.font);
         stack.popPose();
 
         Profilers.DEBUG_TIME_PROFILER.end();
     }
 
-    private void drawPanels(PoseStack stack, MultiBufferSource buffers, Font fontRenderer) {
+    private void drawPanels(GuiGraphics graphics, MultiBufferSource buffers, Font fontRenderer) {
         for(Container panel : PANELS){
             if(panel.isDisabled()) continue;
+            PoseStack stack = graphics.pose();
             stack.pushPose();
-            panel.draw(stack, buffers, fontRenderer);
+            panel.draw(graphics, buffers, fontRenderer);
             stack.popPose();
             stack.translate(Container.PANEL_WIDTH + 5, 0, 0);
         }

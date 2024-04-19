@@ -2,6 +2,7 @@ package com.eerussianguy.blazemap.feature.mapping;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LightTexture;
@@ -40,7 +41,9 @@ public class TerrainHeightLegendWidget implements Renderable {
     }
 
     @Override
-    public void render(PoseStack stack, int i, int j, float k) {
+    public void render(GuiGraphics graphics, int i, int j, float k) {
+        PoseStack stack = graphics.pose();
+
         if(legend == null) getLegend();
 
         int height = legend.getHeight();

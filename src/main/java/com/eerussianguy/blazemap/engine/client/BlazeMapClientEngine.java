@@ -68,7 +68,7 @@ public class BlazeMapClientEngine {
         ServerJoinedEvent serverJoined = new ServerJoinedEvent(serverID, storage.addon(), isServerSource);
         MinecraftForge.EVENT_BUS.post(serverJoined);
         waypointStorageFactory = serverJoined.getWaypointStorageFactory();
-        switchToPipeline(player.level.dimension());
+        switchToPipeline(player.level().dimension());
         mdSource = "unknown";
     }
 

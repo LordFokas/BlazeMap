@@ -1,11 +1,11 @@
 package com.eerussianguy.blazemap.gui;
 
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.resources.ResourceLocation;
 
 import com.eerussianguy.blazemap.util.Colors;
 import com.eerussianguy.blazemap.util.RenderHelper;
-import com.mojang.blaze3d.vertex.PoseStack;
 
 public class Image implements Renderable {
     private final int posX, posY, width, height;
@@ -26,7 +26,7 @@ public class Image implements Renderable {
     }
 
     @Override
-    public void render(PoseStack stack, int i0, int i1, float f0) {
-        RenderHelper.drawTexturedQuad(image, color, stack, posX, posY, width, height);
+    public void render(GuiGraphics graphics, int i0, int i1, float f0) {
+        RenderHelper.drawTexturedQuad(image, color, graphics, posX, posY, width, height);
     }
 }

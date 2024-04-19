@@ -1,5 +1,6 @@
 package com.eerussianguy.blazemap.feature.maps;
 
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -8,7 +9,6 @@ import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
 import com.eerussianguy.blazemap.api.maps.MapType;
 import com.eerussianguy.blazemap.util.Colors;
 import com.eerussianguy.blazemap.util.RenderHelper;
-import com.mojang.blaze3d.vertex.PoseStack;
 
 public class MapTypeButton extends ImageButton {
     private final Key<MapType> key;
@@ -31,13 +31,13 @@ public class MapTypeButton extends ImageButton {
     }
 
     @Override
-    public void render(PoseStack stack, int mx, int my, float partial) {
+    public void render(GuiGraphics graphics, int mx, int my, float partial) {
         if(key.equals(host.getMapType().getID()))
             RenderHelper.setShaderColor(0xFFFFDD00);
         else
             RenderHelper.setShaderColor(Colors.NO_TINT);
 
-        super.render(stack, mx, my, partial);
+        super.render(graphics, mx, my, partial);
         RenderHelper.setShaderColor(Colors.NO_TINT);
     }
 }

@@ -1,6 +1,7 @@
 package com.eerussianguy.blazemap.profiling.overlay;
 
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.MultiBufferSource;
 
 import com.eerussianguy.blazemap.profiling.Profiler;
@@ -20,14 +21,15 @@ public class SubsystemProfile extends Container {
     }
 
     @Override
-    public void draw(PoseStack stack, MultiBufferSource buffers, Font fontRenderer) {
+    public void draw(GuiGraphics graphics, MultiBufferSource buffers, Font fontRenderer) {
         load.ping();
 
+        PoseStack stack = graphics.pose();
         stack.translate(0, style.margin, 0);
         for(IDrawable element : children){
             if(element.isDisabled()) continue;
             stack.pushPose();
-            element.draw(stack, buffers, fontRenderer);
+            element.draw(graphics, buffers, fontRenderer);
             stack.popPose();
             stack.translate(0, element.getHeight(), 0);
         }
