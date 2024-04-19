@@ -7,9 +7,9 @@ import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.config.BlazeMapConfig;
@@ -24,19 +24,18 @@ import com.eerussianguy.blazemap.feature.waypoints.WaypointStore;
 import com.mojang.blaze3d.platform.InputConstants;
 
 public class BlazeMapFeaturesClient {
-    public static final KeyMapping KEY_MAPS = new KeyMapping("blazemap.key.maps", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_B, BlazeMap.MOD_NAME);
-    public static final KeyMapping KEY_ZOOM = new KeyMapping("blazemap.key.zoom", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_LEFT_BRACKET, BlazeMap.MOD_NAME);
-    public static final KeyMapping KEY_WAYPOINTS = new KeyMapping("blazemap.key.waypoints", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_N, BlazeMap.MOD_NAME);
+    public static final Lazy<KeyMapping> KEY_MAPS = Lazy.of(() -> new KeyMapping("blazemap.key.maps", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_B, BlazeMap.MOD_NAME));
+    public static final Lazy<KeyMapping> KEY_ZOOM = Lazy.of(() -> new KeyMapping("blazemap.key.zoom", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_LEFT_BRACKET, BlazeMap.MOD_NAME));
+    public static final Lazy<KeyMapping> KEY_WAYPOINTS = Lazy.of(() -> new KeyMapping("blazemap.key.waypoints", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_N, BlazeMap.MOD_NAME));
 
     private static boolean mapping = false;
     private static boolean maps = false;
     private static boolean waypoints = false;
     
-    @SubscribeEvent
     public static void onKeyBindRegister(RegisterKeyMappingsEvent event) {
-        event.register(KEY_MAPS);
-        event.register(KEY_ZOOM);
-        event.register(KEY_WAYPOINTS);
+        event.register(KEY_MAPS.get());
+        event.register(KEY_ZOOM.get());
+        event.register(KEY_WAYPOINTS.get());
     }
 
     public static boolean hasMapping() {
@@ -75,7 +74,7 @@ public class BlazeMapFeaturesClient {
     }
 
     private static void mapKeybinds(InputEvent.Key evt) {
-        if(KEY_MAPS.isDown()) {
+        if(KEY_MAPS.get().isDown()) {
             if(Screen.hasShiftDown()) {
                 MinimapOptionsGui.open();
             }
@@ -83,7 +82,7 @@ public class BlazeMapFeaturesClient {
                 WorldMapGui.open();
             }
         }
-        if(KEY_WAYPOINTS.isDown()) {
+        if(KEY_WAYPOINTS.get().isDown()) {
             if(Screen.hasShiftDown()) {
                 WaypointManagerGui.open();
             }
@@ -91,7 +90,7 @@ public class BlazeMapFeaturesClient {
                 WaypointEditorGui.open();
             }
         }
-        if(KEY_ZOOM.isDown()) {
+        if(KEY_ZOOM.get().isDown()) {
             if(Screen.hasShiftDown()) {
                 MinimapRenderer.INSTANCE.synchronizer.zoomOut();
             }
