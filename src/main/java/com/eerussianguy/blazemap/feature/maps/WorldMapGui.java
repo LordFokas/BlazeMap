@@ -230,18 +230,20 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
     @Override
     public void render(GuiGraphics graphics, int i0, int i1, float f0) {
         float scale = (float) getMinecraft().getWindow().getGuiScale();
-        graphics.fillGradient(0, 0, this.width, this.height, 0xFF333333, 0xFF333333);
 
         PoseStack stack = graphics.pose();
 
         stack.pushPose();
         stack.scale(1F / scale, 1F / scale, 1);
+
         var buffers = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
         mapRenderer.render(graphics, buffers);
         buffers.endBatch();
+
         if(contextMenu != null){
             contextMenu.render(graphics, i0, i1, f0);
         }
+
         stack.popPose();
 
         if(legend != null) {
@@ -266,6 +268,7 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
                 RenderHelper.fillRect(stack.last().pose(), 20, layers * 20, Colors.WIDGET_BACKGROUND);
                 stack.popPose();
             }
+
             stack.pushPose();
             super.render(graphics, i0, i1, f0);
             stack.popPose();
