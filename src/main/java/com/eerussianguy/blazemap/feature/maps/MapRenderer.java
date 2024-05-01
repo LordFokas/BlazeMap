@@ -501,7 +501,7 @@ public class MapRenderer implements AutoCloseable {
             return;
         }
         try {
-            Pattern pattern = Pattern.compile(search);
+            Pattern pattern = Pattern.compile(search, Pattern.CASE_INSENSITIVE);
             matcher = pattern.asPredicate();
         }
         catch(PatternSyntaxException pse) {
