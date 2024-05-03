@@ -524,7 +524,7 @@ public class MapRenderer implements AutoCloseable {
             matcher = pattern.asPredicate();
         }
         catch(PatternSyntaxException pse) {
-            matcher = (s) -> s.contains(search);
+            matcher = (s) -> s.toLowerCase().contains(search.toLowerCase());
         }
         hasActiveSearch = true;
         labels.forEach(this::matchLabel);
