@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -122,6 +123,7 @@ public class MapRenderer implements AutoCloseable {
     private double zoom = 1;
     private TileResolution resolution;
     private final boolean renderNames;
+    private final double playerMarkerZHeight = 1;
 
     public MapRenderer(int width, int height, ResourceLocation textureResource, double minZoom, double maxZoom, boolean renderNames) {
         this.center = new BlockPos.MutableBlockPos();
@@ -326,7 +328,7 @@ public class MapRenderer implements AutoCloseable {
             }
         }
         LocalPlayer player = Helpers.getPlayer();
-        renderMarker(buffers, stack, player.blockPosition(), PLAYER, Colors.NO_TINT, 32, 32, player.getRotationVector().y, false, null, SearchTargeting.NONE);
+        renderMarker(buffers, stack, player.blockPosition(), PLAYER, Colors.NO_TINT, 32, 32, playerMarkerZHeight, player.getRotationVector().y, false, null, SearchTargeting.NONE);
         stack.popPose();
 
         stack.popPose();
@@ -335,9 +337,15 @@ public class MapRenderer implements AutoCloseable {
     private void renderEntities(PoseStack stack, MultiBufferSource buffers) {
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
+        Random zHeightGenerator = new Random();
         mc.level.entitiesForRendering().forEach(entity -> {
             if(!(entity instanceof LivingEntity)) return;
             BlockPos pos = entity.blockPosition();
+
+            // Get a *consistent* random value for each entity to avoid appearance of z-fighting
+            zHeightGenerator.setSeed(entity.getUUID().getMostSignificantBits());
+            double zHeight = zHeightGenerator.nextDouble();
+
             if(inRange(pos)) {
                 int color;
                 boolean isPlayer = false;
@@ -366,7 +374,7 @@ public class MapRenderer implements AutoCloseable {
                     return;
                 }
 
-                renderMarker(buffers, stack, pos, PLAYER, color, 32, 32, entity.getRotationVector().y, false, isPlayer ? entity.getName().getString() : null, SearchTargeting.NONE);
+                renderMarker(buffers, stack, pos, PLAYER, color, 32, 32, zHeight, entity.getRotationVector().y, false, isPlayer ? entity.getName().getString() : null, SearchTargeting.NONE);
             }
         });
     }
@@ -442,27 +450,37 @@ public class MapRenderer implements AutoCloseable {
     }
 
     private void renderMarker(MultiBufferSource buffers, PoseStack stack, BlockPos position, ResourceLocation marker, int color, double width, double height, float rotation, boolean zoom, String name, SearchTargeting search) {
+        renderMarker(buffers, stack, position, marker, color, width, height, 0, rotation, zoom, name, search);
+    }
+
+
+    private void renderMarker(MultiBufferSource buffers, PoseStack stack, BlockPos position, ResourceLocation marker, int color, double width, double height, double zHeight, float rotation, boolean zoom, String name, SearchTargeting search) {
         stack.pushPose();
+
         stack.scale((float) this.zoom, (float) this.zoom, 1);
         int dx = position.getX() - begin.getX();
         int dy = position.getZ() - begin.getZ();
         stack.translate(dx, dy, 0);
+
         if(!zoom) {
             stack.scale(1F / (float) this.zoom, 1F / (float) this.zoom, 1);
         }
+
         if(name != null) {
             float scale = 2;
             Minecraft mc = Minecraft.getInstance();
+
             stack.pushPose();
-            stack.translate(-mc.font.width(name), (10 + (height / scale)), 0);
+            stack.translate(-mc.font.width(name), (10 + (height / scale)), zHeight);
             stack.scale(scale, scale, 0);
             mc.font.drawInBatch(name, 0, 0, search.color(color), true, stack.last().pose(), buffers, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
             stack.popPose();
         }
         stack.mulPose(Axis.ZP.rotationDegrees(rotation));
-        stack.translate(-width / 2, -height / 2, 0);
+        stack.translate(-width / 2, -height / 2, zHeight);
         VertexConsumer vertices = buffers.getBuffer(RenderType.text(marker));
         RenderHelper.drawQuad(vertices, stack.last().pose(), (float) width, (float) height, search.color(color));
+
         stack.popPose();
     }
 
@@ -494,11 +512,11 @@ public class MapRenderer implements AutoCloseable {
             return;
         }
         try {
-            Pattern pattern = Pattern.compile(search);
+            Pattern pattern = Pattern.compile(search, Pattern.CASE_INSENSITIVE);
             matcher = pattern.asPredicate();
         }
         catch(PatternSyntaxException pse) {
-            matcher = (s) -> s.contains(search);
+            matcher = (s) -> s.toLowerCase().contains(search.toLowerCase());
         }
         hasActiveSearch = true;
         labels.forEach(this::matchLabel);

@@ -12,10 +12,12 @@ public class Waypoint extends Marker<Waypoint> {
 
     public Waypoint(ResourceLocation id, ResourceKey<Level> dimension, BlockPos position, String name) {
         this(id, dimension, position, name, BlazeMapReferences.Icons.WAYPOINT, -1, 0);
+        this.randomizeColor();
     }
 
     public Waypoint(ResourceLocation id, ResourceKey<Level> dimension, BlockPos position, String name, ResourceLocation icon) {
         this(id, dimension, position, name, icon, -1, 0);
+        this.randomizeColor();
     }
 
     public Waypoint(ResourceLocation id, ResourceKey<Level> dimension, BlockPos position, String name, ResourceLocation icon, int color) {
