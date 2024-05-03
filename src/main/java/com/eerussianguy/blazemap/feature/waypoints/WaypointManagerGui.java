@@ -12,7 +12,6 @@ import com.eerussianguy.blazemap.gui.BlazeGui;
 import com.eerussianguy.blazemap.gui.SelectionList;
 import com.eerussianguy.blazemap.util.Helpers;
 import com.eerussianguy.blazemap.util.RenderHelper;
-import com.mojang.blaze3d.vertex.PoseStack;
 
 public class WaypointManagerGui extends BlazeGui {
     private static IMarkerStorage<Waypoint> waypointStorage;
