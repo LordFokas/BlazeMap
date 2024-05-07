@@ -43,6 +43,7 @@ public class BlazeMapFeaturesClient {
 
     public static void initMapping() {
         BlazeMapAPI.LAYERS.register(new TerrainHeightLayer());
+        BlazeMapAPI.LAYERS.register(new TerrainSlopeLayer());
         BlazeMapAPI.LAYERS.register(new WaterLevelLayer());
         BlazeMapAPI.LAYERS.register(new TerrainIsolinesLayer());
         BlazeMapAPI.LAYERS.register(new BlockColorLayer());
