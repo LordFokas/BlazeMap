@@ -21,12 +21,14 @@ public class BlazeMapReferences {
         public static final Key<DataType<MasterDatum>> BLOCK_COLOR = new Key<>(MASTER_DATA, MODID, "block_color");
         public static final Key<DataType<MasterDatum>> NETHER = new Key<>(MASTER_DATA, MODID, "nether");
         public static final Key<DataType<MasterDatum>> TERRAIN_HEIGHT = new Key<>(MASTER_DATA, MODID, "terrain_height");
+        public static final Key<DataType<MasterDatum>> TERRAIN_SLOPE = new Key<>(MASTER_DATA, MODID, "terrain_slope");
         public static final Key<DataType<MasterDatum>> WATER_LEVEL = new Key<>(MASTER_DATA, MODID, "water_level");
     }
 
     public static class Collectors {
         public static final Key<Collector<MasterDatum>> WATER_LEVEL = new Key<>(COLLECTORS, MODID, "water_level");
         public static final Key<Collector<MasterDatum>> TERRAIN_HEIGHT = new Key<>(COLLECTORS, MODID, "terrain_height");
+        public static final Key<Collector<MasterDatum>> TERRAIN_SLOPE = new Key<>(COLLECTORS, MODID, "terrain_slope");
         public static final Key<Collector<MasterDatum>> BLOCK_COLOR = new Key<>(COLLECTORS, MODID, "block_color");
         public static final Key<Collector<MasterDatum>> NETHER = new Key<>(COLLECTORS, MODID, "nether");
     }
@@ -40,6 +42,7 @@ public class BlazeMapReferences {
     public static class Layers {
         public static final Key<Layer> WATER_LEVEL = new Key<>(LAYERS, MODID, "water_level");
         public static final Key<Layer> TERRAIN_HEIGHT = new Key<>(LAYERS, MODID, "terrain_height");
+        public static final Key<Layer> TERRAIN_SLOPE = new Key<>(LAYERS, MODID, "terrain_slope");
         public static final Key<Layer> TERRAIN_ISOLINES = new Key<>(LAYERS, MODID, "terrain_isolines");
         public static final Key<Layer> BLOCK_COLOR = new Key<>(LAYERS, MODID, "block_color");
         public static final Key<Layer> NETHER = new Key<>(LAYERS, MODID, "nether");
