@@ -27,7 +27,7 @@ public class TerrainSlopeCollector extends Collector<TerrainSlopeMD> {
             }
         }
 
-        return new TerrainSlopeMD(BlazeMapReferences.MasterData.TERRAIN_SLOPE, slopemap);
+        return new TerrainSlopeMD(slopemap);
     }
 
     protected static int getSlopeGradient(Level level, int x, int z) {
