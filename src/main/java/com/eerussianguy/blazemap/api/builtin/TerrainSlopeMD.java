@@ -8,9 +8,9 @@ import com.eerussianguy.blazemap.api.pipeline.DataType;
 import com.eerussianguy.blazemap.api.pipeline.MasterDatum;
 
 public class TerrainSlopeMD extends MasterDatum {
-    public final int[][] slopemap;
+    public final float[][] slopemap;
 
-    public TerrainSlopeMD(int[][] slopemap) {
+    public TerrainSlopeMD(float[][] slopemap) {
         this.slopemap = slopemap;
     }
 
