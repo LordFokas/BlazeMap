@@ -2,22 +2,21 @@ package com.eerussianguy.blazemap.api.builtin;
 
 import java.util.Arrays;
 
+import com.eerussianguy.blazemap.api.BlazeMapReferences;
 import com.eerussianguy.blazemap.api.BlazeRegistry;
 import com.eerussianguy.blazemap.api.pipeline.DataType;
 import com.eerussianguy.blazemap.api.pipeline.MasterDatum;
 
 public class TerrainSlopeMD extends MasterDatum {
-    private final BlazeRegistry.Key<DataType<MasterDatum>> id;
     public final int[][] slopemap;
 
-    public TerrainSlopeMD(BlazeRegistry.Key<DataType<MasterDatum>> id, int[][] slopemap) {
-        this.id = id;
+    public TerrainSlopeMD(int[][] slopemap) {
         this.slopemap = slopemap;
     }
 
     @Override
     public BlazeRegistry.Key<DataType<MasterDatum>> getID() {
-        return id;
+        return BlazeMapReferences.MasterData.TERRAIN_SLOPE;
     }
 
     @Override

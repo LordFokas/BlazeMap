@@ -11,6 +11,8 @@ import com.eerussianguy.blazemap.util.Helpers;
 import com.mojang.blaze3d.platform.NativeImage;
 
 public class TerrainSlopeLayer extends Layer {
+    // Note that this range bounds 10 * ln(the slope), not the slope value itself
+    private static final int shadingRange = 25;
 
     public TerrainSlopeLayer() {
         super(
@@ -36,8 +38,6 @@ public class TerrainSlopeLayer extends Layer {
     }
 
     private static void paintSlope(NativeImage tile, int x, int z, int slope) {
-        int shadingRange = 25;
-
         if (slope == 0) {
             // No slope, so nothing to change
             return;
