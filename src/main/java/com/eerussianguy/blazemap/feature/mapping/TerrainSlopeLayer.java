@@ -30,14 +30,14 @@ public class TerrainSlopeLayer extends Layer {
         TerrainSlopeMD terrain = (TerrainSlopeMD) data.get(BlazeMapReferences.MasterData.TERRAIN_SLOPE);
 
         foreachPixel(resolution, (x, z) -> {
-            int slope = ArrayAggregator.avg(relevantData(resolution, x, z, terrain.slopemap));
+            float slope = ArrayAggregator.avg(relevantData(resolution, x, z, terrain.slopemap));
             paintSlope(tile, x, z, slope);
         });
 
         return true;
     }
 
-    private static void paintSlope(NativeImage tile, int x, int z, int slope) {
+    private static void paintSlope(NativeImage tile, int x, int z, float slope) {
         if (slope == 0) {
             // No slope, so nothing to change
             return;

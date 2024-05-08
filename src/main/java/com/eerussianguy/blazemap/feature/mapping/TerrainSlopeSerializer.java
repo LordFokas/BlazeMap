@@ -13,14 +13,14 @@ public class TerrainSlopeSerializer implements DataType<TerrainSlopeMD> {
     public void serialize(MinecraftStreams.Output stream, TerrainSlopeMD terrain) throws IOException {
         for(int x = 0; x < 16; x++) {
             for(int z = 0; z < 16; z++) {
-                stream.writeShort(terrain.slopemap[x][z]);
+                stream.writeFloat(terrain.slopemap[x][z]);
             }
         }
     }
 
     @Override
     public TerrainSlopeMD deserialize(MinecraftStreams.Input stream) throws IOException {
-        int[][] slopemap = new int[16][16];
+        float[][] slopemap = new float[16][16];
 
         for(int x = 0; x < 16; x++) {
             for(int z = 0; z < 16; z++) {
