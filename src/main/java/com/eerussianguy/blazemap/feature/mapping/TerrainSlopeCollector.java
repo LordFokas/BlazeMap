@@ -55,7 +55,7 @@ public class TerrainSlopeCollector extends Collector<TerrainSlopeMD> {
 
                     if (nearSlope < 0) {
                         nearSlopeTotal += nearSlope;
-                        nearSlopeCount += 1 - (0.2 * nearSlopeCount);
+                        nearSlopeCount += 1 - (0.4 * nearSlopeCount);
                     } else if (nearSlope > 0) {
                         // Shadows are weighted more heavily than sunlight
                         nearSlopeTotal += 4 * nearSlope;
@@ -68,7 +68,7 @@ public class TerrainSlopeCollector extends Collector<TerrainSlopeMD> {
 
                     if (farSlope < -2) {
                         farSlopeTotal += farSlope;
-                        farSlopeCount += 1 - (0.2 * farSlopeCount);
+                        farSlopeCount += 1 - (0.4 * farSlopeCount);
                     } else if (farSlope > 2) {
                         // Shadows are weighted more heavily than sunlight
                         farSlopeTotal += 4 * farSlope;
