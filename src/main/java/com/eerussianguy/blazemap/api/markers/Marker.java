@@ -10,7 +10,7 @@ import net.minecraft.world.level.Level;
 public abstract class Marker<T extends Marker<T>> {
     private final ResourceLocation id;
     private final ResourceKey<Level> dimension;
-    private final BlockPos.MutableBlockPos position;
+    private BlockPos.MutableBlockPos position;
     private ResourceLocation icon;
     private int color;
     private float rotation;
@@ -38,6 +38,15 @@ public abstract class Marker<T extends Marker<T>> {
 
     public final BlockPos getPosition() {
         return position;
+    }
+
+    /**
+     * Used to set a MutableBlockPos object you control.
+     * You most likely won't need this.
+     * Maybe see setPosition() instead?
+     */
+    public void setPositionObject(BlockPos.MutableBlockPos position) {
+        this.position = position;
     }
 
     public ResourceLocation getIcon() {
