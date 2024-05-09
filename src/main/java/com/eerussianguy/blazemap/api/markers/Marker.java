@@ -1,6 +1,6 @@
 package com.eerussianguy.blazemap.api.markers;
 
-import java.awt.*;
+import java.awt.Color;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
@@ -36,7 +36,7 @@ public abstract class Marker<T extends Marker<T>> {
         return dimension;
     }
 
-    public final BlockPos getPosition() {
+    public BlockPos getPosition() {
         return position;
     }
 
@@ -45,8 +45,9 @@ public abstract class Marker<T extends Marker<T>> {
      * You most likely won't need this.
      * Maybe see setPosition() instead?
      */
-    public void setPositionObject(BlockPos.MutableBlockPos position) {
+    public T setPositionObject(BlockPos.MutableBlockPos position) {
         this.position = position;
+        return (T) this;
     }
 
     public ResourceLocation getIcon() {
