@@ -24,7 +24,7 @@ public class TerrainSlopeSerializer implements DataType<TerrainSlopeMD> {
 
         for(int x = 0; x < 16; x++) {
             for(int z = 0; z < 16; z++) {
-                slopemap[x][z] = stream.readShort();
+                slopemap[x][z] = stream.readFloat();
             }
         }
 
