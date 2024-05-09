@@ -1,9 +1,11 @@
 package com.eerussianguy.blazemap.feature.mapping;
 
+import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
 import com.eerussianguy.blazemap.api.builtin.TerrainSlopeMD;
 import com.eerussianguy.blazemap.api.pipeline.Collector;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.Heightmap;
 
@@ -18,7 +20,6 @@ public class TerrainSlopeCollector extends Collector<TerrainSlopeMD> {
 
     @Override
     public TerrainSlopeMD collect(Level level, int minX, int minZ, int maxX, int maxZ) {
-
         final float[][] slopemap = new float[16][16];
 
         for(int x = 0; x < 16; x++) {
@@ -87,7 +88,12 @@ public class TerrainSlopeCollector extends Collector<TerrainSlopeMD> {
 
         int relativeSlope = adjacentBlockHeight - height;
 
-        if (relativeSlope == 0) {
+        if (adjacentBlockHeight <= -64 && level.getBlockState(new BlockPos(x + dx, adjacentBlockHeight, z + dz)).isAir()) {
+            // This block is in an unloaded chunk and can't be processed until BME-47 is dealt with.
+            // (Alternatively, somebody's broken through to the void, but that's their own fault!)
+            return 0;
+
+        } else if (relativeSlope == 0) {
             // No shading changes
             return 0;
 
