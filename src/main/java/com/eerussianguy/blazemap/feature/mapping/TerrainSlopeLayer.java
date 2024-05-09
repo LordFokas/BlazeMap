@@ -12,7 +12,7 @@ import com.mojang.blaze3d.platform.NativeImage;
 
 public class TerrainSlopeLayer extends Layer {
     // Note that this range bounds 10 * ln(the slope), not the slope value itself
-    private static final int SHADING_RANGE = 25;
+    private static final int SHADING_RANGE = 30;
 
     public TerrainSlopeLayer() {
         super(
@@ -43,13 +43,13 @@ public class TerrainSlopeLayer extends Layer {
             return;
 
         } else if (slope > 0) {
-            int slopeLog = Helpers.clamp(0, (int)(Math.log(slope) * 10), SHADING_RANGE);
+            float slopeLog = (float)Helpers.clamp(0, (Math.log(slope) * 10), SHADING_RANGE);
             int shadow = Colors.interpolate(0x30000000, 0, 0x70000000, SHADING_RANGE, slopeLog);
             tile.setPixelRGBA(x, z, shadow);
 
         } else {
-            int slopeLog = Helpers.clamp(0, (int)(Math.log(-slope) * 10), SHADING_RANGE);
-            int sunlight = Colors.interpolate(0x20FFFFFF, 0, 0x70FFFFFF, SHADING_RANGE, slopeLog);
+            float slopeLog = (float)Helpers.clamp(0, (Math.log(-slope) * 10), SHADING_RANGE);
+            int sunlight = Colors.interpolate(0x20FFFFFF, 0, 0x60FFFFFF, SHADING_RANGE, slopeLog);
             tile.setPixelRGBA(x, z, sunlight);
         }
     }
