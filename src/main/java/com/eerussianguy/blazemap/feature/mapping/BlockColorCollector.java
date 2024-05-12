@@ -2,6 +2,7 @@ package com.eerussianguy.blazemap.feature.mapping;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockColors;
+import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -24,7 +25,7 @@ public class BlockColorCollector extends ClientOnlyCollector<BlockColorMD> {
     public BlockColorMD collect(Level level, int minX, int minZ, int maxX, int maxZ) {
         final int[][] colors = new int[16][16];
         final BlockColors blockColors = Minecraft.getInstance().getBlockColors();
-
+        final MutableBlockPos colorPOS = new MutableBlockPos();
 
         for(int x = 0; x < 16; x++) {
             for(int z = 0; z < 16; z++) {
@@ -32,20 +33,29 @@ public class BlockColorCollector extends ClientOnlyCollector<BlockColorMD> {
 
                 int color = -1;
                 while(color == 0 || color == -1) {
-                    POS.set(x + minX, y, z + minZ);
-                    final BlockState state = level.getBlockState(POS);
-                    color = blockColors.getColor(state, level, POS, 0);
+                    colorPOS.set(x + minX, y, z + minZ);
+                    final BlockState state = level.getBlockState(colorPOS);
+
+                    if (state.isAir()) {
+                        y--;
+                        continue;
+                    }
+
+                    color = blockColors.getColor(state, level, colorPOS, 0);
                     if(color <= 0) {
-                        MaterialColor mapColor = state.getMapColor(level, POS);
+                        MaterialColor mapColor = state.getMapColor(level, colorPOS);
                         if(mapColor != MaterialColor.NONE) {
                             color = mapColor.col;
                         }
                     }
+
                     y--;
+
                     if(y <= level.getMinBuildHeight()) {
                         break;
                     }
                 }
+
                 if(color != 0 && color != -1) {
                     colors[x][z] = color;
                 }
