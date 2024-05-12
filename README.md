@@ -11,13 +11,22 @@ have the mapping run purely client side.
 
 ## For Contributors
 
-To build Blaze Map locally, make sure to have a copy of the Rubidium binary stored under `/libs`.
-This is because Rubidium is a build time dependency, even if only an optional runtime dependency.
+To build Blaze Map locally, make sure to have a copy of the Embeddium binary stored under `/libs`.
+This is because Embeddium is a build time dependency, even if only an optional runtime dependency.
 
-You can see what version of the Rubidium binary is needed by looking at which version is listed 
+You can see what version of the Embeddium binary is needed by looking at which version is listed
 in `build.gradle`.
 
 ### Local Dev
+
+To set up your IDE to be able to access the deobfuscated Minecraft classes, make sure your IDE
+is configured for both Java 17 and Gradle and then run the setup applicable to your IDE:
+
+```powershell
+gradlew genEclipseRuns
+gradlew genIntellijRuns
+gradlew genVSCodeRuns
+```
 
 To build and run the local dev server in single player mode (client with integrated server):
 
@@ -29,15 +38,6 @@ To build and run just the server:
 
 ```powershell
 gradlew runServer
-```
-
-To set up your IDE to be able to access the deobfuscated Minecraft classes, make sure your IDE
-is configured for both Java 17 and Gradle and then run the setup applicable to your IDE:
-
-```powershell
-gradlew genEclipseRuns
-gradlew genIntellijRuns
-gradlew genVSCodeRuns
 ```
 
 To view all available commands:
@@ -73,3 +73,20 @@ the mixed in version of each `.class` to `.mixin.out` in that instance's folder:
 ```
 -Dmixin.debug.export=true -Dmixin.debug.verbose=true -Dmixin.debug.countInjections=true 
 ```
+
+### Running Client Side Only
+
+To easily start a local Minecraft server with Forge for the sake of testing how Blaze Map works when
+_only_ installed client side, you can spin up a local server in docker with the following:
+
+```powershell
+# Replace <minecraft-version> with your desired Minecraft version, eg 1.20.1
+docker run -it -p 25565:25565 -e EULA=TRUE -e VERSION=<minecraft-version> -e TYPE=FORGE itzg/minecraft-server
+```
+
+Note that to log into this server, you will need to be authenticated. You can either look up how
+to do this with `gradlew runClient` or just build the prod jar as outlined above and launch the
+game via your modded launcher as per usual.
+
+There are other ways you can start up a local Minecraft server too of course, but this is one of
+the simplest.
