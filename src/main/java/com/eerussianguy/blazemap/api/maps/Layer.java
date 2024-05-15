@@ -31,7 +31,7 @@ import com.mojang.blaze3d.platform.NativeImage;
  *
  * @author LordFokas
  */
-public abstract class Layer implements RegistryEntry, Consumer {
+public abstract class Layer implements RegistryEntry, Consumer, IMapPart {
     protected static final int OPAQUE = 0xFF000000;
 
     private final Key<Layer> id;

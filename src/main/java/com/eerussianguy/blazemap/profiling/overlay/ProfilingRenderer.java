@@ -99,7 +99,7 @@ public class ProfilingRenderer {
 
     private ProfilingRenderer() {}
 
-    public void draw(GuiGraphics graphics, MultiBufferSource buffers) {
+    public void draw(GuiGraphics graphics) {
         Minecraft mc = Minecraft.getInstance();
         if(mc.screen instanceof WorldMapGui) return;
         if(Helpers.getPlayer() == null) return;
@@ -113,18 +113,18 @@ public class ProfilingRenderer {
             stack.scale((float)(DEBUG_SCALE / guiScale), (float)(DEBUG_SCALE / guiScale), 1);
         }
         stack.translate(5, 5, 0);
-        drawPanels(graphics, buffers, mc.font);
+        drawPanels(graphics, mc.font);
         stack.popPose();
 
         Profilers.DEBUG_TIME_PROFILER.end();
     }
 
-    private void drawPanels(GuiGraphics graphics, MultiBufferSource buffers, Font fontRenderer) {
+    private void drawPanels(GuiGraphics graphics, Font fontRenderer) {
         for(Container panel : PANELS){
             if(panel.isDisabled()) continue;
             PoseStack stack = graphics.pose();
             stack.pushPose();
-            panel.draw(graphics, buffers, fontRenderer);
+            panel.draw(graphics, fontRenderer);
             stack.popPose();
             stack.translate(Container.PANEL_WIDTH + 5, 0, 0);
         }

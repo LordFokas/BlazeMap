@@ -6,8 +6,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
@@ -20,7 +18,6 @@ import com.eerussianguy.blazemap.gui.*;
 import com.eerussianguy.blazemap.util.Colors;
 import com.eerussianguy.blazemap.util.Helpers;
 import com.eerussianguy.blazemap.util.RenderHelper;
-import com.mojang.blaze3d.vertex.PoseStack;
 
 public class WaypointEditorGui extends BlazeGui {
     private static IMarkerStorage<Waypoint> waypointStorage;
@@ -39,12 +36,12 @@ public class WaypointEditorGui extends BlazeGui {
 
     private Button save;
     private HueSlider slider;
+    private WaypointIconPreview preview;
     private SaturationBrightnessSelector sbs;
     private final NumericWrapper nx, ny, nz;
 
     private final Waypoint waypoint;
     private ResourceLocation icon = BlazeMapReferences.Icons.WAYPOINT;
-    private RenderType iconRender;
     private String name;
     private int x, y, z;
     private int color;
@@ -84,8 +81,6 @@ public class WaypointEditorGui extends BlazeGui {
         this.hue360 = hsb[0] * 360;
         this.s = hsb[1];
         this.b = hsb[2];
-
-        iconRender = RenderType.text(icon);
     }
 
     private void createWaypoint() {
@@ -158,6 +153,8 @@ public class WaypointEditorGui extends BlazeGui {
         fy.setValue(String.valueOf(y));
         fz.setValue(String.valueOf(z));
 
+        preview = addRenderableOnly(new WaypointIconPreview(icon, left + 150, top + 25, 50, 50, color));
+
         sbs = addRenderableWidget(new SaturationBrightnessSelector(left + 150, top + 87, 50, 50));
         sbs.setResponder((s, b) -> {
             this.s = s;
@@ -186,27 +183,18 @@ public class WaypointEditorGui extends BlazeGui {
 
     private void updateColor() {
         color = Color.HSBtoRGB(hue360 / 360, s, b);
+        preview.setColor(color);
     }
 
     private void onSelect(ResourceLocation icon) {
         if(icon == null) icon = BlazeMapReferences.Icons.WAYPOINT;
         this.icon = icon;
-        this.iconRender = RenderType.text(icon);
+        preview.setTexture(icon);
     }
 
     private void renderIcon(GuiGraphics graphics, ResourceLocation icon) {
         RenderHelper.drawTexturedQuad(icon, -1, graphics, 2, 1, 16, 16);
         String[] path = icon.getPath().split("/");
         graphics.drawString(font, path[path.length - 1].split("\\.")[0], 20, 5, -1);
-    }
-
-    @Override
-    protected void renderComponents(GuiGraphics graphics, MultiBufferSource buffers) {
-        renderSlot(graphics, buffers, 150, 25, 50, 50);
-        PoseStack stack = graphics.pose();
-        stack.pushPose();
-        stack.translate(159, 34, 0);
-        RenderHelper.drawQuad(buffers.getBuffer(iconRender), stack.last().pose(), 32, 32, color);
-        stack.popPose();
     }
 }

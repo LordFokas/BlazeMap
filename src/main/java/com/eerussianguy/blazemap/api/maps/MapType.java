@@ -20,7 +20,7 @@ import com.eerussianguy.blazemap.api.BlazeRegistry;
  *
  * @author LordFokas
  */
-public abstract class MapType implements BlazeRegistry.RegistryEntry {
+public abstract class MapType implements BlazeRegistry.RegistryEntry, IMapPart {
     private final BlazeRegistry.Key<MapType> id;
     private final Set<BlazeRegistry.Key<Layer>> layers;
     private final Component name;

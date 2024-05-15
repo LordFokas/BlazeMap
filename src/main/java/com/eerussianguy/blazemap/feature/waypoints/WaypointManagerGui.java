@@ -3,7 +3,6 @@ package com.eerussianguy.blazemap.feature.waypoints;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.renderer.MultiBufferSource;
 
 import com.eerussianguy.blazemap.api.event.DimensionChangedEvent;
 import com.eerussianguy.blazemap.api.markers.IMarkerStorage;
@@ -49,9 +48,6 @@ public class WaypointManagerGui extends BlazeGui {
         list = addRenderableWidget(new SelectionList<>(left + 12, top + 25, 166, 162, 20, this::renderWaypoint)).setResponder(this::onSelected).setItems(waypointStorage.getAll().stream().toList());
         updateButtons();
     }
-
-    @Override
-    protected void renderComponents(GuiGraphics graphics, MultiBufferSource buffers) {}
 
     private void renderWaypoint(GuiGraphics graphics, Waypoint waypoint) {
         RenderHelper.drawTexturedQuad(waypoint.getIcon(), waypoint.getColor(), graphics, 2, 2, 16, 16);

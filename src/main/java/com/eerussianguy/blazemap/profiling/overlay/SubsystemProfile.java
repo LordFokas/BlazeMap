@@ -21,20 +21,24 @@ public class SubsystemProfile extends Container {
     }
 
     @Override
-    public void draw(GuiGraphics graphics, MultiBufferSource buffers, Font fontRenderer) {
+    public void draw(GuiGraphics graphics, Font fontRenderer) {
         load.ping();
 
         PoseStack stack = graphics.pose();
+        MultiBufferSource buffers = graphics.bufferSource();
         stack.translate(0, style.margin, 0);
+
         for(IDrawable element : children){
             if(element.isDisabled()) continue;
             stack.pushPose();
-            element.draw(graphics, buffers, fontRenderer);
+            element.draw(graphics, fontRenderer);
             stack.popPose();
             stack.translate(0, element.getHeight(), 0);
         }
+
         String label = metric == null ? name : String.format("%s : %s", name, metric.get());
         String roll = String.format("[ last %s ]", load.span);
+
         ProfilingRenderer.drawSubsystem(load, time, label, roll, type, style, fontRenderer, stack.last().pose(), buffers);
     }
 }

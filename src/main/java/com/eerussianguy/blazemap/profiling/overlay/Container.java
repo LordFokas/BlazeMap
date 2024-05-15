@@ -57,27 +57,30 @@ public class Container implements IDrawable {
     }
 
     @Override
-    public void draw(GuiGraphics graphics, MultiBufferSource buffers, Font fontRenderer) {
+    public void draw(GuiGraphics graphics, Font fontRenderer) {
         PoseStack stack = graphics.pose();
+        MultiBufferSource buffers = graphics.bufferSource();
         Matrix4f matrix = stack.last().pose();
 
         if(style.isRoot){
             RenderHelper.fillRect(buffers, matrix, PANEL_WIDTH, getHeight(), 0xA0000000);
         }
 
-        drawHead(matrix, buffers, fontRenderer);
+        drawHead(matrix, graphics, fontRenderer);
 
         stack.translate(0, 10 + style.margin, 0);
         for(IDrawable element : children){
             if(element.isDisabled()) continue;
             stack.pushPose();
-            element.draw(graphics, buffers, fontRenderer);
+            element.draw(graphics, fontRenderer);
             stack.popPose();
             stack.translate(0, element.getHeight(), 0);
         }
     }
 
-    protected void drawHead(Matrix4f matrix, MultiBufferSource buffers, Font fontRenderer){
+    protected void drawHead(Matrix4f matrix, GuiGraphics graphics, Font fontRenderer){
+        MultiBufferSource buffers = graphics.bufferSource();
+
         if(style.isRoot){
             fontRenderer.drawInBatch(name, style.indent, style.margin, style.header, false, matrix, buffers, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
             if(metric != null){

@@ -22,15 +22,19 @@ public class DefaultObjectRenderer implements ObjectRenderer<MapLabel> {
     }
 
     @Override
-    public void render(MapLabel label, GuiGraphics graphics, MultiBufferSource buffers, double zoom, SearchTargeting search) {
+    public void render(MapLabel label, GuiGraphics graphics, double zoom, SearchTargeting search) {
         PoseStack stack = graphics.pose();
+        MultiBufferSource buffers = graphics.bufferSource();
+
         if(!label.getUsesZoom()) {
             stack.scale(1F / (float) zoom, 1F / (float) zoom, 1);
         }
+
         stack.mulPose(Axis.ZP.rotationDegrees(label.getRotation()));
         int width = label.getWidth();
         int height = label.getHeight();
         stack.translate(-width / 2, -height / 2, 0);
+
         VertexConsumer vertices = buffers.getBuffer(RenderType.text(label.getIcon()));
         RenderHelper.drawQuad(vertices, stack.last().pose(), (float) width, (float) height, search.color(label.getColor()));
     }

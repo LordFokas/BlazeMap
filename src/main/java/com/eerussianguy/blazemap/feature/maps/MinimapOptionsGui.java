@@ -3,7 +3,6 @@ package com.eerussianguy.blazemap.feature.maps;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
@@ -17,11 +16,10 @@ import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.config.ClientConfig;
 import com.eerussianguy.blazemap.config.MinimapConfigFacade;
 import com.eerussianguy.blazemap.gui.BlazeGui;
+import com.eerussianguy.blazemap.gui.MinimapConfigurator;
 import com.eerussianguy.blazemap.util.Helpers;
 
 public class MinimapOptionsGui extends BlazeGui implements IScreenSkipsMinimap, IMapHost {
-    private static final Component MAP_TYPES = Helpers.translate("blazemap.gui.minimap_options.map_types");
-    private static final Component LAYERS = Helpers.translate("blazemap.gui.minimap_options.layers");
     private static final int WIDTH = 128, HEIGHT = 154;
 
     public static void open() {
@@ -73,44 +71,13 @@ public class MinimapOptionsGui extends BlazeGui implements IScreenSkipsMinimap, 
         synchronizer.override(mapRenderer);
         ResourceKey<Level> dimension = getMinecraft().level.dimension();
 
-        int px = 15, py = 38;
-        for(Key<MapType> mapID : BlazeMapAPI.MAPTYPES.keys()) {
-            if(!mapID.value().shouldRenderInDimension(dimension)) continue;
-            if(px > 96) {
-                px = 15;
-                py += 20;
-            }
-            addRenderableWidget(new MapTypeButton(left + px, top + py, 18, 18, mapID, this));
-            MapType map = mapID.value();
-            int lpx = 15, lpy = 99;
-            for(Key<Layer> layerID : map.getLayers()) {
-                Layer layer = layerID.value();
-                if(!layer.shouldRenderInDimension(dimension) || layer.isOpaque()) continue;
-                if(lpx > 96) {
-                    lpx = 15;
-                    lpy += 20;
-                }
-                LayerButton lb = new LayerButton(left + lpx, top + lpy, 18, 18, layerID, map, this);
-                lb.checkVisible();
-                addRenderableWidget(lb);
-                lpx += 20;
-            }
-            px += 20;
-        }
+        addRenderableWidget(new MinimapConfigurator.MapTypeConfigurator(BlazeMapAPI.MAPTYPES.keys(), dimension, this, left + 12, top + 25));
+        addRenderableWidget(new MinimapConfigurator.LayerConfigurator(BlazeMapAPI.MAPTYPES.keys(), dimension, this, left + 12, top + 86));
     }
 
     @Override
-    protected void renderComponents(GuiGraphics graphics, MultiBufferSource buffers) {
-        renderLabel(graphics, buffers, MAP_TYPES, 12, 25, false);
-        renderSlot(graphics, buffers, 12, 36, 104, 45);
-
-        renderLabel(graphics, buffers, LAYERS, 12, 86, false);
-        renderSlot(graphics, buffers, 12, 97, 104, 45);
-    }
-
-    @Override
-    protected void renderAbsolute(GuiGraphics graphics, MultiBufferSource buffers, float scale) {
-        minimap.render(graphics, buffers);
+    protected void renderAbsolute(GuiGraphics graphics, float scale) {
+        minimap.render(graphics);
     }
 
     @Override

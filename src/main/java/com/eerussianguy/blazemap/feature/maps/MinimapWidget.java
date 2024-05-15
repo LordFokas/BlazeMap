@@ -34,7 +34,7 @@ public class MinimapWidget {
         this.mouse = editor ? new MouseSubpixelSmoother() : null;
     }
 
-    public void render(GuiGraphics graphics, MultiBufferSource buffers) {
+    public void render(GuiGraphics graphics) {
         Window window = Minecraft.getInstance().getWindow();
         int mcWidth = window.getWidth();
         int mcHeight = window.getHeight();
@@ -49,6 +49,8 @@ public class MinimapWidget {
         posY = Helpers.clamp(0, posY, mcHeight - height);
 
         PoseStack stack = graphics.pose();
+        MultiBufferSource buffers = graphics.bufferSource();
+
         stack.translate(posX, posY, 0);
 
         stack.pushPose();
@@ -56,7 +58,7 @@ public class MinimapWidget {
         RenderHelper.fillRect(stack.last().pose(), width + BORDER_SIZE*2, height + BORDER_SIZE*2, Colors.WIDGET_BACKGROUND);
         stack.popPose();
 
-        map.render(graphics, buffers);
+        map.render(graphics);
 
         if(editor){
             stack.pushPose();
