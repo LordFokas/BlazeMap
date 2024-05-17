@@ -36,6 +36,11 @@ public class MinecraftStreams {
         public void writeChunkPos(ChunkPos pos) throws IOException {
             writeLong(pos.toLong());
         }
+
+        public void writeRegionPos(RegionPos pos) throws IOException {
+            writeInt(pos.x);
+            writeInt(pos.z);
+        }
     }
 
     public static class Input extends DataInputStream {
@@ -64,6 +69,12 @@ public class MinecraftStreams {
 
         public ChunkPos readChunkPos() throws IOException {
             return new ChunkPos(readLong());
+        }
+
+        public RegionPos readRegionPos() throws IOException {
+            int x = readInt();
+            int z = readInt();
+            return new RegionPos(x, z);
         }
     }
 }
