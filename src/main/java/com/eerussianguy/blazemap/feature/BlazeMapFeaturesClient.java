@@ -19,6 +19,7 @@ import com.eerussianguy.blazemap.feature.mapping.*;
 import com.eerussianguy.blazemap.feature.maps.*;
 import com.eerussianguy.blazemap.feature.waypoints.WaypointEditorGui;
 import com.eerussianguy.blazemap.feature.waypoints.WaypointManagerGui;
+import com.eerussianguy.blazemap.feature.waypoints.WaypointRenderer;
 import com.eerussianguy.blazemap.feature.waypoints.WaypointStore;
 import com.mojang.blaze3d.platform.InputConstants;
 
@@ -82,7 +83,7 @@ public class BlazeMapFeaturesClient {
                 WorldMapGui.open();
             }
         }
-        if(KEY_WAYPOINTS.get().isDown()) {
+        if(KEY_WAYPOINTS.get().isDown() && hasWaypoints()) {
             if(Screen.hasShiftDown()) {
                 WaypointManagerGui.open();
             }
@@ -110,7 +111,9 @@ public class BlazeMapFeaturesClient {
     }
 
     public static boolean hasWaypoints() {
-        return waypoints;
+        return waypoints &&
+            (BlazeMapConfig.COMMON.clientFeatures.displayWaypointsOnMap.get() ||
+             BlazeMapConfig.COMMON.clientFeatures.renderWaypointsInWorld.get());
     }
 
     public static void initWaypoints() {
@@ -122,8 +125,7 @@ public class BlazeMapFeaturesClient {
         bus.addListener(MapRenderer::onWaypointRemoved);
         bus.addListener(WorldMapMenu::trackWaypointStore);
 
-        // Disabling while feature incomplete. See BME-46
-        // WaypointRenderer.init();
+        WaypointRenderer.init();
 
         waypoints = true;
     }
