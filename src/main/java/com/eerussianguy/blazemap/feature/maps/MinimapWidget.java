@@ -7,6 +7,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.phys.Vec3;
 
 import com.eerussianguy.blazemap.BlazeMap;
+import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.config.MinimapConfigFacade.IWidgetConfig;
 import com.eerussianguy.blazemap.gui.MouseSubpixelSmoother;
 import com.eerussianguy.blazemap.util.Colors;
@@ -65,17 +66,21 @@ public class MinimapWidget {
             stack.popPose();
         }
 
-        Vec3 pos = Helpers.getPlayer().position();
-        String coords = String.format("[ %d | %d | %d ]", (int) pos.x, (int) pos.y, (int) pos.z);
-        Font font = Minecraft.getInstance().font;
-        stack.pushPose();
-        stack.translate(width / 2, height + BORDER_SIZE * 2, 0);
-        stack.scale(2, 2, 1);
-        int length = font.width(coords);
-        stack.translate(-COORDS_BORDER - ((float)length) / 2F, 0, 0);
-        RenderHelper.fillRect(buffers, stack.last().pose(), length + COORDS_BORDER*2, font.lineHeight - 2 + COORDS_BORDER*2, Colors.WIDGET_BACKGROUND);
-        font.drawInBatch(coords, COORDS_BORDER, COORDS_BORDER, Colors.WHITE, false, stack.last().pose(), buffers, false, 0, LightTexture.FULL_BRIGHT);
-        stack.popPose();
+        if (BlazeMapConfig.COMMON.clientFeatures.displayCoords.get()) {
+            Vec3 pos = Helpers.getPlayer().position();
+            String coords = String.format("[ %d | %d | %d ]", (int) pos.x, (int) pos.y, (int) pos.z);
+            Font font = Minecraft.getInstance().font;
+            int length = font.width(coords);
+
+            stack.pushPose();
+            stack.translate(width / 2, height + BORDER_SIZE * 2, 0);
+            stack.scale(2, 2, 1);
+            stack.translate(-COORDS_BORDER - ((float)length) / 2F, 0, 0);
+
+            RenderHelper.fillRect(buffers, stack.last().pose(), length + COORDS_BORDER*2, font.lineHeight - 2 + COORDS_BORDER*2, Colors.WIDGET_BACKGROUND);
+            font.drawInBatch(coords, COORDS_BORDER, COORDS_BORDER, Colors.WHITE, false, stack.last().pose(), buffers, false, 0, LightTexture.FULL_BRIGHT);
+            stack.popPose();
+        }
     }
 
     public boolean mouseDragged(double mouseX, double mouseY, int button, double draggedX, double draggedY) {
