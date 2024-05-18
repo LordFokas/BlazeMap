@@ -41,4 +41,8 @@ public class LayerButton extends ImageButton {
     public void checkVisible() {
         this.visible = host.getMapType() == parent;
     }
+
+    public void forceVisible() {
+        this.visible = true;
+    }
 }

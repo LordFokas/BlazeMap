@@ -20,7 +20,7 @@ import com.eerussianguy.blazemap.api.BlazeRegistry;
  *
  * @author LordFokas
  */
-public abstract class MapType implements BlazeRegistry.RegistryEntry {
+public abstract class MapType implements BlazeRegistry.RegistryEntry, IClientComponent {
     private final BlazeRegistry.Key<MapType> id;
     private final Set<BlazeRegistry.Key<Layer>> layers;
     private final Component name;
@@ -43,14 +43,17 @@ public abstract class MapType implements BlazeRegistry.RegistryEntry {
         return id;
     }
 
+    @Override
     public boolean shouldRenderInDimension(ResourceKey<Level> dimension) {
         return true;
     }
 
+    @Override
     public Component getName() {
         return name;
     }
 
+    @Override
     public ResourceLocation getIcon() {
         return icon;
     }

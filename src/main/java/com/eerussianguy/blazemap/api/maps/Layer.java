@@ -31,7 +31,7 @@ import com.mojang.blaze3d.platform.NativeImage;
  *
  * @author LordFokas
  */
-public abstract class Layer implements RegistryEntry, Consumer {
+public abstract class Layer implements RegistryEntry, Consumer, IClientComponent {
     protected static final int OPAQUE = 0xFF000000;
 
     private final Key<Layer> id;
@@ -58,6 +58,7 @@ public abstract class Layer implements RegistryEntry, Consumer {
         this.opaque = false;
     }
 
+    @Override
     public Key<Layer> getID() {
         return id;
     }
@@ -67,6 +68,7 @@ public abstract class Layer implements RegistryEntry, Consumer {
         return inputs;
     }
 
+    @Override
     public boolean shouldRenderInDimension(ResourceKey<Level> dimension) {
         return true;
     }
@@ -77,10 +79,12 @@ public abstract class Layer implements RegistryEntry, Consumer {
 
     public abstract boolean renderTile(NativeImage tile, TileResolution resolution, IDataSource data, int xGridOffset, int zGridOffset);
 
+    @Override
     public Component getName() {
         return name;
     }
 
+    @Override
     public ResourceLocation getIcon() {
         return icon;
     }

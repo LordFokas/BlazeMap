@@ -27,15 +27,14 @@ import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.MapType;
 import com.eerussianguy.blazemap.engine.BlazeMapAsync;
 import com.eerussianguy.blazemap.feature.BlazeMapFeaturesClient;
-import com.eerussianguy.blazemap.gui.Image;
 import com.eerussianguy.blazemap.gui.MouseSubpixelSmoother;
+import com.eerussianguy.blazemap.gui.primitives.Image;
 import com.eerussianguy.blazemap.profiling.overlay.ProfilingRenderer;
 import com.eerussianguy.blazemap.util.Colors;
 import com.eerussianguy.blazemap.util.Helpers;
 import com.eerussianguy.blazemap.profiling.Profiler;
 import com.eerussianguy.blazemap.util.RenderHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
 
 public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost {
     private static final Component EMPTY = Component.literal("");
@@ -236,9 +235,7 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
         stack.pushPose();
         stack.scale(1F / scale, 1F / scale, 1);
 
-        var buffers = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-        mapRenderer.render(graphics, buffers);
-        buffers.endBatch();
+        mapRenderer.render(graphics);
 
         if(contextMenu != null){
             contextMenu.render(graphics, i0, i1, f0);
@@ -327,10 +324,9 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
         stack.scale(0.5F, 0.5F, 1);
 
         graphics.drawString(font, "Atlas Time Profiling:", 0, 0, -1);
-        var buffers = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        MultiBufferSource buffers = graphics.bufferSource();
         ProfilingRenderer.drawTimeProfiler(renderTime, 12, "Render", font, stack.last().pose(), buffers);
         ProfilingRenderer.drawTimeProfiler(uploadTime, 24, "Upload", font, stack.last().pose(), buffers);
-        buffers.endBatch();
 
         MapRenderer.DebugInfo debug = mapRenderer.debug;
         int y = 30;

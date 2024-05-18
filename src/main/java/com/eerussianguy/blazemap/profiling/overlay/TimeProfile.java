@@ -22,8 +22,9 @@ public class TimeProfile implements IDrawable {
     }
 
     @Override
-    public void draw(GuiGraphics graphics, MultiBufferSource buffers, Font fontRenderer) {
+    public void draw(GuiGraphics graphics, Font fontRenderer) {
         PoseStack stack = graphics.pose();
+        MultiBufferSource buffers = graphics.bufferSource();
         ProfilingRenderer.drawTimeProfiler(time, 0, label, Container.Style.BLOCK, fontRenderer, stack.last().pose(), buffers);
     }
 }
