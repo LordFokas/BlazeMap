@@ -41,6 +41,7 @@ import com.eerussianguy.blazemap.api.event.WaypointEvent;
 import com.eerussianguy.blazemap.api.maps.*;
 import com.eerussianguy.blazemap.api.markers.*;
 import com.eerussianguy.blazemap.api.util.RegionPos;
+import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.engine.BlazeMapAsync;
 import com.eerussianguy.blazemap.engine.async.AsyncAwaiter;
 import com.eerussianguy.blazemap.util.Colors;
@@ -313,22 +314,26 @@ public class MapRenderer implements AutoCloseable {
             for(MapLabel l : labels_off) {
                 renderObject(graphics, l, SearchTargeting.MISS);
             }
-            for(Waypoint w : waypoints_off) {
-                renderMarker(graphics, w.getPosition(), w.getIcon(), w.getColor(), 32, 32, w.getRotation(), false, renderNames ? w.getName() : null, SearchTargeting.MISS);
-            }
             for(MapLabel l : labels_on) {
                 renderObject(graphics, l, SearchTargeting.HIT);
             }
-            for(Waypoint w : waypoints_on) {
-                renderMarker(graphics, w.getPosition(), w.getIcon(), w.getColor(), 32, 32, w.getRotation(), false, renderNames ? w.getName() : null, SearchTargeting.HIT);
+            if (BlazeMapConfig.COMMON.clientFeatures.displayWaypointsOnMap.get()) {
+                for(Waypoint w : waypoints_off) {
+                    renderMarker(graphics, w.getPosition(), w.getIcon(), w.getColor(), 32, 32, w.getRotation(), false, renderNames ? w.getName() : null, SearchTargeting.MISS);
+                }
+                for(Waypoint w : waypoints_on) {
+                    renderMarker(graphics, w.getPosition(), w.getIcon(), w.getColor(), 32, 32, w.getRotation(), false, renderNames ? w.getName() : null, SearchTargeting.HIT);
+                }
             }
         }
         else {
             for(MapLabel l : labels) {
                 renderObject(graphics, l, SearchTargeting.NONE);
             }
-            for(Waypoint w : waypoints) {
-                renderMarker(graphics, w.getPosition(), w.getIcon(), w.getColor(), 32, 32, w.getRotation(), false, renderNames ? w.getName() : null, SearchTargeting.NONE);
+            if (BlazeMapConfig.COMMON.clientFeatures.displayWaypointsOnMap.get()) {
+                for(Waypoint w : waypoints) {
+                    renderMarker(graphics, w.getPosition(), w.getIcon(), w.getColor(), 32, 32, w.getRotation(), false, renderNames ? w.getName() : null, SearchTargeting.NONE);
+                }
             }
         }
         LocalPlayer player = Helpers.getPlayer();
@@ -354,21 +359,21 @@ public class MapRenderer implements AutoCloseable {
             if(inRange(pos)) {
                 int color;
                 boolean isPlayer = false;
-                if(entity instanceof Player) {
+                if(entity instanceof Player && BlazeMapConfig.COMMON.clientFeatures.displayOtherPlayers.get()) {
                     if(entity == player) return;
                     color = 0xFF88FF66;
                     isPlayer = true;
                 }
-                else if(entity instanceof AbstractVillager || entity instanceof AbstractGolem) {
+                else if((entity instanceof AbstractVillager || entity instanceof AbstractGolem) && BlazeMapConfig.COMMON.clientFeatures.displayFriendlyMobs.get()) {
                     color = 0xFFFFFF3F;
                 }
-                else if(entity instanceof Animal) {
+                else if(entity instanceof Animal && BlazeMapConfig.COMMON.clientFeatures.displayFriendlyMobs.get()) {
                     color = 0xFFA0A0A0;
                 }
-                else if(entity instanceof WaterAnimal) {
+                else if(entity instanceof WaterAnimal && BlazeMapConfig.COMMON.clientFeatures.displayFriendlyMobs.get()) {
                     color = 0xFF4488FF;
                 }
-                else if(entity instanceof Monster) {
+                else if(entity instanceof Monster && BlazeMapConfig.COMMON.clientFeatures.displayHostileMobs.get()) {
                     color = 0xFFFF2222;
                 }
                 else {
