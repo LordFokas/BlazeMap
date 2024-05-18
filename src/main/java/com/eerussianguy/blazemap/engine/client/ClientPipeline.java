@@ -213,7 +213,13 @@ class ClientPipeline extends Pipeline {
                         @Override
                         public LayerRegionTile load(RegionPos pos) {
                             LayerRegionTile layerRegionTile = new LayerRegionTile(storage, layer, pos, resolution);
-                            layerRegionTile.tryLoad();
+                            layerRegionTile.tryLoad(() -> {
+                                async.runOnGameThread(() -> {
+                                    if(active) {
+                                        BlazeMapClientEngine.notifyLayerRegionChange(new LayerRegion(layer, region));
+                                    }
+                                });
+                            });
                             return layerRegionTile;
                         }
                     })
@@ -255,9 +261,15 @@ class ClientPipeline extends Pipeline {
         return this;
     }
 
-    public void consumeTile(Key<Layer> layer, RegionPos region, TileResolution resolution, Consumer<NativeImage> consumer) {
+    public void consumeTileSync(Key<Layer> layer, RegionPos region, TileResolution resolution, Consumer<NativeImage> consumer) {
         if(!availableLayers.contains(layer))
             throw new IllegalArgumentException("Layer " + layer + " not available for dimension " + dimension);
-        getLayerRegionTile(layer, region, resolution, true).consume(consumer);
+        getLayerRegionTile(layer, region, resolution, true).consumeSync(consumer);
+    }
+
+    public void consumeTileAsync(Key<Layer> layer, RegionPos region, TileResolution resolution, Consumer<NativeImage> consumer) {
+        if(!availableLayers.contains(layer))
+            throw new IllegalArgumentException("Layer " + layer + " not available for dimension " + dimension);
+        getLayerRegionTile(layer, region, resolution, true).consumeAsync(consumer);
     }
 }

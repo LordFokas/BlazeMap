@@ -61,7 +61,7 @@ public class MapRenderer implements AutoCloseable {
 
     public static void onDimensionChange(DimensionChangedEvent evt) {
         evt.tileNotifications.addUpdateListener(MapRenderer::onTileChanged);
-        tileStorage = evt.tileStorage;
+        tileStorage = evt.tileStorageAsync;
         dimension = evt.dimension;
         waypointStorage = evt.waypoints;
         labelStorage = evt.labels;

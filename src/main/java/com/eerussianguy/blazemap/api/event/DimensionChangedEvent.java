@@ -52,9 +52,13 @@ public class DimensionChangedEvent extends Event {
     public final DimensionTileNotifications tileNotifications;
 
     /**
-     * Storage containing all rendered map layer images
+     * Storages containing all rendered map layer images.
+     * When attempting to consume missing tiles:
+     * - Sync storage will halt the game and synchronously load from the disk
+     * - Async will skip consumption, load from disk asynchronously, and fire a notification for this tile when done
+     * When in doubt, you should use the async version.
      */
-    public final DimensionTileStorage tileStorage;
+    public final DimensionTileStorage tileStorageSync, tileStorageAsync;
 
     /**
      * Volatile storage containing all the addon map labels for this dimension
@@ -76,7 +80,8 @@ public class DimensionChangedEvent extends Event {
         Set<BlazeRegistry.Key<MapType>> mapTypes,
         Set<BlazeRegistry.Key<Layer>> layers,
         DimensionTileNotifications notifications,
-        DimensionTileStorage tiles,
+        DimensionTileStorage tilesSync,
+        DimensionTileStorage tilesAsync,
         IMarkerStorage.Layered<MapLabel> labels,
         IMarkerStorage<Waypoint> waypoints,
         IStorageAccess storageAccess
@@ -85,7 +90,8 @@ public class DimensionChangedEvent extends Event {
         this.availableMapTypes = mapTypes;
         this.availableLayers = layers;
         this.tileNotifications = notifications;
-        this.tileStorage = tiles;
+        this.tileStorageSync = tilesSync;
+        this.tileStorageAsync = tilesAsync;
         this.labels = labels;
         this.waypoints = waypoints;
         this.dimensionStorage = storageAccess;

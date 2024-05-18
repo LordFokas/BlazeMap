@@ -118,7 +118,8 @@ public class BlazeMapClientEngine {
             activePipeline.availableMapTypes,
             activePipeline.availableLayers,
             TILE_CHANGE_LISTENERS::add,
-            activePipeline::consumeTile,
+            activePipeline::consumeTileSync,
+            activePipeline::consumeTileAsync,
             activeLabels,
             activeWaypoints,
             fileStorage

@@ -13,7 +13,9 @@ import com.eerussianguy.blazemap.api.BlazeRegistry;
 import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.TileResolution;
 import com.eerussianguy.blazemap.api.util.RegionPos;
+import com.eerussianguy.blazemap.engine.BlazeMapAsync;
 import com.eerussianguy.blazemap.engine.StorageAccess;
+import com.eerussianguy.blazemap.engine.async.AsyncAwaiter;
 import com.eerussianguy.blazemap.engine.async.PriorityLock;
 import com.mojang.blaze3d.platform.NativeImage;
 
@@ -22,12 +24,14 @@ public class LayerRegionTile {
     private static int instances = 0, loaded = 0;
 
     private final PriorityLock lock = new PriorityLock();
+    private final AsyncAwaiter load = new AsyncAwaiter(1);
     private final File file, buffer;
     private NativeImage image;
     private final TileResolution resolution;
     private boolean isEmpty = true;
     private boolean isDirty = false;
     private boolean destroyed = false;
+    private boolean isLoading = false;
 
     public LayerRegionTile(StorageAccess.Internal storage, BlazeRegistry.Key<Layer> layer, RegionPos region, TileResolution resolution) {
         this.file = storage.getMipmap(layer.location, region + ".png", resolution);
@@ -35,20 +39,27 @@ public class LayerRegionTile {
         this.resolution = resolution;
     }
 
-    public void tryLoad() {
+    public void tryLoad(Runnable onLoad) {
         if(file.exists()) {
             lock.lockPriority();
-            try {
-                image = NativeImage.read(Files.newInputStream(file.toPath()));
-                isEmpty = false;
-            }
-            catch(IOException e) {
-                // FIXME: this needs to hook into a reporting mechanism AND possibly automated LRT regeneration
-                BlazeMap.LOGGER.error("Error loading LayerRegionTile: {}", file, e);
-            }
-            finally {
-                lock.unlock();
-            }
+            isLoading = true;
+            BlazeMapAsync.instance().clientChain.runOnDataThread(() -> {
+                try {
+                    image = NativeImage.read(Files.newInputStream(file.toPath()));
+                    isEmpty = false;
+                    onFill();
+                }
+                catch(IOException e) {
+                    // FIXME: this needs to hook into a reporting mechanism AND possibly automated LRT regeneration
+                    BlazeMap.LOGGER.error("Error loading LayerRegionTile: {}", file, e);
+                }
+                isLoading = false;
+                load.done();
+                if(!isEmpty) {
+                    onLoad.run();
+                }
+            });
+            lock.unlock();
         }
         else {
             file.getParentFile().mkdirs();
@@ -57,7 +68,7 @@ public class LayerRegionTile {
     }
 
     public void save() {
-        if(isEmpty || !isDirty) return;
+        if(isEmpty || isLoading || !isDirty) return;
 
         // Save image into buffer
         lock.lock();
@@ -93,6 +104,9 @@ public class LayerRegionTile {
 
         lock.lock();
         try {
+            if(isLoading) {
+                load.await();
+            }
             if(isEmpty) {
                 image = new NativeImage(NativeImage.Format.RGBA, resolution.regionWidth, resolution.regionWidth, true);
                 isEmpty = false;
@@ -123,8 +137,20 @@ public class LayerRegionTile {
         return isDirty;
     }
 
-    public void consume(Consumer<NativeImage> consumer) {
+    public void consumeSync(Consumer<NativeImage> consumer) {
+        if(isLoading) load.await();
         if(isEmpty) return;
+        lock.lockPriority();
+        try {
+            consumer.accept(image);
+        }
+        finally {
+            lock.unlock();
+        }
+    }
+
+    public void consumeAsync(Consumer<NativeImage> consumer) {
+        if(isEmpty || isLoading) return;
         lock.lockPriority();
         try {
             consumer.accept(image);
