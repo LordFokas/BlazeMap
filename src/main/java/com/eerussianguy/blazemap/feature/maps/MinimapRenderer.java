@@ -2,6 +2,7 @@ package com.eerussianguy.blazemap.feature.maps;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.ReceivingLevelScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraftforge.client.gui.overlay.ForgeGui;
@@ -30,7 +31,7 @@ public class MinimapRenderer implements AutoCloseable {
 
     public void draw(GuiGraphics graphics, ForgeGui gui, int width, int height) {
         Minecraft mc = Minecraft.getInstance();
-        if(mc.screen instanceof IScreenSkipsMinimap) return;
+        if(mc.screen instanceof IScreenSkipsMinimap || mc.screen instanceof ReceivingLevelScreen) return;
 
         LocalPlayer player = Helpers.getPlayer();
         if(player == null) return;

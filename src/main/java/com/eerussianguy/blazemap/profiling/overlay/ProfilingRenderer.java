@@ -6,6 +6,7 @@ import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.ReceivingLevelScreen;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 
@@ -101,7 +102,7 @@ public class ProfilingRenderer {
 
     public void draw(GuiGraphics graphics) {
         Minecraft mc = Minecraft.getInstance();
-        if(mc.screen instanceof WorldMapGui) return;
+        if(mc.screen instanceof WorldMapGui || mc.screen instanceof ReceivingLevelScreen) return;
         if(Helpers.getPlayer() == null) return;
 
         Profilers.DEBUG_TIME_PROFILER.begin();
