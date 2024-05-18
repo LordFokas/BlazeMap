@@ -1,4 +1,4 @@
-package com.eerussianguy.blazemap.gui;
+package com.eerussianguy.blazemap.feature.waypoints;
 
 import com.eerussianguy.blazemap.gui.primitives.GuiPrimitive;
 import com.eerussianguy.blazemap.gui.primitives.Image;

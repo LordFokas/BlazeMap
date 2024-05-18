@@ -10,8 +10,8 @@ import net.minecraft.world.level.Level;
 /**
  * To unify the rendering behaviour of widgets that can take either a MapType or a Layer
  */
-public interface IMapPart {
-    public BlazeRegistry.Key<? extends IMapPart> getID();
+public interface IClientComponent {
+    public BlazeRegistry.Key<? extends IClientComponent> getID();
 
     public boolean shouldRenderInDimension(ResourceKey<Level> dimension);
 

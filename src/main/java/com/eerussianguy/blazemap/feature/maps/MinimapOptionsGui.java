@@ -16,7 +16,6 @@ import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.config.ClientConfig;
 import com.eerussianguy.blazemap.config.MinimapConfigFacade;
 import com.eerussianguy.blazemap.gui.BlazeGui;
-import com.eerussianguy.blazemap.gui.MinimapConfigurator;
 import com.eerussianguy.blazemap.util.Helpers;
 
 public class MinimapOptionsGui extends BlazeGui implements IScreenSkipsMinimap, IMapHost {

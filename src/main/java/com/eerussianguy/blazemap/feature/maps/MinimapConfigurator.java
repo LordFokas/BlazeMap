@@ -1,4 +1,4 @@
-package com.eerussianguy.blazemap.gui;
+package com.eerussianguy.blazemap.feature.maps;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -7,12 +7,9 @@ import java.util.HashMap;
 import javax.annotation.Nullable;
 
 import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
-import com.eerussianguy.blazemap.api.maps.IMapPart;
+import com.eerussianguy.blazemap.api.maps.IClientComponent;
 import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.MapType;
-import com.eerussianguy.blazemap.feature.maps.IMapHost;
-import com.eerussianguy.blazemap.feature.maps.LayerButton;
-import com.eerussianguy.blazemap.feature.maps.MapTypeButton;
 import com.eerussianguy.blazemap.gui.primitives.GuiPrimitive;
 import com.eerussianguy.blazemap.gui.primitives.Label;
 import com.eerussianguy.blazemap.gui.primitives.Slot;
@@ -28,7 +25,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 
-public abstract class MinimapConfigurator<T extends IMapPart> extends GuiPrimitive implements ContainerEventHandler, NarratableEntry {
+public abstract class MinimapConfigurator<T extends IClientComponent> extends GuiPrimitive implements ContainerEventHandler, NarratableEntry {
     protected final ResourceKey<Level> dimension;
     protected final IMapHost host;
     protected final Label label;
