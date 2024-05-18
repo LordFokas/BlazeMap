@@ -83,7 +83,7 @@ public class BlazeMapFeaturesClient {
                 WorldMapGui.open();
             }
         }
-        if(KEY_WAYPOINTS.get().isDown()) {
+        if(KEY_WAYPOINTS.get().isDown() && hasWaypoints()) {
             if(Screen.hasShiftDown()) {
                 WaypointManagerGui.open();
             }
@@ -111,7 +111,9 @@ public class BlazeMapFeaturesClient {
     }
 
     public static boolean hasWaypoints() {
-        return waypoints;
+        return waypoints &&
+            (BlazeMapConfig.COMMON.clientFeatures.displayWaypointsOnMap.get() ||
+             BlazeMapConfig.COMMON.clientFeatures.renderWaypointsInWorld.get());
     }
 
     public static void initWaypoints() {
@@ -123,8 +125,7 @@ public class BlazeMapFeaturesClient {
         bus.addListener(MapRenderer::onWaypointRemoved);
         bus.addListener(WorldMapMenu::trackWaypointStore);
 
-        // Disabling while feature incomplete. See BME-46
-        // WaypointRenderer.init();
+        WaypointRenderer.init();
 
         waypoints = true;
     }
