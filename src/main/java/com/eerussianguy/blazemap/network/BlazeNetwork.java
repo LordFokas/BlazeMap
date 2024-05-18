@@ -24,6 +24,10 @@ public class BlazeNetwork {
     }
 
     private static SimpleChannel makeChannel(ResourceLocation channel, String version) {
-        return NetworkRegistry.newSimpleChannel(channel, () -> version, version::equals, version::equals);
+        return NetworkRegistry.newSimpleChannel(channel, () -> version, remote -> equalsOptional(version, remote), remote -> equalsOptional(version, remote));
+    }
+
+    private static boolean equalsOptional(String ours, String theirs) {
+        return NetworkRegistry.ABSENT.equals(theirs) || ours.equals(theirs);
     }
 }
