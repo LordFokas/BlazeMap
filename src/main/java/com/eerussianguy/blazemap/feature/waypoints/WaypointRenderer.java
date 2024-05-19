@@ -43,7 +43,7 @@ public class WaypointRenderer {
         // Forge Doc:
         // Use this to render custom effects into the world, such as custom entity-like objects or special rendering effects. Called within a fabulous graphics target. Happens after entities render.
         // ForgeRenderTypes.TRANSLUCENT_ON_PARTICLES_TARGET
-        if(event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES && BlazeMapConfig.COMMON.clientFeatures.renderWaypointsInWorld.get()) {
+        if(event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES && BlazeMapConfig.CLIENT.clientFeatures.renderWaypointsInWorld.get()) {
             Minecraft mc = Minecraft.getInstance();
             Entity playerCamera = mc.cameraEntity;
             PoseStack stack = event.getPoseStack();

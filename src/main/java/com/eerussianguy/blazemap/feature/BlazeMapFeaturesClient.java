@@ -109,8 +109,8 @@ public class BlazeMapFeaturesClient {
 
     public static boolean hasWaypoints() {
         return waypoints &&
-            (BlazeMapConfig.COMMON.clientFeatures.displayWaypointsOnMap.get() ||
-             BlazeMapConfig.COMMON.clientFeatures.renderWaypointsInWorld.get());
+            (BlazeMapConfig.CLIENT.clientFeatures.displayWaypointsOnMap.get() ||
+             BlazeMapConfig.CLIENT.clientFeatures.renderWaypointsInWorld.get());
     }
 
     public static void initWaypoints() {
