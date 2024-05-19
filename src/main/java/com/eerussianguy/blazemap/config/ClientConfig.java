@@ -24,6 +24,7 @@ import com.eerussianguy.blazemap.util.MapTypeAdapter;
  */
 public class ClientConfig {
     public final BooleanValue enableDebug;
+    public final FeaturesConfig clientFeatures;
     public final MapConfig worldMap;
     public final MinimapConfig minimap;
 
@@ -34,6 +35,11 @@ public class ClientConfig {
         enableDebug = builder.apply("enableDebug").comment("Enable debug mode?").define("enableDebug", !FMLEnvironment.production);
         innerBuilder.pop();
 
+        innerBuilder.comment("Enable or disable (un)desired features");
+        innerBuilder.push("clientFeatures");
+        clientFeatures = new FeaturesConfig(builder);
+        innerBuilder.pop();
+
         innerBuilder.push("worldmap");
         worldMap = new MapConfig(builder, WorldMapGui.MIN_ZOOM, WorldMapGui.MAX_ZOOM);
         innerBuilder.pop();
@@ -41,6 +47,38 @@ public class ClientConfig {
         innerBuilder.push("minimap");
         minimap = new MinimapConfig(builder);
         innerBuilder.pop();
+    }
+
+    public static class FeaturesConfig {
+        public final BooleanValue displayCoords;
+        public final BooleanValue displayFriendlyMobs;
+        public final BooleanValue displayHostileMobs;
+        public final BooleanValue displayOtherPlayers;
+        public final BooleanValue displayWaypointsOnMap;
+        public final BooleanValue renderWaypointsInWorld;
+
+        FeaturesConfig(Function<String, Builder> builder) {
+            this.displayCoords = builder.apply("displayCoords")
+                .comment("Enables current coordinates to render under minimap")
+                .define("displayCoords", true);
+
+            this.displayFriendlyMobs = builder.apply("displayFriendlyMobs")
+                .comment("Enables markers showing the location of nearby friendly mobs")
+                .define("displayFriendlyMobs", true);
+            this.displayHostileMobs = builder.apply("displayHostileMobs")
+                .comment("Enables markers showing the location of nearby hostile mobs")
+                .define("displayHostileMobs", true);
+            this.displayOtherPlayers = builder.apply("displayOtherPlayers")
+                .comment("Enables markers showing the location of other players")
+                .define("displayOtherPlayers", true);
+
+            this.displayWaypointsOnMap = builder.apply("displayWaypointsOnMap")
+                .comment("Enables waypoints to be shown on the map itself")
+                .define("displayWaypointsOnMap", true);
+            this.renderWaypointsInWorld = builder.apply("renderWaypointsInWorld")
+                .comment("Enables waypoints to be rendered in the world")
+                .define("renderWaypointsInWorld", false);
+        }
     }
 
     public static class MapConfig {
