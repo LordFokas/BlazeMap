@@ -313,7 +313,7 @@ public class MapRenderer implements AutoCloseable {
             for(MapLabel l : labels_on) {
                 renderObject(buffers, stack, l, SearchTargeting.HIT);
             }
-            if (BlazeMapConfig.COMMON.clientFeatures.displayWaypointsOnMap.get()) {
+            if (BlazeMapConfig.CLIENT.clientFeatures.displayWaypointsOnMap.get()) {
                 for(Waypoint w : waypoints_off) {
                     renderMarker(buffers, stack, w.getPosition(), w.getIcon(), w.getColor(), 32, 32, w.getRotation(), false, renderNames ? w.getName() : null, SearchTargeting.MISS);
                 }
@@ -326,7 +326,7 @@ public class MapRenderer implements AutoCloseable {
             for(MapLabel l : labels) {
                 renderObject(buffers, stack, l, SearchTargeting.NONE);
             }
-            if (BlazeMapConfig.COMMON.clientFeatures.displayWaypointsOnMap.get()) {
+            if (BlazeMapConfig.CLIENT.clientFeatures.displayWaypointsOnMap.get()) {
                 for(Waypoint w : waypoints) {
                     renderMarker(buffers, stack, w.getPosition(), w.getIcon(), w.getColor(), 32, 32, w.getRotation(), false, renderNames ? w.getName() : null, SearchTargeting.NONE);
                 }
@@ -354,21 +354,21 @@ public class MapRenderer implements AutoCloseable {
             if(inRange(pos)) {
                 int color;
                 boolean isPlayer = false;
-                if(entity instanceof Player && BlazeMapConfig.COMMON.clientFeatures.displayOtherPlayers.get()) {
+                if(entity instanceof Player && BlazeMapConfig.CLIENT.clientFeatures.displayOtherPlayers.get()) {
                     if(entity == player) return;
                     color = 0xFF88FF66;
                     isPlayer = true;
                 }
-                else if((entity instanceof AbstractVillager || entity instanceof AbstractGolem) && BlazeMapConfig.COMMON.clientFeatures.displayFriendlyMobs.get()) {
+                else if((entity instanceof AbstractVillager || entity instanceof AbstractGolem) && BlazeMapConfig.CLIENT.clientFeatures.displayFriendlyMobs.get()) {
                     color = 0xFFFFFF3F;
                 }
-                else if(entity instanceof Animal && BlazeMapConfig.COMMON.clientFeatures.displayFriendlyMobs.get()) {
+                else if(entity instanceof Animal && BlazeMapConfig.CLIENT.clientFeatures.displayFriendlyMobs.get()) {
                     color = 0xFFA0A0A0;
                 }
-                else if(entity instanceof WaterAnimal && BlazeMapConfig.COMMON.clientFeatures.displayFriendlyMobs.get()) {
+                else if(entity instanceof WaterAnimal && BlazeMapConfig.CLIENT.clientFeatures.displayFriendlyMobs.get()) {
                     color = 0xFF4488FF;
                 }
-                else if(entity instanceof Monster && BlazeMapConfig.COMMON.clientFeatures.displayHostileMobs.get()) {
+                else if(entity instanceof Monster && BlazeMapConfig.CLIENT.clientFeatures.displayHostileMobs.get()) {
                     color = 0xFFFF2222;
                 }
                 else {
