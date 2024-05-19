@@ -14,8 +14,13 @@ public class Coordination {
         mousePixelX = mouseX;
         mousePixelY = mouseY;
 
-        blockX = (int) (beginX + (mouseX / zoom));
-        blockZ = (int) (beginZ + (mouseY / zoom));
+        if (zoom >= 1) {
+            blockX = (beginX + (mouseX / (int)zoom));
+            blockZ = (beginZ + (mouseY / (int)zoom));
+        } else {
+            blockX = (int) (beginX + (mouseX / zoom));
+            blockZ = (int) (beginZ + (mouseY / zoom));
+        }
         chunkX = blockX >> 4;
         chunkZ = blockZ >> 4;
         regionX = chunkX >> 5;

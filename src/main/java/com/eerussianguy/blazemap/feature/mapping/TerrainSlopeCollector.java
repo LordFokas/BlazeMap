@@ -1,6 +1,5 @@
 package com.eerussianguy.blazemap.feature.mapping;
 
-import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
 import com.eerussianguy.blazemap.api.builtin.TerrainSlopeMD;
 import com.eerussianguy.blazemap.api.pipeline.Collector;
