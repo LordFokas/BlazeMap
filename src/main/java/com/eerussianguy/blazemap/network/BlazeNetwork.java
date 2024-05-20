@@ -4,6 +4,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
 
+// import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.util.Helpers;
 
 public class BlazeNetwork {
@@ -28,6 +29,6 @@ public class BlazeNetwork {
     }
 
     private static boolean equalsOptional(String ours, String theirs) {
-        return NetworkRegistry.ABSENT.equals(theirs) || ours.equals(theirs);
+        return NetworkRegistry.ABSENT.version().equals(theirs) || ours.equals(theirs);
     }
 }
