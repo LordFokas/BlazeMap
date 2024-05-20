@@ -44,6 +44,7 @@ public class BlazeMapFeaturesClient {
 
     public static void initMapping() {
         BlazeMapAPI.LAYERS.register(new TerrainHeightLayer());
+        BlazeMapAPI.LAYERS.register(new TerrainSlopeLayer());
         BlazeMapAPI.LAYERS.register(new WaterLevelLayer());
         BlazeMapAPI.LAYERS.register(new TerrainIsolinesLayer());
         BlazeMapAPI.LAYERS.register(new BlockColorLayer());
@@ -82,7 +83,7 @@ public class BlazeMapFeaturesClient {
                 WorldMapGui.open();
             }
         }
-        if(KEY_WAYPOINTS.get().isDown()) {
+        if(KEY_WAYPOINTS.get().isDown() && hasWaypoints()) {
             if(Screen.hasShiftDown()) {
                 WaypointManagerGui.open();
             }
@@ -110,7 +111,9 @@ public class BlazeMapFeaturesClient {
     }
 
     public static boolean hasWaypoints() {
-        return waypoints;
+        return waypoints &&
+            (BlazeMapConfig.CLIENT.clientFeatures.displayWaypointsOnMap.get() ||
+             BlazeMapConfig.CLIENT.clientFeatures.renderWaypointsInWorld.get());
     }
 
     public static void initWaypoints() {
@@ -122,8 +125,7 @@ public class BlazeMapFeaturesClient {
         bus.addListener(MapRenderer::onWaypointRemoved);
         bus.addListener(WorldMapMenu::trackWaypointStore);
 
-        // Disabling while feature incomplete. See BME-46
-        // WaypointRenderer.init();
+        WaypointRenderer.init();
 
         waypoints = true;
     }
