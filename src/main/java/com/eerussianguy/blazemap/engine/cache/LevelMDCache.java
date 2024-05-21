@@ -10,10 +10,10 @@ import com.google.common.cache.LoadingCache;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 
+import com.eerussianguy.blazemap.api.util.IStorageAccess;
 import com.eerussianguy.blazemap.api.util.MinecraftStreams;
 import com.eerussianguy.blazemap.api.util.RegionPos;
 import com.eerussianguy.blazemap.engine.BlazeMapAsync;
-import com.eerussianguy.blazemap.engine.StorageAccess;
 import com.eerussianguy.blazemap.engine.async.AsyncChainRoot;
 import com.eerussianguy.blazemap.engine.async.DebouncingDomain;
 import com.eerussianguy.blazemap.util.Helpers;
@@ -21,11 +21,11 @@ import com.eerussianguy.blazemap.util.Helpers;
 public class LevelMDCache {
     private static final ResourceLocation NODE = Helpers.identifier("md-cache");
     private final LoadingCache<RegionPos, RegionMDCache> regions;
-    private final StorageAccess storage;
+    private final IStorageAccess storage;
     private final DebouncingDomain<RegionMDCache> debouncer;
     private final AsyncChainRoot asyncChain;
 
-    public LevelMDCache(final StorageAccess storage, AsyncChainRoot asyncChain) {
+    public LevelMDCache(final IStorageAccess storage, AsyncChainRoot asyncChain) {
         this.storage = storage;
         this.regions = CacheBuilder.newBuilder()
             .maximumSize(256)
@@ -51,8 +51,17 @@ public class LevelMDCache {
     private void persist(RegionMDCache cache) {
         if(!cache.isDirty()) return;
         asyncChain.runOnDataThread(() -> {
-            try(MinecraftStreams.Output stream = storage.write(NODE, getFilename(cache.pos()))) {
+            String buffer = getBufferFile(cache.pos());
+            String file = getFilename(cache.pos());
+            try(MinecraftStreams.Output stream = storage.write(NODE, buffer)) {
                 cache.write(stream);
+            }
+            catch(IOException e) {
+                e.printStackTrace();
+                debouncer.push(cache);
+            }
+            try {
+                storage.move(NODE, buffer, file);
             }
             catch(IOException e) {
                 e.printStackTrace();
@@ -63,6 +72,10 @@ public class LevelMDCache {
 
     private static String getFilename(RegionPos pos) {
         return pos + ".rmd";
+    }
+
+    private static String getBufferFile(RegionPos pos) {
+        return pos + ".buffer";
     }
 
     public void flush() {
