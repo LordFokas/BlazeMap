@@ -74,6 +74,7 @@ public class WaypointStore implements IMarkerStorage<Waypoint> {
         }
 
         try(MinecraftStreams.Output output = outputSupplier.get()) {
+            output.writeByte(0x00); // version zero
             output.writeInt(store.size());
             for(Waypoint waypoint : store.values()) {
                 output.writeResourceLocation(waypoint.getID());
@@ -93,6 +94,7 @@ public class WaypointStore implements IMarkerStorage<Waypoint> {
     public void load() {
         if(!exists.get()) return;
         try(MinecraftStreams.Input input = inputSupplier.get()) {
+            input.readByte(); // version; unused for now, needed for later
             int count = input.readInt();
             for(int i = 0; i < count; i++) {
                 Waypoint waypoint = new Waypoint(

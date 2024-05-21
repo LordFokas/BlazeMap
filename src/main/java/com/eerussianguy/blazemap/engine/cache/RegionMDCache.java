@@ -35,6 +35,7 @@ public class RegionMDCache {
     public void read(MinecraftStreams.Input stream) throws IOException {
         try {
             lock.lock();
+            stream.readByte(); // read version; ignored for now
             for(int index = 0; index < chunks.length; index++) {
                 byte b = stream.readByte();
                 switch(b) {
@@ -56,6 +57,7 @@ public class RegionMDCache {
     public void write(MinecraftStreams.Output stream) throws IOException {
         try {
             lock.lockPriority();
+            stream.writeByte(0x00); // version zero
             for(ChunkMDCache.Persisted chunk : chunks) {
                 if(chunk == null || chunk.isEmpty()) {
                     stream.writeByte(VOID);
