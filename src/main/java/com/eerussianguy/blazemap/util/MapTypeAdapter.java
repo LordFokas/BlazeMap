@@ -5,6 +5,7 @@ import net.minecraftforge.common.ForgeConfigSpec;
 import com.eerussianguy.blazemap.api.BlazeMapAPI;
 import com.eerussianguy.blazemap.api.BlazeRegistry;
 import com.eerussianguy.blazemap.api.maps.MapType;
+import com.eerussianguy.blazemap.config.IConfigAdapter;
 
 public class MapTypeAdapter implements IConfigAdapter<BlazeRegistry.Key<MapType>> {
     private final ForgeConfigSpec.ConfigValue<String> target;

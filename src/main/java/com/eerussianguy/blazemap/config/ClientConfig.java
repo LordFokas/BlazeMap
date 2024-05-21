@@ -13,7 +13,6 @@ import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.MapType;
 import com.eerussianguy.blazemap.feature.maps.MinimapRenderer;
 import com.eerussianguy.blazemap.feature.maps.WorldMapGui;
-import com.eerussianguy.blazemap.util.IConfigAdapter;
 import com.eerussianguy.blazemap.util.LayerListAdapter;
 import com.eerussianguy.blazemap.util.MapTypeAdapter;
 
