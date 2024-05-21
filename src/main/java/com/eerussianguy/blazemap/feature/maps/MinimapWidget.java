@@ -70,7 +70,7 @@ public class MinimapWidget {
             stack.popPose();
         }
 
-        if (BlazeMapConfig.COMMON.clientFeatures.displayCoords.get()) {
+        if (BlazeMapConfig.CLIENT.clientFeatures.displayCoords.get()) {
             Vec3 pos = Helpers.getPlayer().position();
             String coords = String.format("[ %d | %d | %d ]", (int) pos.x, (int) pos.y, (int) pos.z);
             Font font = Minecraft.getInstance().font;

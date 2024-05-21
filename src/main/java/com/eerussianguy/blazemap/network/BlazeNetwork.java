@@ -4,6 +4,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
 
+// import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.util.Helpers;
 
 public class BlazeNetwork {
@@ -24,6 +25,10 @@ public class BlazeNetwork {
     }
 
     private static SimpleChannel makeChannel(ResourceLocation channel, String version) {
-        return NetworkRegistry.newSimpleChannel(channel, () -> version, version::equals, version::equals);
+        return NetworkRegistry.newSimpleChannel(channel, () -> version, remote -> equalsOptional(version, remote), remote -> equalsOptional(version, remote));
+    }
+
+    private static boolean equalsOptional(String ours, String theirs) {
+        return NetworkRegistry.ABSENT.version().equals(theirs) || ours.equals(theirs);
     }
 }

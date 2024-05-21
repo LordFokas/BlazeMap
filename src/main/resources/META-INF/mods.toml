@@ -21,4 +21,4 @@ The open-source Forge map mod, made by modders for modders.
     mandatory=true
     versionRange="[1.20,1.20.2)"
     ordering="NONE"
-    side="BOTH"
+    displayTest="NONE"
