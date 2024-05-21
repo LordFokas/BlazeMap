@@ -13,4 +13,7 @@ public interface IStorageAccess {
 
     MinecraftStreams.Output write(ResourceLocation node) throws IOException;
     MinecraftStreams.Output write(ResourceLocation node, String child) throws IOException;
+
+    void move(ResourceLocation source, ResourceLocation destination) throws IOException;
+    void move(ResourceLocation node, String source, String destination) throws IOException;
 }
