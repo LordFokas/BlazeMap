@@ -4,7 +4,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
 
-// import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.util.Helpers;
 
 public class BlazeNetwork {
