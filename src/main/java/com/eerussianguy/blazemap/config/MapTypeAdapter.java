@@ -1,4 +1,4 @@
-package com.eerussianguy.blazemap.util;
+package com.eerussianguy.blazemap.config;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 

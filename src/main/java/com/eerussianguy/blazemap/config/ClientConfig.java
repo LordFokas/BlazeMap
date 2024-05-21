@@ -13,8 +13,6 @@ import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.MapType;
 import com.eerussianguy.blazemap.feature.maps.MinimapRenderer;
 import com.eerussianguy.blazemap.feature.maps.WorldMapGui;
-import com.eerussianguy.blazemap.util.LayerListAdapter;
-import com.eerussianguy.blazemap.util.MapTypeAdapter;
 
 /**
  * Forge configs happen to be a very simple way to serialize things across saves and hold data within a particular instance
