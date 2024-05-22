@@ -1,7 +1,8 @@
 {
   "blazemap.key.maps": "Open World Map / [Shift] Edit Minimap",
   "blazemap.key.waypoints": "Create Waypoint / [Shift] Manage Waypoints",
-  "blazemap.key.zoom": "Zoom In / [Shift] Zoom Out",
+  "blazemap.key.zoom_in": "Zoom In",
+  "blazemap.key.zoom_out": "Zoom Out",
   "blazemap.terrain_isolines": "Terrain Isolines",
   "blazemap.water_depth": "Water Depth",
   "blazemap.block_color": "Block Color",
