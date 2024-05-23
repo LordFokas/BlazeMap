@@ -25,7 +25,8 @@ import com.mojang.blaze3d.platform.InputConstants;
 
 public class BlazeMapFeaturesClient {
     public static final Lazy<KeyMapping> KEY_MAPS = Lazy.of(() -> new KeyMapping("blazemap.key.maps", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_B, BlazeMap.MOD_NAME));
-    public static final Lazy<KeyMapping> KEY_ZOOM = Lazy.of(() -> new KeyMapping("blazemap.key.zoom", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_LEFT_BRACKET, BlazeMap.MOD_NAME));
+    public static final Lazy<KeyMapping> KEY_ZOOM_IN = Lazy.of(() -> new KeyMapping("blazemap.key.zoom_in", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_LEFT_BRACKET, BlazeMap.MOD_NAME));
+    public static final Lazy<KeyMapping> KEY_ZOOM_OUT = Lazy.of(() -> new KeyMapping("blazemap.key.zoom_out", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_BRACKET, BlazeMap.MOD_NAME));
     public static final Lazy<KeyMapping> KEY_WAYPOINTS = Lazy.of(() -> new KeyMapping("blazemap.key.waypoints", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_N, BlazeMap.MOD_NAME));
 
     private static boolean mapping = false;
@@ -34,7 +35,8 @@ public class BlazeMapFeaturesClient {
     
     public static void onKeyBindRegister(RegisterKeyMappingsEvent event) {
         event.register(KEY_MAPS.get());
-        event.register(KEY_ZOOM.get());
+        event.register(KEY_ZOOM_IN.get());
+        event.register(KEY_ZOOM_OUT.get());
         event.register(KEY_WAYPOINTS.get());
     }
 
@@ -91,13 +93,11 @@ public class BlazeMapFeaturesClient {
                 WaypointEditorGui.open();
             }
         }
-        if(KEY_ZOOM.get().isDown()) {
-            if(Screen.hasShiftDown()) {
-                MinimapRenderer.INSTANCE.synchronizer.zoomOut();
-            }
-            else {
-                MinimapRenderer.INSTANCE.synchronizer.zoomIn();
-            }
+        if(KEY_ZOOM_IN.get().isDown()) {
+            MinimapRenderer.INSTANCE.synchronizer.zoomIn();
+        }
+        if(KEY_ZOOM_OUT.get().isDown()) {
+            MinimapRenderer.INSTANCE.synchronizer.zoomOut();
         }
     }
 
