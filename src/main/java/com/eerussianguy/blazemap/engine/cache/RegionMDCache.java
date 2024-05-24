@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import net.minecraft.world.level.ChunkPos;
 
+import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.util.MinecraftStreams;
 import com.eerussianguy.blazemap.api.util.RegionPos;
 import com.eerussianguy.blazemap.engine.async.DebouncingDomain;
@@ -32,7 +33,7 @@ public class RegionMDCache {
         return dirty;
     }
 
-    public void read(MinecraftStreams.Input stream) throws IOException {
+    public void read(MinecraftStreams.Input stream) {
         try {
             lock.lock();
             for(int index = 0; index < chunks.length; index++) {
@@ -47,8 +48,9 @@ public class RegionMDCache {
                 }
             }
             dirty = false;
-        }
-        finally {
+        } catch (IOException e) {
+            BlazeMap.LOGGER.error("Could not read chunk MD cache file. Skipping.", e);
+        } finally {
             lock.unlock();
         }
     }
