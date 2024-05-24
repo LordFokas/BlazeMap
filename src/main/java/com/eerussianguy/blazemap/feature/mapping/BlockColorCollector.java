@@ -31,8 +31,8 @@ public class BlockColorCollector extends ClientOnlyCollector<BlockColorMD> {
             for(int z = 0; z < 16; z++) {
                 int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING, minX + x, minZ + z);
 
-                int color = -1;
-                while(color == 0 || color == -1) {
+                int color = 0;
+                while(color == 0 && y > level.getMinBuildHeight()) {
                     colorPOS.set(x + minX, y, z + minZ);
                     final BlockState state = level.getBlockState(colorPOS);
 
@@ -50,10 +50,6 @@ public class BlockColorCollector extends ClientOnlyCollector<BlockColorMD> {
                     }
 
                     y--;
-
-                    if(y <= level.getMinBuildHeight()) {
-                        break;
-                    }
                 }
 
                 if(color != 0 && color != -1) {
