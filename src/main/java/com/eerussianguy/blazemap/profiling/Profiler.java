@@ -2,6 +2,11 @@ package com.eerussianguy.blazemap.profiling;
 
 import java.util.Arrays;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.util.profiling.InactiveProfiler;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraftforge.fml.util.thread.SidedThreadGroups;
+
 public abstract class Profiler {
     protected long[] roll;
     protected long min, max;
@@ -36,14 +41,40 @@ public abstract class Profiler {
         }
     }
 
+    /**
+     * This is the Minecraft profiler triggered by F3 + L
+     *
+     * @return ProfilerFiller for the current side
+     */
+    protected ProfilerFiller getMCProfiler() {
+        // Minecraft runs a separate profiler for the Client and Server thread
+        // TODO: Figure out how to access the actual server profiler
+        if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.SERVER) {
+            return InactiveProfiler.INSTANCE;
+        }
+        return Minecraft.getInstance().getProfiler();
+    }
+
+
     public static abstract class TimeProfiler extends Profiler {
         protected boolean populated = false;
+        protected String profilerName;
+
+
+        public TimeProfiler(String profilerName, int rollSize) {
+            this.roll = new long[rollSize];
+            this.profilerName = "BlazeMap_" + profilerName;
+        }
 
         public abstract void begin();
 
         public abstract void end();
 
         public static class Dummy extends TimeProfiler {
+            public Dummy() {
+                super("DUMMY", 20);
+            }
+
             @Override
             public void begin() {}
 
@@ -55,17 +86,19 @@ public abstract class Profiler {
     public static class TimeProfilerSync extends TimeProfiler {
         private long start;
 
-        public TimeProfilerSync(int rollSize) {
-            this.roll = new long[rollSize];
+        public TimeProfilerSync(String profilerName, int rollSize) {
+            super(profilerName, rollSize);
         }
 
         @Override
         public void begin() {
             start = System.nanoTime();
+            getMCProfiler().push(profilerName);
         }
 
         @Override
         public void end() {
+            getMCProfiler().pop();
             if(populated) {
                 roll[idx] = System.nanoTime() - start;
                 idx = (idx + 1) % roll.length;
@@ -85,8 +118,8 @@ public abstract class Profiler {
     public static class TimeProfilerAsync extends TimeProfiler {
         private final ThreadLocal<Long> start = new ThreadLocal<>();
 
-        public TimeProfilerAsync(int rollSize) {
-            this.roll = new long[rollSize];
+        public TimeProfilerAsync(String profilerName, int rollSize) {
+            super(profilerName, rollSize);
         }
 
         @Override
