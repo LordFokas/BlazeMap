@@ -16,6 +16,9 @@ public class Colors {
 
         float point = ((float) (top >> 24)) / 255F;
         return 0xFF000000 | interpolate(bottom, 0, top, 1, point);
+
+        // float alpha = top >> 24;
+        // return 0xFF000000 | interpolate(bottom, 0, top, 255, alpha);
     }
 
     public static int interpolate(int color1, float key1, int color2, float key2, float point) {

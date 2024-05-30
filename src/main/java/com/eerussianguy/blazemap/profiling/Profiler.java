@@ -2,9 +2,12 @@ package com.eerussianguy.blazemap.profiling;
 
 import java.util.Arrays;
 
+import com.eerussianguy.blazemap.BlazeMap;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.profiling.InactiveProfiler;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.entity.monster.Blaze;
 import net.minecraftforge.fml.util.thread.SidedThreadGroups;
 
 public abstract class Profiler {
@@ -12,6 +15,8 @@ public abstract class Profiler {
     protected long min, max;
     protected double avg;
     protected int idx;
+
+    protected static int logOnce = 0;
 
     public synchronized double getAvg() {
         return avg;
@@ -42,17 +47,23 @@ public abstract class Profiler {
     }
 
     /**
-     * This is the Minecraft profiler triggered by F3 + L
+     * This is the Minecraft profiler triggered by F3 + L.
+     * It's public static so temporary profiles can easily be sprinkled about
+     * while debugging.
      *
      * @return ProfilerFiller for the current side
      */
-    protected ProfilerFiller getMCProfiler() {
-        // Minecraft runs a separate profiler for the Client and Server thread
-        // TODO: Figure out how to access the actual server profiler
-        if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.SERVER) {
+    public static ProfilerFiller getMCProfiler() {
+        // Minecraft runs a separate profiler for the Client and Server thread.
+        // Also, the Minecraft profiler only works in the context of the main game threads.
+        if (Thread.currentThread().getName() == "Render thread") {
+            return Minecraft.getInstance().getProfiler();
+
+        } else if (Thread.currentThread().getName() == "Server thread") {
+            // TODO: Figure out how to access the actual server profiler
             return InactiveProfiler.INSTANCE;
         }
-        return Minecraft.getInstance().getProfiler();
+        return InactiveProfiler.INSTANCE;
     }
 
 
