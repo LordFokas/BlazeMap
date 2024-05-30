@@ -23,6 +23,7 @@ import com.eerussianguy.blazemap.engine.*;
 import com.eerussianguy.blazemap.engine.async.*;
 import com.eerussianguy.blazemap.engine.cache.ChunkMDCache;
 import com.eerussianguy.blazemap.engine.cache.ChunkMDCacheView;
+import com.eerussianguy.blazemap.profiling.Profiler;
 import com.eerussianguy.blazemap.util.Helpers;
 import com.mojang.blaze3d.platform.NativeImage;
 
@@ -200,6 +201,7 @@ class ClientPipeline extends Pipeline {
     }
 
     private LayerRegionTile getLayerRegionTile(Key<Layer> layer, RegionPos region, TileResolution resolution, boolean priority) {
+        Profiler.getMCProfiler().push("BlazeMap_ClientPipeline_getLayerRegionTile");
         if(priority) lock.lockPriority();
         else lock.lock();
         try {
@@ -225,6 +227,7 @@ class ClientPipeline extends Pipeline {
         }
         finally {
             lock.unlock();
+            Profiler.getMCProfiler().pop();
         }
     }
 
