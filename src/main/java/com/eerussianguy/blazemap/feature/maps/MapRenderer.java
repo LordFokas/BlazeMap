@@ -294,10 +294,13 @@ public class MapRenderer implements AutoCloseable {
 
 
     public void render(GuiGraphics graphics) {
+        Profiler.getMCProfiler().push("BlazeMap_map_update_texture");
         PoseStack stack = graphics.pose();
         MultiBufferSource buffers = graphics.bufferSource();
 
         if(needsUpdate) updateTexture();
+
+        Profiler.getMCProfiler().popPush("BlazeMap_map_background");
 
         stack.pushPose();
         Matrix4f matrix = stack.last().pose();
@@ -305,9 +308,13 @@ public class MapRenderer implements AutoCloseable {
         RenderHelper.fillRect(buffers, matrix, this.width, this.height, 0xFF333333);
         RenderHelper.drawQuad(buffers.getBuffer(renderType), matrix, width, height);
 
+        Profiler.getMCProfiler().popPush("BlazeMap_map_entities");
+
         stack.pushPose();
         renderEntities(graphics);
         stack.popPose();
+
+        Profiler.getMCProfiler().popPush("BlazeMap_map_labels");
 
         stack.pushPose();
         if(hasActiveSearch) {
@@ -336,11 +343,16 @@ public class MapRenderer implements AutoCloseable {
                 }
             }
         }
+
+        Profiler.getMCProfiler().popPush("BlazeMap_map_player_marker");
+
         LocalPlayer player = Helpers.getPlayer();
         renderMarker(graphics, player.blockPosition(), PLAYER, Colors.NO_TINT, 32, 32, playerMarkerZHeight, player.getRotationVector().y, false, null, SearchTargeting.NONE);
         stack.popPose();
 
         stack.popPose();
+        Profiler.getMCProfiler().pop();
+
     }
 
     private void renderEntities(GuiGraphics graphics) {
@@ -403,26 +415,36 @@ public class MapRenderer implements AutoCloseable {
         renderTimer.begin();
         if(regionCount > 4) {
             debug.stitching = "Parallel";
+            Profiler.getMCProfiler().push("BlazeMap_map_update_parallel");
+
             AsyncAwaiter jobs = new AsyncAwaiter(regionCount);
             for(int regionIndexX = 0; regionIndexX < offsets.length; regionIndexX++) {
                 for(int regionIndexZ = 0; regionIndexZ < offsets[regionIndexX].length; regionIndexZ++) {
                     generateMapTileAsync(texture, resolution, textureW, textureH, cornerXOffset, cornerZOffset, regionIndexX, regionIndexZ, jobs);
                 }
             }
+
             jobs.await();
+            Profiler.getMCProfiler().pop();
         }
         else {
             debug.stitching = "Sequential";
+            Profiler.getMCProfiler().push("BlazeMap_map_update_sequential");
+
             for(int regionIndexX = 0; regionIndexX < offsets.length; regionIndexX++) {
                 for(int regionIndexZ = 0; regionIndexZ < offsets[regionIndexX].length; regionIndexZ++) {
                     generateMapTile(texture, resolution, textureW, textureH, cornerXOffset, cornerZOffset, regionIndexX, regionIndexZ);
                 }
             }
+
+            Profiler.getMCProfiler().pop();
         }
         renderTimer.end();
 
         uploadTimer.begin();
+        Profiler.getMCProfiler().push("BlazeMap_map_upload_texture");
         mapTexture.upload();
+        Profiler.getMCProfiler().pop();
         uploadTimer.end();
 
         needsUpdate = false;
@@ -439,22 +461,48 @@ public class MapRenderer implements AutoCloseable {
     private void generateMapTile(NativeImage texture, TileResolution resolution, int textureW, int textureH, int cornerXOffset, int cornerZOffset, int regionIndexX, int regionIndexZ) {
         for(BlazeRegistry.Key<Layer> layer : visible) {
             if(layer.value() instanceof FakeLayer) return;
+
             final RegionPos region = offsets[regionIndexX][regionIndexZ];
             final int cxo = cornerXOffset / resolution.pixelWidth;
             final int czo = cornerZOffset / resolution.pixelWidth;
+
+            final int beginX = begin.getX();
+            final int beginZ = begin.getZ();
+            final int regWidthbyIndexX = (regionIndexX * resolution.regionWidth);
+            final int regWidthbyIndexZ = (regionIndexZ * resolution.regionWidth);
+
             tileStorage.consumeTile(layer, region, resolution, source -> {
-                for(int x = (region.x * 512) < begin.getX() ? cxo : 0; x < source.getWidth(); x++) {
-                    int textureX = (regionIndexX * resolution.regionWidth) + x - cxo;
-                    if(textureX < 0 || textureX >= textureW) continue;
+                Profiler.getMCProfiler().push("BlazeMap_map_layer_" + layer.toString() + "_" + region.toString());
+                final int sourceWidth = source.getWidth();
+                final int sourceHeight = source.getHeight();
 
-                    for(int y = (region.z * 512) < begin.getZ() ? czo : 0; y < source.getHeight(); y++) {
-                        int textureY = (regionIndexZ * resolution.regionWidth) + y - czo;
-                        if(textureY < 0 || textureY >= textureH) continue;
+                for(int x = (region.x * 512) < beginX ? cxo : 0; x < sourceWidth; x++) {
+                    int textureX = regWidthbyIndexX + x - cxo;
+                    if(textureX < 0) {
+                        // Set x to be the value it should be when textureX == -1
+                        x = czo - regWidthbyIndexX - 1;
+                        continue;
+                    }
+                    if(textureX >= textureW) break;
 
+                    for(int y = (region.z * 512) < beginZ ? czo : 0; y < sourceHeight; y++) {
+                        int textureY = regWidthbyIndexZ + y - czo;
+                        if(textureY < 0) {
+                            // Set y to be the value it should be when textureY == -1
+                            y = czo - regWidthbyIndexZ - 1;
+                            continue;
+                        }
+                        if(textureY >= textureH) break;
+
+                        // Profiler.getMCProfiler().incrementCounter("BlazeMap_map_layer_pixel");
+                        // Profiler.getMCProfiler().push("BlazeMap_map_layer_blendcolors");
                         int color = Colors.layerBlend(texture.getPixelRGBA(textureX, textureY), source.getPixelRGBA(x, y));
+                        // Profiler.getMCProfiler().popPush("BlazeMap_map_layer_settexture");
                         texture.setPixelRGBA(textureX, textureY, color);
+                        // Profiler.getMCProfiler().pop();
                     }
                 }
+                Profiler.getMCProfiler().pop();
             });
         }
     }

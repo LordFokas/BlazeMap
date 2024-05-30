@@ -5,6 +5,7 @@ import java.util.ArrayList;
 public class DebouncingDelay {
     private static final int MAX_POOL = 1000;
     private static final ArrayList<DebouncingDelay> POOL = new ArrayList<>();
+    private static final int FUZZ_FACTOR = 5;
 
     /** How much to further delay execution when touch() is called. Actual delay is 1-2x this. */
     private int step;
@@ -37,8 +38,10 @@ public class DebouncingDelay {
     private DebouncingDelay configure(int step, int limit) {
         long now = System.currentTimeMillis();
         this.step = step;
-        this.executionTimestamp = now + step;
-        this.latestExecutionTimestamp = now + limit;
+        int fuzz = getFuzz();
+
+        this.executionTimestamp = now + step + fuzz;
+        this.latestExecutionTimestamp = now + limit + fuzz;
         return this;
     }
 
@@ -47,10 +50,19 @@ public class DebouncingDelay {
         long now = System.currentTimeMillis();
 
         // Add another random fraction of a step to spread out sibling tasks in the timeline and further smooth CPU load.
-        long random = System.nanoTime() % step;
+        long random = getFuzz();
         executionTimestamp = Math.min(now + step + random, latestExecutionTimestamp);
 
         return this;
+    }
+
+    /**
+     * Randomly offset execution time by several ticks to avoid updates all happening
+     * at once.
+     * 1 tick == 50ms
+     */
+    private int getFuzz() {
+        return (int)(Math.random() * FUZZ_FACTOR - FUZZ_FACTOR / 2) * 50;
     }
 
     /**
