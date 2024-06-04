@@ -75,3 +75,16 @@ the mixed in version of each `.class` to `.mixin.out` in that instance's folder:
 ```
 -Dmixin.debug.export=true -Dmixin.debug.verbose=true -Dmixin.debug.countInjections=true 
 ```
+
+### Running Client Side Only
+
+To easily start a local Minecraft server with Forge for the sake of testing how Blaze Map works when
+_only_ installed client side, you can spin up a local server in docker with the following:
+
+```powershell
+# Replace <minecraft-version> with your desired Minecraft version, eg 1.18.2
+docker run -it -p 25565:25565 -e EULA=TRUE -e VERSION=<minecraft-version> -e TYPE=FORGE  -e ONLINE_MODE=FALSE itzg/minecraft-server
+```
+
+There are other ways you can start up a local Minecraft server too of course, but this is one of
+the simplest.
