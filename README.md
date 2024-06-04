@@ -11,11 +11,13 @@ have the mapping run purely client side.
 
 ## For Contributors
 
-To build Blaze Map locally, make sure to have a copy of the Embeddium binary stored under `/libs`.
+To build Blaze Map locally, make sure to have a copy of the Embeddium binary (jar) stored under `/libs`.
 This is because Embeddium is a build time dependency, even if only an optional runtime dependency.
 
-You can see what version of the Embeddium binary is needed by looking at which version is listed
-in `build.gradle`.
+You can see what version of the Embeddium binary is needed by looking at which version is listed 
+in `build.gradle` under "dependencies". 
+
+You may need to create the `/libs` folder at the root of the project.
 
 ### Local Dev
 
