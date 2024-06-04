@@ -11,13 +11,24 @@ have the mapping run purely client side.
 
 ## For Contributors
 
-To build Blaze Map locally, make sure to have a copy of the Rubidium binary stored under `/libs`.
+To build Blaze Map locally, make sure to have a copy of the Rubidium binary (jar) stored under `/libs`.
 This is because Rubidium is a build time dependency, even if only an optional runtime dependency.
 
 You can see what version of the Rubidium binary is needed by looking at which version is listed 
-in `build.gradle`.
+in `build.gradle` under "dependencies". 
+
+You may need to create the `/libs` folder at the root of the project.
 
 ### Local Dev
+
+To set up your IDE to be able to access the deobfuscated Minecraft classes, make sure your IDE
+is configured for both Java 17 and Gradle and then run the setup applicable to your IDE:
+
+```powershell
+gradlew genEclipseRuns
+gradlew genIntellijRuns
+gradlew genVSCodeRuns
+```
 
 To build and run the local dev server in single player mode (client with integrated server):
 
@@ -29,15 +40,6 @@ To build and run just the server:
 
 ```powershell
 gradlew runServer
-```
-
-To set up your IDE to be able to access the deobfuscated Minecraft classes, make sure your IDE
-is configured for both Java 17 and Gradle and then run the setup applicable to your IDE:
-
-```powershell
-gradlew genEclipseRuns
-gradlew genIntellijRuns
-gradlew genVSCodeRuns
 ```
 
 To view all available commands:
