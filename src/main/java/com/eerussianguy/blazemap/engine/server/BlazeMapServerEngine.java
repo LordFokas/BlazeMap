@@ -19,6 +19,7 @@ import com.eerussianguy.blazemap.engine.Pipeline;
 import com.eerussianguy.blazemap.engine.RegistryController;
 import com.eerussianguy.blazemap.engine.StorageAccess;
 import com.eerussianguy.blazemap.network.BlazeNetwork;
+import com.eerussianguy.blazemap.profiling.Profiler;
 
 public class BlazeMapServerEngine {
     private static final Map<ResourceKey<Level>, ServerPipeline> PIPELINES = new HashMap<>();
@@ -43,6 +44,7 @@ public class BlazeMapServerEngine {
         isRunning = true;
         server = event.getServer();
         storage = new StorageAccess.Internal(server.getWorldPath(LevelResource.ROOT).toFile(), "blazemap-server");
+        Profiler.setServerInstance(server);
     }
 
     @SubscribeEvent
@@ -51,6 +53,7 @@ public class BlazeMapServerEngine {
         server = null;
         storage = null;
         PIPELINES.clear();
+        Profiler.setServerInstance(null);
     }
 
     public static void onChunkChanged(ResourceKey<Level> dim, ChunkPos pos) {
