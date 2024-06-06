@@ -6,7 +6,6 @@ import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.TileResolution;
 import com.eerussianguy.blazemap.api.util.ArrayAggregator;
 import com.eerussianguy.blazemap.api.util.IDataSource;
-import com.eerussianguy.blazemap.profiling.Profiler;
 import com.eerussianguy.blazemap.util.Colors;
 import com.eerussianguy.blazemap.util.Helpers;
 import com.mojang.blaze3d.platform.NativeImage;
@@ -28,14 +27,12 @@ public class TerrainSlopeLayer extends Layer {
 
     @Override
     public boolean renderTile(NativeImage tile, TileResolution resolution, IDataSource data, int xGridOffset, int zGridOffset) {
-        Profiler.getMCProfiler().push("BlazeMap_rendertile_terrainslopelayer");
         TerrainSlopeMD terrain = (TerrainSlopeMD) data.get(BlazeMapReferences.MasterData.TERRAIN_SLOPE);
 
         foreachPixel(resolution, (x, z) -> {
             float slope = ArrayAggregator.avg(relevantData(resolution, x, z, terrain.slopemap));
             paintSlope(tile, x, z, slope);
         });
-        Profiler.getMCProfiler().pop();
 
         return true;
     }
