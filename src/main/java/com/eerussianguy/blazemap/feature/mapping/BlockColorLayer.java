@@ -7,7 +7,6 @@ import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.TileResolution;
 import com.eerussianguy.blazemap.api.util.ArrayAggregator;
 import com.eerussianguy.blazemap.api.util.IDataSource;
-import com.eerussianguy.blazemap.profiling.Profiler;
 import com.eerussianguy.blazemap.util.Colors;
 import com.eerussianguy.blazemap.util.Helpers;
 import com.mojang.blaze3d.platform.NativeImage;
@@ -26,8 +25,6 @@ public class BlockColorLayer extends Layer {
 
     @Override
     public boolean renderTile(NativeImage tile, TileResolution resolution, IDataSource data, int xGridOffset, int zGridOffset) {
-        Profiler.getMCProfiler().push("BlazeMap_rendertile_blockcolorlayer");
-
         BlockColorMD blocks = (BlockColorMD) data.get(BlazeMapReferences.MasterData.BLOCK_COLOR);
         if(blocks == null) return false;
 
@@ -41,7 +38,6 @@ public class BlockColorLayer extends Layer {
             tile.setPixelRGBA(x, z, Colors.interpolate(Colors.abgr(OPAQUE | color), 0, OPAQUE, 1, point));
         });
 
-        Profiler.getMCProfiler().pop();
         return true;
     }
 }

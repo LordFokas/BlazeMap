@@ -62,7 +62,7 @@ public class DebouncingDelay {
      * 1 tick == 50ms
      */
     private int getFuzz() {
-        return (int)(Math.random() * FUZZ_FACTOR - FUZZ_FACTOR / 2) * 50;
+        return (int)(Math.random() * FUZZ_FACTOR - FUZZ_FACTOR * 0.5) * 50;
     }
 
     /**
