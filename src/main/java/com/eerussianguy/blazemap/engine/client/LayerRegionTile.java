@@ -15,7 +15,6 @@ import com.eerussianguy.blazemap.api.maps.TileResolution;
 import com.eerussianguy.blazemap.api.util.RegionPos;
 import com.eerussianguy.blazemap.engine.StorageAccess;
 import com.eerussianguy.blazemap.engine.async.PriorityLock;
-import com.eerussianguy.blazemap.profiling.Profiler;
 import com.mojang.blaze3d.platform.NativeImage;
 
 public class LayerRegionTile {
@@ -126,9 +125,7 @@ public class LayerRegionTile {
 
     public void consume(Consumer<NativeImage> consumer) {
         if(isEmpty) return;
-        Profiler.getMCProfiler().push("BlazeMap_map_consume_waitforlock");
         lock.lockPriority();
-        Profiler.getMCProfiler().pop();
         try {
             consumer.accept(image);
         }

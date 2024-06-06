@@ -2,13 +2,10 @@ package com.eerussianguy.blazemap.profiling;
 
 import java.util.Arrays;
 
-import com.eerussianguy.blazemap.BlazeMap;
-
 import net.minecraft.client.Minecraft;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.profiling.InactiveProfiler;
 import net.minecraft.util.profiling.ProfilerFiller;
-import net.minecraft.world.entity.monster.Blaze;
-import net.minecraftforge.fml.util.thread.SidedThreadGroups;
 
 public abstract class Profiler {
     protected long[] roll;
@@ -16,7 +13,7 @@ public abstract class Profiler {
     protected double avg;
     protected int idx;
 
-    protected static int logOnce = 0;
+    protected static MinecraftServer serverInstance = null;
 
     public synchronized double getAvg() {
         return avg;
@@ -48,29 +45,37 @@ public abstract class Profiler {
 
     /**
      * This is the Minecraft profiler triggered by F3 + L.
-     * It's public static so temporary profiles can easily be sprinkled about
+     * This method is public static so temporary profiles can easily be sprinkled about
      * while debugging.
      *
-     * @return ProfilerFiller for the current side
+     * @return ProfilerFiller for the current thread, if on a thread with a profiler
      */
     public static ProfilerFiller getMCProfiler() {
         // Minecraft runs a separate profiler for the Client and Server thread.
-        // Also, the Minecraft profiler only works in the context of the main game threads.
+        // Also, the Minecraft profiler only works in the context of those two main game threads.
         if (Thread.currentThread().getName() == "Render thread") {
             return Minecraft.getInstance().getProfiler();
 
-        } else if (Thread.currentThread().getName() == "Server thread") {
-            // TODO: Figure out how to access the actual server profiler
-            return InactiveProfiler.INSTANCE;
+        } else if (Thread.currentThread().getName() == "Server thread" && serverInstance != null) {
+            return serverInstance.getProfiler();
         }
+
         return InactiveProfiler.INSTANCE;
+    }
+
+    /**
+     * We need to set a reference to the MinecraftServer itself instead of just
+     * its profiler as its profiler reference will be swapped out by Minecraft
+     * when profiling starts and stops
+     */
+    public static void setServerInstance(MinecraftServer server) {
+        serverInstance = server;
     }
 
 
     public static abstract class TimeProfiler extends Profiler {
         protected boolean populated = false;
         protected String profilerName;
-
 
         public TimeProfiler(String profilerName, int rollSize) {
             this.roll = new long[rollSize];
