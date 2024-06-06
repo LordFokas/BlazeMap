@@ -11,7 +11,6 @@ import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.config.MinimapConfigFacade.IWidgetConfig;
 import com.eerussianguy.blazemap.gui.MouseSubpixelSmoother;
-import com.eerussianguy.blazemap.profiling.Profiler;
 import com.eerussianguy.blazemap.util.Colors;
 import com.eerussianguy.blazemap.util.Helpers;
 import com.eerussianguy.blazemap.util.RenderHelper;
@@ -37,7 +36,6 @@ public class MinimapWidget {
     }
 
     public void render(GuiGraphics graphics) {
-        Profiler.getMCProfiler().push("BlazeMap_minimap_setup");
         Window window = Minecraft.getInstance().getWindow();
         int mcWidth = window.getWidth();
         int mcHeight = window.getHeight();
@@ -56,19 +54,14 @@ public class MinimapWidget {
 
         stack.translate(posX, posY, 0);
 
-        Profiler.getMCProfiler().popPush("BlazeMap_minimap_background");
-
         stack.pushPose();
         stack.translate(-BORDER_SIZE, -BORDER_SIZE, 0);
         RenderHelper.fillRect(stack.last().pose(), width + BORDER_SIZE*2, height + BORDER_SIZE*2, Colors.WIDGET_BACKGROUND);
         stack.popPose();
 
-        Profiler.getMCProfiler().popPush("BlazeMap_minimap_map_render");
         map.render(graphics);
 
         if(editor){
-            Profiler.getMCProfiler().popPush("BlazeMap_minimap_editor");
-
             stack.pushPose();
             stack.translate(0, height - HANDLE_SIZE - BORDER_SIZE, 0);
             RenderHelper.fillRect(buffers, stack.last().pose(), HANDLE_SIZE + BORDER_SIZE, HANDLE_SIZE + BORDER_SIZE, Colors.WIDGET_BACKGROUND);
@@ -78,8 +71,6 @@ public class MinimapWidget {
         }
 
         if (BlazeMapConfig.CLIENT.clientFeatures.displayCoords.get()) {
-            Profiler.getMCProfiler().popPush("BlazeMap_minimap_coords");
-
             Vec3 pos = Helpers.getPlayer().position();
             String coords = String.format("[ %d | %d | %d ]", (int) pos.x, (int) pos.y, (int) pos.z);
             Font font = Minecraft.getInstance().font;
@@ -94,8 +85,6 @@ public class MinimapWidget {
             font.drawInBatch(coords, COORDS_BORDER, COORDS_BORDER, Colors.WHITE, false, stack.last().pose(), buffers, Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
             stack.popPose();
         }
-
-        Profiler.getMCProfiler().pop();
     }
 
     public boolean mouseDragged(double mouseX, double mouseY, int button, double draggedX, double draggedY) {
