@@ -7,9 +7,12 @@ import java.util.concurrent.TimeUnit;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.cache.RemovalNotification;
+
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 
+import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.util.IStorageAccess;
 import com.eerussianguy.blazemap.api.util.MinecraftStreams;
 import com.eerussianguy.blazemap.api.util.RegionPos;
@@ -27,25 +30,36 @@ public class LevelMDCache {
 
     public LevelMDCache(final IStorageAccess storage, AsyncChainRoot asyncChain) {
         this.storage = storage;
+        this.asyncChain = asyncChain;
+        this.debouncer = new DebouncingDomain<>(BlazeMapAsync.instance().debouncer, this::persist, 5_000, 30_000);
+
         this.regions = CacheBuilder.newBuilder()
             .maximumSize(256)
             .expireAfterAccess(15, TimeUnit.MINUTES)
-            .removalListener(regionCache -> {})
+            .removalListener((RemovalNotification<RegionPos, RegionMDCache> regionCache) -> {
+                // Make sure region cache on disk reflects its last known state before evicting
+                debouncer.push(regionCache.getValue());
+            })
             .build(new CacheLoader<>() {
                 @Override
-                public RegionMDCache load(RegionPos key) throws IOException {
+                public RegionMDCache load(RegionPos key) {
                     RegionMDCache cache = new RegionMDCache(key, debouncer);
                     String file = getFilename(key);
+
                     if(storage.exists(NODE, file)){
                         try(MinecraftStreams.Input stream = storage.read(NODE, file)) {
                             cache.read(stream);
+
+                        } catch (Exception e) {
+                            // Couldn't populate the cache from the existing cache file (corruption?)
+                            // so behaving as if no cache file was found
+                            cache = new RegionMDCache(key, debouncer);
                         }
                     }
+
                     return cache;
                 }
             });
-        this.asyncChain = asyncChain;
-        this.debouncer = new DebouncingDomain<>(BlazeMapAsync.instance().debouncer, this::persist, 5_000, 30_000);
     }
 
     private void persist(RegionMDCache cache) {
@@ -57,6 +71,7 @@ public class LevelMDCache {
                 cache.write(stream);
             }
             catch(IOException e) {
+                BlazeMap.LOGGER.warn("Error writing cache buffer {}. Will try again later", buffer);
                 e.printStackTrace();
                 debouncer.push(cache);
             }
@@ -64,6 +79,7 @@ public class LevelMDCache {
                 storage.move(NODE, buffer, file);
             }
             catch(IOException e) {
+                BlazeMap.LOGGER.warn("Error moving buffer to file {}. Will try again later", file);
                 e.printStackTrace();
                 debouncer.push(cache);
             }
