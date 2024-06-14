@@ -42,8 +42,8 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
     private static final ResourceLocation ICON = Helpers.identifier("textures/mod_icon.png");
     private static final ResourceLocation NAME = Helpers.identifier("textures/mod_name.png");
     public static final double MIN_ZOOM = 0.125, MAX_ZOOM = 8;
-    private static final Profiler.TimeProfiler renderTime = new Profiler.TimeProfilerSync(10);
-    private static final Profiler.TimeProfiler uploadTime = new Profiler.TimeProfilerSync(10);
+    private static final Profiler.TimeProfiler renderTime = new Profiler.TimeProfilerSync("world_map_render", 10);
+    private static final Profiler.TimeProfiler uploadTime = new Profiler.TimeProfilerSync("world_map_upload", 10);
     private static boolean showWidgets = true, renderDebug = false;
 
     public static void open() {

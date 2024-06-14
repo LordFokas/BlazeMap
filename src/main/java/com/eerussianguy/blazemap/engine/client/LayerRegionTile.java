@@ -15,6 +15,7 @@ import com.eerussianguy.blazemap.api.maps.TileResolution;
 import com.eerussianguy.blazemap.api.util.RegionPos;
 import com.eerussianguy.blazemap.engine.StorageAccess;
 import com.eerussianguy.blazemap.engine.async.PriorityLock;
+import com.eerussianguy.blazemap.profiling.Profilers;
 import com.mojang.blaze3d.platform.NativeImage;
 
 public class LayerRegionTile {
@@ -37,6 +38,7 @@ public class LayerRegionTile {
 
     public void tryLoad() {
         if(file.exists()) {
+            Profilers.FileOps.LAYER_READ_TIME_PROFILER.begin();
             lock.lockPriority();
             try {
                 image = NativeImage.read(Files.newInputStream(file.toPath()));
@@ -48,6 +50,7 @@ public class LayerRegionTile {
             }
             finally {
                 lock.unlock();
+                Profilers.FileOps.LAYER_READ_TIME_PROFILER.end();
             }
         }
         else {
@@ -60,18 +63,20 @@ public class LayerRegionTile {
         if(isEmpty || !isDirty) return;
 
         // Save image into buffer
+        Profilers.FileOps.LAYER_WRITE_TIME_PROFILER.begin();
         lock.lock();
         try {
             image.writeToFile(buffer);
             isDirty = false;
         }
         catch(IOException e) {
-            e.printStackTrace();
             // FIXME: this needs to hook into a reporting mechanism
             BlazeMap.LOGGER.error("Error saving LayerRegionTile buffer: {}", buffer, e);
+            e.printStackTrace();
         }
         finally {
             lock.unlock();
+            Profilers.FileOps.LAYER_WRITE_TIME_PROFILER.end();
         }
 
         // Move buffer to real image path
@@ -80,9 +85,9 @@ public class LayerRegionTile {
             buffer.delete();
         }
         catch(IOException e) {
-            e.printStackTrace();
             // FIXME: this needs to hook into a reporting mechanism
             BlazeMap.LOGGER.error("Error moving LayerRegionTile buffer to image: {} {}", buffer, file, e);
+            e.printStackTrace();
         }
     }
 

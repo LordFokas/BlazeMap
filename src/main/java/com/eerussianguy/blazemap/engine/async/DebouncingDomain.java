@@ -3,6 +3,8 @@ package com.eerussianguy.blazemap.engine.async;
 import java.util.*;
 import java.util.function.Consumer;
 
+import com.eerussianguy.blazemap.BlazeMap;
+
 public class DebouncingDomain<T> {
     private static final ThreadLocal<List<Object>> PENDING = ThreadLocal.withInitial(ArrayList::new);
 
@@ -114,6 +116,7 @@ public class DebouncingDomain<T> {
                 callback.accept(task);
             }
             catch(Exception e) {
+                BlazeMap.LOGGER.error("Exception while executing pending task. Skipping");
                 e.printStackTrace();
             }
         }
