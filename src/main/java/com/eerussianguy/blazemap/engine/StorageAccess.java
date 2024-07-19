@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.Objects;
 
 import net.minecraft.resources.ResourceLocation;
@@ -47,6 +49,20 @@ public class StorageAccess implements IStorageAccess {
     @Override
     public MinecraftStreams.Output write(ResourceLocation node, String child) throws IOException {
         return new MinecraftStreams.Output(new FileOutputStream(getFile(node, child)));
+    }
+
+    @Override
+    public void move(ResourceLocation source, ResourceLocation destination) throws IOException {
+        move(getFile(source), getFile(destination));
+    }
+
+    @Override
+    public void move(ResourceLocation node, String source, String destination) throws IOException {
+        move(getFile(node, source), getFile(node, destination));
+    }
+
+    protected void move(File source, File destination) throws IOException {
+        Files.move(source.toPath(), destination.toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
 
     protected File getFile(ResourceLocation node) {
