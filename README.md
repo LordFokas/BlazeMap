@@ -11,11 +11,13 @@ have the mapping run purely client side.
 
 ## For Contributors
 
-To build Blaze Map locally, make sure to have a copy of the Embeddium binary stored under `/libs`.
+To build Blaze Map locally, make sure to have a copy of the Embeddium binary (jar) stored under `/libs`.
 This is because Embeddium is a build time dependency, even if only an optional runtime dependency.
 
-You can see what version of the Embeddium binary is needed by looking at which version is listed
-in `build.gradle`.
+You can see what version of the Embeddium binary is needed by looking at which version is listed 
+in `build.gradle` under "dependencies". 
+
+You may need to create the `/libs` folder at the root of the project.
 
 ### Local Dev
 
@@ -81,12 +83,8 @@ _only_ installed client side, you can spin up a local server in docker with the 
 
 ```powershell
 # Replace <minecraft-version> with your desired Minecraft version, eg 1.20.1
-docker run -it -p 25565:25565 -e EULA=TRUE -e VERSION=<minecraft-version> -e TYPE=FORGE itzg/minecraft-server
+docker run -it -p 25565:25565 -e EULA=TRUE -e VERSION=<minecraft-version> -e TYPE=FORGE -e ONLINE_MODE=FALSE itzg/minecraft-server
 ```
-
-Note that to log into this server, you will need to be authenticated. You can either look up how
-to do this with `gradlew runClient` or just build the prod jar as outlined above and launch the
-game via your modded launcher as per usual.
 
 There are other ways you can start up a local Minecraft server too of course, but this is one of
 the simplest.

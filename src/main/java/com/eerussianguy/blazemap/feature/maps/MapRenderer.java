@@ -336,6 +336,7 @@ public class MapRenderer implements AutoCloseable {
                 }
             }
         }
+
         LocalPlayer player = Helpers.getPlayer();
         renderMarker(graphics, player.blockPosition(), PLAYER, Colors.NO_TINT, 32, 32, playerMarkerZHeight, player.getRotationVector().y, false, null, SearchTargeting.NONE);
         stack.popPose();
@@ -403,16 +404,19 @@ public class MapRenderer implements AutoCloseable {
         renderTimer.begin();
         if(regionCount > 4) {
             debug.stitching = "Parallel";
+
             AsyncAwaiter jobs = new AsyncAwaiter(regionCount);
             for(int regionIndexX = 0; regionIndexX < offsets.length; regionIndexX++) {
                 for(int regionIndexZ = 0; regionIndexZ < offsets[regionIndexX].length; regionIndexZ++) {
                     generateMapTileAsync(texture, resolution, textureW, textureH, cornerXOffset, cornerZOffset, regionIndexX, regionIndexZ, jobs);
                 }
             }
+
             jobs.await();
         }
         else {
             debug.stitching = "Sequential";
+
             for(int regionIndexX = 0; regionIndexX < offsets.length; regionIndexX++) {
                 for(int regionIndexZ = 0; regionIndexZ < offsets[regionIndexX].length; regionIndexZ++) {
                     generateMapTile(texture, resolution, textureW, textureH, cornerXOffset, cornerZOffset, regionIndexX, regionIndexZ);
@@ -439,17 +443,40 @@ public class MapRenderer implements AutoCloseable {
     private void generateMapTile(NativeImage texture, TileResolution resolution, int textureW, int textureH, int cornerXOffset, int cornerZOffset, int regionIndexX, int regionIndexZ) {
         for(BlazeRegistry.Key<Layer> layer : visible) {
             if(layer.value() instanceof FakeLayer) return;
+
+            // Precomputing values so they don't waste CPU cycles recalculating for each pixel
             final RegionPos region = offsets[regionIndexX][regionIndexZ];
             final int cxo = cornerXOffset / resolution.pixelWidth;
             final int czo = cornerZOffset / resolution.pixelWidth;
-            tileStorage.consumeTile(layer, region, resolution, source -> {
-                for(int x = (region.x * 512) < begin.getX() ? cxo : 0; x < source.getWidth(); x++) {
-                    int textureX = (regionIndexX * resolution.regionWidth) + x - cxo;
-                    if(textureX < 0 || textureX >= textureW) continue;
 
-                    for(int y = (region.z * 512) < begin.getZ() ? czo : 0; y < source.getHeight(); y++) {
-                        int textureY = (regionIndexZ * resolution.regionWidth) + y - czo;
-                        if(textureY < 0 || textureY >= textureH) continue;
+            final int regWidthbyIndexX = (regionIndexX * resolution.regionWidth);
+            final int regWidthbyIndexZ = (regionIndexZ * resolution.regionWidth);
+
+            tileStorage.consumeTile(layer, region, resolution, source -> {
+                final int sourceWidth = source.getWidth();
+                final int sourceHeight = source.getHeight();
+
+                int startX = (region.x * 512) < begin.getX() ? cxo : 0;
+                int startY = (region.z * 512) < begin.getZ() ? czo : 0;
+
+                if (regWidthbyIndexX + startX - cxo < 0) {
+                    // Set x to be the value it should be when textureX == 0
+                    startX = czo - regWidthbyIndexX;
+                }
+                if (regWidthbyIndexZ + startY - czo < 0) {
+                    // Set y to be the value it should be when textureY == 0
+                    startY = czo - regWidthbyIndexZ;
+                }
+
+                for(int x = startX; x < sourceWidth; x++) {
+                    int textureX = regWidthbyIndexX + x - cxo;
+
+                    if(textureX >= textureW) break;
+
+                    for(int y = startY; y < sourceHeight; y++) {
+                        int textureY = regWidthbyIndexZ + y - czo;
+
+                        if(textureY >= textureH) break;
 
                         int color = Colors.layerBlend(texture.getPixelRGBA(textureX, textureY), source.getPixelRGBA(x, y));
                         texture.setPixelRGBA(textureX, textureY, color);

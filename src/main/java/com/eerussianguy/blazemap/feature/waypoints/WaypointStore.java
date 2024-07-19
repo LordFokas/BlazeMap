@@ -87,6 +87,8 @@ public class WaypointStore implements IMarkerStorage<Waypoint> {
             }
         }
         catch(IOException e) {
+            // TODO: Should add some form of retry mechanism to minimise loss of folks' data
+            BlazeMap.LOGGER.error("Error while saving waypoints. Not all waypoints could be saved. Aborting");
             e.printStackTrace();
         }
     }
@@ -110,6 +112,7 @@ public class WaypointStore implements IMarkerStorage<Waypoint> {
             }
         }
         catch(IOException e) {
+            BlazeMap.LOGGER.error("Error loading waypoints. Not all waypoints could be loaded");
             e.printStackTrace();
         }
     }

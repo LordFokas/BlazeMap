@@ -3,6 +3,7 @@ package com.eerussianguy.blazemap.engine.cache;
 import java.io.IOException;
 import java.util.*;
 
+import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.BlazeMapAPI;
 import com.eerussianguy.blazemap.api.BlazeRegistry;
 import com.eerussianguy.blazemap.api.pipeline.DataType;
@@ -63,10 +64,18 @@ public class ChunkMDCache {
         public Persisted(RegionMDCache parent) {
             this.parent = parent;
         }
+
         public void read(MinecraftStreams.Input stream) throws IOException {
             int entries = stream.readInt();
+
             for(int i = 0; i < entries; i++) { // Why can't I just write Key<DataType<>> and have the compiler trust me? ffs.
                 BlazeRegistry.Key<DataType> key = (BlazeRegistry.Key<DataType>) (Object) BlazeMapAPI.MASTER_DATA.findOrCreate(stream.readResourceLocation());
+
+                if (key.value() == null) {
+                    BlazeMap.LOGGER.warn("Unrecognised DataType in MD cache. Did you uninstall a Blaze Map extension? Skipping cache read");
+                    throw new IOException("Cannot deserialize unregistered MD DataType");
+                }
+
                 data.put(key, key.value().deserialize(stream));
             }
         }

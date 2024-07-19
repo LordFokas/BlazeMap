@@ -4,10 +4,12 @@ import java.io.IOException;
 
 import net.minecraft.world.level.ChunkPos;
 
+import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.util.MinecraftStreams;
 import com.eerussianguy.blazemap.api.util.RegionPos;
 import com.eerussianguy.blazemap.engine.async.DebouncingDomain;
 import com.eerussianguy.blazemap.engine.async.PriorityLock;
+import com.eerussianguy.blazemap.profiling.Profilers;
 
 public class RegionMDCache {
     private static final int CHUNKS = 0x20;
@@ -32,7 +34,8 @@ public class RegionMDCache {
         return dirty;
     }
 
-    public void read(MinecraftStreams.Input stream) throws IOException {
+    public void read(MinecraftStreams.Input stream) {
+        Profilers.FileOps.CACHE_READ_TIME_PROFILER.begin();
         try {
             lock.lock();
             stream.readByte(); // read version; ignored for now
@@ -48,13 +51,16 @@ public class RegionMDCache {
                 }
             }
             dirty = false;
-        }
-        finally {
+        } catch (IOException e) {
+            BlazeMap.LOGGER.error("Could not read region MD cache file. Skipping.", e);
+        } finally {
             lock.unlock();
+            Profilers.FileOps.CACHE_READ_TIME_PROFILER.end();
         }
     }
 
     public void write(MinecraftStreams.Output stream) throws IOException {
+        Profilers.FileOps.CACHE_WRITE_TIME_PROFILER.begin();
         try {
             lock.lockPriority();
             stream.writeByte(0x00); // version zero
@@ -70,6 +76,7 @@ public class RegionMDCache {
         }
         finally {
             lock.unlock();
+            Profilers.FileOps.CACHE_WRITE_TIME_PROFILER.end();
         }
     }
 
