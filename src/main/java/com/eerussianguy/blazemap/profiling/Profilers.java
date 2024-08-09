@@ -3,7 +3,7 @@ package com.eerussianguy.blazemap.profiling;
 import com.eerussianguy.blazemap.profiling.Profiler.*;
 
 public class Profilers {
-    public static final TimeProfilerSync DEBUG_TIME_PROFILER = new TimeProfilerSync("debug", 60);
+    public static final TimeProfilerSync DEBUG_TIME_PROFILER = new TimeProfilerSync("debug", 200);
 
     public static class Server {
         public static final TimeProfilerSync COLLECTOR_TIME_PROFILER = new TimeProfilerSync("server_collector", 20);
@@ -42,15 +42,19 @@ public class Profilers {
     }
 
     public static class Minimap {
-        public static final TimeProfilerSync DRAW_TIME_PROFILER = new TimeProfilerSync("draw", 60);
+        public static final TimeProfilerSync DRAW_TIME_PROFILER = new TimeProfilerSync("draw", 200);
         public static final TimeProfilerSync TEXTURE_TIME_PROFILER = new TimeProfilerSync("texture", 60);
         public static final LoadProfiler TEXTURE_LOAD_PROFILER = new LoadProfiler(60, 16);
     }
 
     public static class FileOps {
         public static final TimeProfilerAsync CACHE_READ_TIME_PROFILER = new TimeProfilerAsync("cache_read", 20);
+        public static final LoadProfiler CACHE_READ_LOAD_PROFILER = new LoadProfiler(20, 60000);
         public static final TimeProfilerAsync CACHE_WRITE_TIME_PROFILER = new TimeProfilerAsync("cache_write", 20);
+        public static final LoadProfiler CACHE_WRITE_LOAD_PROFILER = new LoadProfiler(20, 60000);
         public static final TimeProfilerAsync LAYER_READ_TIME_PROFILER = new TimeProfilerAsync("layer_read", 20);
+        public static final LoadProfiler LAYER_READ_LOAD_PROFILER = new LoadProfiler(20, 60000);
         public static final TimeProfilerAsync LAYER_WRITE_TIME_PROFILER = new TimeProfilerAsync("layer_write", 20);
+        public static final LoadProfiler LAYER_WRITE_LOAD_PROFILER = new LoadProfiler(20, 60000);
     }
 }

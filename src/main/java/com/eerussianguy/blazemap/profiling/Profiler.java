@@ -1,6 +1,7 @@
 package com.eerussianguy.blazemap.profiling;
 
-import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLongArray;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
@@ -8,38 +9,59 @@ import net.minecraft.util.profiling.InactiveProfiler;
 import net.minecraft.util.profiling.ProfilerFiller;
 
 public abstract class Profiler {
-    protected long[] roll;
-    protected long min, max;
-    protected double avg;
-    protected int idx;
+    protected AtomicLongArray roll;
+    protected AtomicInteger idx = new AtomicInteger(0);
+
+    protected volatile long min, max;
+    protected volatile double avg;
+    protected volatile boolean isDirty = false;
 
     protected static MinecraftServer serverInstance = null;
 
-    public synchronized double getAvg() {
+    /**
+     * Must call updateSummaryStats() before this to synchronise the value
+     */
+    public double getAvg() {
         return avg;
     }
 
-    public synchronized double getMin() {
+    /**
+     * Must call updateSummaryStats() before this to synchronise the value
+     */
+    public double getMin() {
         return min;
     }
 
-    public synchronized double getMax() {
+    /**
+     * Must call updateSummaryStats() before this to synchronise the value
+     */
+    public double getMax() {
         return max;
     }
 
-    protected void recalculate() {
+    /**
+     * This should only be called just before accessing the max, min, and avg
+     * to avoid unnecessary thread synchronisations when the debugger is shut.
+     */
+    public void updateSummaryStats() {
+        if (!isDirty) return;
+
         double sum = 0;
         long min = Long.MAX_VALUE, max = Long.MIN_VALUE;
-        for(long v : roll) {
-            if(v < min) min = v;
-            if(v > max) max = v;
-            sum += v;
+
+        for(int v = 0; v < roll.length(); v++) {
+            long value = roll.get(v);
+
+            if(value < min) min = value;
+            if(value > max) max = value;
+            sum += value;
         }
 
         synchronized(this) {
-            this.avg = sum / roll.length;
+            this.avg = sum / roll.length();
             this.min = min;
             this.max = max;
+            this.isDirty = false;
         }
     }
 
@@ -51,12 +73,16 @@ public abstract class Profiler {
      * @return ProfilerFiller for the current thread, if on a thread with a profiler
      */
     public static ProfilerFiller getMCProfiler() {
+        // Short circuit to avoid spending time on string comparisons when profiler not active
+        if (Minecraft.getInstance().getProfiler() == InactiveProfiler.INSTANCE) {
+            return InactiveProfiler.INSTANCE;
+
         // Minecraft runs a separate profiler for the Client and Server thread.
         // Also, the Minecraft profiler only works in the context of those two main game threads.
-        if (Thread.currentThread().getName() == "Render thread") {
+        } else if (Thread.currentThread().getName().equals("Render thread")) {
             return Minecraft.getInstance().getProfiler();
 
-        } else if (Thread.currentThread().getName() == "Server thread" && serverInstance != null) {
+        } else if (Thread.currentThread().getName().equals("Server thread") && serverInstance != null) {
             return serverInstance.getProfiler();
         }
 
@@ -78,7 +104,7 @@ public abstract class Profiler {
         protected String profilerName;
 
         public TimeProfiler(String profilerName, int rollSize) {
-            this.roll = new long[rollSize];
+            this.roll = new AtomicLongArray(rollSize);
             this.profilerName = "BlazeMap_" + profilerName;
         }
 
@@ -115,19 +141,22 @@ public abstract class Profiler {
         @Override
         public void end() {
             getMCProfiler().pop();
+
             if(populated) {
-                roll[idx] = System.nanoTime() - start;
-                idx = (idx + 1) % roll.length;
-                recalculate();
+                roll.set(idx.get(), System.nanoTime() - start);
+                idx.getAndUpdate((int i) -> (i + 1) % roll.length());
             }
             else {
                 long delta = System.nanoTime() - start;
-                Arrays.fill(roll, delta);
+                for (int i = 0; i < roll.length(); i++) {
+                    roll.set(i, delta);
+                }
                 synchronized(this) {
                     avg = min = max = delta;
                 }
                 populated = true;
             }
+            isDirty = true;
         }
     }
 
@@ -144,18 +173,21 @@ public abstract class Profiler {
         }
 
         @Override
-        public synchronized void end() {
+        public void end() {
             if(populated) {
-                roll[idx] = System.nanoTime() - start.get();
-                idx = (idx + 1) % roll.length;
-                recalculate();
+                roll.set(idx.get(), System.nanoTime() - start.get());
+                idx.getAndUpdate((int i) -> (i + 1) % roll.length());
             }
             else {
                 long delta = System.nanoTime() - start.get();
-                Arrays.fill(roll, delta);
+                for (int i = 0; i < roll.length(); i++) {
+                    roll.set(i, delta);
+                }
+
                 avg = min = max = delta;
                 populated = true;
             }
+            isDirty = true;
         }
     }
 
@@ -166,7 +198,7 @@ public abstract class Profiler {
         private long last;
 
         public LoadProfiler(int rollSize, int interval) {
-            this.roll = new long[rollSize];
+            this.roll = new AtomicLongArray(rollSize);
             this.interval = interval;
             switch(interval) {
                 case 16 -> this.unit = "f";
@@ -195,20 +227,25 @@ public abstract class Profiler {
 
         public void ping() {
             update(0);
+            updateSummaryStats();
         }
 
-        private synchronized void update(int i) {
+        private void update(int i) {
+            int index = idx.get();
             long now = System.currentTimeMillis() / interval;
-            if(now == last) {
-                if(i == 0) return;
-                roll[idx] += i;
+
+            // I believe this should be thread safe, as only one thread should be able to
+            // advance the idx if we're in the next time block
+            if(now != last && idx.compareAndSet(index, (index + 1) % roll.length())) {
+                roll.set(idx.get(), i);
+                last = now;
+                isDirty = true;
             }
             else {
-                idx = (idx + 1) % roll.length;
-                roll[idx] = i;
-                last = now;
+                if(i == 0) return;
+                roll.getAndAdd(index, i);
+                isDirty = true;
             }
-            recalculate();
         }
     }
 }
