@@ -402,19 +402,22 @@ public class MapRenderer implements AutoCloseable {
         int regionCount = offsets.length * offsets[0].length;
 
         renderTimer.begin();
-        if(regionCount > 4) {
-            debug.stitching = "Parallel";
+        /**
+         * Commenting out the following until the thread pool depletion issue has been solved
+         */
+        // if(regionCount > 6) {
+        //     debug.stitching = "Parallel";
 
-            AsyncAwaiter jobs = new AsyncAwaiter(regionCount);
-            for(int regionIndexX = 0; regionIndexX < offsets.length; regionIndexX++) {
-                for(int regionIndexZ = 0; regionIndexZ < offsets[regionIndexX].length; regionIndexZ++) {
-                    generateMapTileAsync(texture, resolution, textureW, textureH, cornerXOffset, cornerZOffset, regionIndexX, regionIndexZ, jobs);
-                }
-            }
+        //     AsyncAwaiter jobs = new AsyncAwaiter(regionCount);
+        //     for(int regionIndexX = 0; regionIndexX < offsets.length; regionIndexX++) {
+        //         for(int regionIndexZ = 0; regionIndexZ < offsets[regionIndexX].length; regionIndexZ++) {
+        //             generateMapTileAsync(texture, resolution, textureW, textureH, cornerXOffset, cornerZOffset, regionIndexX, regionIndexZ, jobs);
+        //         }
+        //     }
 
-            jobs.await();
-        }
-        else {
+        //     jobs.await();
+        // }
+        // else {
             debug.stitching = "Sequential";
 
             for(int regionIndexX = 0; regionIndexX < offsets.length; regionIndexX++) {
@@ -422,7 +425,7 @@ public class MapRenderer implements AutoCloseable {
                     generateMapTile(texture, resolution, textureW, textureH, cornerXOffset, cornerZOffset, regionIndexX, regionIndexZ);
                 }
             }
-        }
+        // }
         renderTimer.end();
 
         uploadTimer.begin();
