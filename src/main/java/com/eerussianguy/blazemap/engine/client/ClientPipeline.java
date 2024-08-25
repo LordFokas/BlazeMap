@@ -59,6 +59,13 @@ class ClientPipeline extends Pipeline {
             BlazeMapAPI.PROCESSORS.keys().stream().filter(k -> k.value().shouldExecuteIn(dimension, type)).collect(Collectors.toUnmodifiableSet())
         );
 
+        // See if need to port data from BM v0.4 or below before doing anything else
+        try {
+            storage.tryPortDimension(dimension.location());
+        } catch (Exception e) {
+            // Do nothing. Don't care.
+        }
+
         // Set up views (immutable sets) for the available maps and layers.
         this.availableMapTypes = BlazeMapAPI.MAPTYPES.keys().stream().filter(m -> m.value().shouldRenderInDimension(dimension)).collect(Collectors.toUnmodifiableSet());
         this.availableLayers = availableMapTypes.stream().map(k -> k.value().getLayers()).flatMap(Set::stream).filter(l -> l.value().shouldRenderInDimension(dimension)).collect(Collectors.toUnmodifiableSet());
