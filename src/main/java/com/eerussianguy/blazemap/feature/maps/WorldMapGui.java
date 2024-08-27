@@ -230,7 +230,6 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
     @Override
     public void render(PoseStack stack, int i0, int i1, float f0) {
         float scale = (float) getMinecraft().getWindow().getGuiScale();
-        fillGradient(stack, 0, 0, this.width, this.height, 0xFF333333, 0xFF333333);
 
         stack.pushPose();
         stack.scale(1F / scale, 1F / scale, 1);
