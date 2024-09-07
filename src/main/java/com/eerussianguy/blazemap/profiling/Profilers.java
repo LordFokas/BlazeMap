@@ -49,12 +49,12 @@ public class Profilers {
 
     public static class FileOps {
         public static final TimeProfilerAsync CACHE_READ_TIME_PROFILER = new TimeProfilerAsync("cache_read", 20);
-        public static final LoadProfiler CACHE_READ_LOAD_PROFILER = new LoadProfiler(20, 60000);
+        public static final LoadProfiler CACHE_READ_LOAD_PROFILER = new LoadProfiler(20, 50);
         public static final TimeProfilerAsync CACHE_WRITE_TIME_PROFILER = new TimeProfilerAsync("cache_write", 20);
-        public static final LoadProfiler CACHE_WRITE_LOAD_PROFILER = new LoadProfiler(20, 60000);
+        public static final LoadProfiler CACHE_WRITE_LOAD_PROFILER = new LoadProfiler(20, 50);
         public static final TimeProfilerAsync LAYER_READ_TIME_PROFILER = new TimeProfilerAsync("layer_read", 20);
-        public static final LoadProfiler LAYER_READ_LOAD_PROFILER = new LoadProfiler(20, 60000);
+        public static final LoadProfiler LAYER_READ_LOAD_PROFILER = new LoadProfiler(20, 50);
         public static final TimeProfilerAsync LAYER_WRITE_TIME_PROFILER = new TimeProfilerAsync("layer_write", 20);
-        public static final LoadProfiler LAYER_WRITE_LOAD_PROFILER = new LoadProfiler(20, 60000);
+        public static final LoadProfiler LAYER_WRITE_LOAD_PROFILER = new LoadProfiler(20, 50);
     }
 }
