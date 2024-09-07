@@ -358,6 +358,12 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
             return true;
         }
 
+        if(key == GLFW.GLFW_KEY_F12) {
+            boolean accepted = AtlasExporter.export(new AtlasExporter.Task(this.dimension, this.getMapType().getID(), this.mapRenderer.getVisibleLayers()));
+            //TODO: give feedback based on boolean accepted
+            return true;
+        }
+
         if(key == GLFW.GLFW_KEY_F3) {
             renderDebug = !renderDebug;
             return true;
