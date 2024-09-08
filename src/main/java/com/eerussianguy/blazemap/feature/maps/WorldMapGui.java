@@ -251,6 +251,8 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
         }
 
         if(showWidgets) {
+            renderExportProgress(graphics, scale);
+
             int maps = mapTypes.size();
             if(maps > 0) {
                 stack.pushPose();
@@ -281,6 +283,26 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
             renderCoordination(graphics, scale);
             stack.popPose();
         }
+    }
+
+    private void renderExportProgress(GuiGraphics graphics, float scale) {
+        AtlasExporter.Task task = AtlasExporter.getTask();
+        if(task == null) return;
+        Font font = Minecraft.getInstance().font;
+        var stack = graphics.pose();
+        stack.pushPose();
+        stack.translate(width - 205, 5, 0);
+        RenderHelper.fillRect(stack.last().pose(), 200, 30, Colors.WIDGET_BACKGROUND);
+        int total = task.getTilesTotal();
+        int current = task.getTilesCurrent();
+        double progress = ((double)current) / ((double)total);
+        String tiles = String.format("%d / %d tiles", current, total);
+        graphics.drawString(font, "Exporting", 5, 5, Colors.WHITE);
+        graphics.drawString(font, tiles, 195 - font.width(tiles), 5, Colors.WHITE);
+        stack.translate(5, 17, 0);
+        RenderHelper.fillRect(stack.last().pose(), 190, 10, Colors.LABEL_COLOR);
+        RenderHelper.fillRect(stack.last().pose(), (int)(190*progress), 10, Colors.WHITE);
+        stack.popPose();
     }
 
     private void renderCoordination(GuiGraphics graphics, float scale){
@@ -359,8 +381,7 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
         }
 
         if(key == GLFW.GLFW_KEY_F12) {
-            boolean accepted = AtlasExporter.export(new AtlasExporter.Task(this.dimension, this.getMapType().getID(), this.mapRenderer.getVisibleLayers()));
-            //TODO: give feedback based on boolean accepted
+            AtlasExporter.export(new AtlasExporter.Task(this.dimension, this.getMapType().getID(), this.mapRenderer.getVisibleLayers()));
             return true;
         }
 

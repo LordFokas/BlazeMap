@@ -19,19 +19,20 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class AtlasExporter {
     private static Task task = null;
 
-    public static boolean export(Task task) {
+    public static synchronized void export(Task task) {
         if(AtlasExporter.task == null) {
             AtlasExporter.task = task;
             BlazeMapAsync.instance().clientChain.runOnDataThread(AtlasExporter::export);
-            return true;
         }
-        return false;
+    }
+
+    public static synchronized Task getTask() {
+        return task;
     }
 
     private static void export() {
@@ -62,6 +63,10 @@ public class AtlasExporter {
                                 atlas.setPixelRGBA(atlasPixelX, atlasPixelZ, Colors.layerBlend(atlasPixel, tilePixel));
                             }
                         }
+
+                        // non-atomic op on volatile int is ok because only 1 thread writes to variable
+                        // Java guarantees r/w access to 32-bit variables is atomic, so there are no mid-write reads
+                        task.tilesCurrent++;
                     }
                 }
             }
@@ -79,7 +84,9 @@ public class AtlasExporter {
         int minX = Integer.MAX_VALUE, maxX = Integer.MIN_VALUE, minZ = Integer.MAX_VALUE, maxZ = Integer.MIN_VALUE;
         int regionsX, regionsZ;
 
-        for(var layer : task.layers) {
+        var layers = task.map.value().getLayers();
+        for(var layer : layers) {
+            if(!task.layers.contains(layer)) continue;
             File folder = storage.getMipmap(layer.location, ".", resolution);
             File[] images = folder.listFiles();
             if(images == null) continue;
@@ -87,6 +94,9 @@ public class AtlasExporter {
             for(var image : images) {
                 String[] coords = image.getName().replaceAll("(^\\[)|(]\\.png$)", "").split(",");
                 if(coords.length != 2) continue;
+                // non-atomic op on volatile int is ok because only 1 thread writes to variable
+                // Java guarantees r/w access to 32-bit variables is atomic, so there are no mid-write reads
+                task.tilesTotal++;
                 int x = Integer.parseInt(coords[0]);
                 int z = Integer.parseInt(coords[1]);
                 if(x < minX) minX = x;
@@ -115,11 +125,20 @@ public class AtlasExporter {
         public final ResourceKey<Level> dimension;
         public final BlazeRegistry.Key<MapType> map;
         public final List<BlazeRegistry.Key<Layer>> layers;
+        private volatile int tilesTotal, tilesCurrent;
 
         public Task(ResourceKey<Level> dimension, BlazeRegistry.Key<MapType> map, List<BlazeRegistry.Key<Layer>> layers) {
             this.dimension = dimension;
             this.map = map;
             this.layers = new ArrayList<>(layers);
+        }
+
+        public int getTilesTotal() {
+            return tilesTotal;
+        }
+
+        public int getTilesCurrent() {
+            return tilesCurrent;
         }
     }
 }
