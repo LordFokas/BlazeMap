@@ -1,6 +1,7 @@
 package com.eerussianguy.blazemap.engine.client;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -14,6 +15,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 
+import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.BlazeMapAPI;
 import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
 import com.eerussianguy.blazemap.api.maps.*;
@@ -43,7 +45,8 @@ class ClientPipeline extends Pipeline {
     public final Set<Key<Layer>> availableLayers;
     private final Layer[] layers;
     public final int numLayers;
-    private final Map<TileResolution, Map<Key<Layer>, LoadingCache<RegionPos, LayerRegionTile>>> tiles = new EnumMap<>(TileResolution.class);
+    private final Map<TileResolution, Map<Key<Layer>, LoadingCache<RegionPos, LayerRegionTile>>> tiles =
+            new ConcurrentHashMap<TileResolution, Map<Key<Layer>, LoadingCache<RegionPos, LayerRegionTile>>>();
     private final DebouncingDomain<LayerRegionTile> dirtyTiles;
     private final PriorityLock lock = new PriorityLock();
     private boolean active, cold;
@@ -200,11 +203,9 @@ class ClientPipeline extends Pipeline {
     }
 
     private LayerRegionTile getLayerRegionTile(Key<Layer> layer, RegionPos region, TileResolution resolution, boolean priority) {
-        if(priority) lock.lockPriority();
-        else lock.lock();
         try {
             return tiles
-                .computeIfAbsent(resolution, $ -> new HashMap<>())
+                .computeIfAbsent(resolution, $ -> new ConcurrentHashMap<>())
                 .computeIfAbsent(layer, $ -> CacheBuilder.newBuilder()
                     .maximumSize(256 * 1024 / resolution.regionSizeKb)
                     .expireAfterAccess(resolution.cacheTime, TimeUnit.SECONDS)
@@ -222,9 +223,6 @@ class ClientPipeline extends Pipeline {
         catch(ExecutionException e) {
             // Should never happen as the loader code does not throw exceptions.
             throw new RuntimeException(e);
-        }
-        finally {
-            lock.unlock();
         }
     }
 

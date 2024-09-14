@@ -9,25 +9,42 @@ import net.minecraft.util.profiling.ProfilerFiller;
 
 public abstract class Profiler {
     protected long[] roll;
+    protected int idx;
+
     protected long min, max;
     protected double avg;
-    protected int idx;
+    protected boolean isDirty = false;
 
     protected static MinecraftServer serverInstance = null;
 
-    public synchronized double getAvg() {
+    /**
+     * Must call updateSummaryStats() before this to synchronise the value
+     */
+    public double getAvg() {
         return avg;
     }
 
-    public synchronized double getMin() {
+    /**
+     * Must call updateSummaryStats() before this to synchronise the value
+     */
+    public double getMin() {
         return min;
     }
 
-    public synchronized double getMax() {
+    /**
+     * Must call updateSummaryStats() before this to synchronise the value
+     */
+    public double getMax() {
         return max;
     }
 
-    protected void recalculate() {
+    /**
+     * This should only be called just before accessing the max, min, and avg
+     * to avoid unnecessary work when the debugger is shut.
+     */
+    public void updateSummaryStats() {
+        if (!isDirty) return;
+
         double sum = 0;
         long min = Long.MAX_VALUE, max = Long.MIN_VALUE;
         for(long v : roll) {
@@ -40,6 +57,7 @@ public abstract class Profiler {
             this.avg = sum / roll.length;
             this.min = min;
             this.max = max;
+            this.isDirty = false;
         }
     }
 
@@ -51,12 +69,16 @@ public abstract class Profiler {
      * @return ProfilerFiller for the current thread, if on a thread with a profiler
      */
     public static ProfilerFiller getMCProfiler() {
+        // Short circuit to avoid spending time on string comparisons when profiler not active
+        if (Minecraft.getInstance().getProfiler() == InactiveProfiler.INSTANCE) {
+            return InactiveProfiler.INSTANCE;
+
         // Minecraft runs a separate profiler for the Client and Server thread.
         // Also, the Minecraft profiler only works in the context of those two main game threads.
-        if (Thread.currentThread().getName() == "Render thread") {
+        } else if (Thread.currentThread().getName().equals("Render thread")) {
             return Minecraft.getInstance().getProfiler();
 
-        } else if (Thread.currentThread().getName() == "Server thread" && serverInstance != null) {
+        } else if (Thread.currentThread().getName().equals("Server thread") && serverInstance != null) {
             return serverInstance.getProfiler();
         }
 
@@ -115,10 +137,10 @@ public abstract class Profiler {
         @Override
         public void end() {
             getMCProfiler().pop();
+
             if(populated) {
                 roll[idx] = System.nanoTime() - start;
                 idx = (idx + 1) % roll.length;
-                recalculate();
             }
             else {
                 long delta = System.nanoTime() - start;
@@ -128,6 +150,7 @@ public abstract class Profiler {
                 }
                 populated = true;
             }
+            isDirty = true;
         }
     }
 
@@ -148,7 +171,6 @@ public abstract class Profiler {
             if(populated) {
                 roll[idx] = System.nanoTime() - start.get();
                 idx = (idx + 1) % roll.length;
-                recalculate();
             }
             else {
                 long delta = System.nanoTime() - start.get();
@@ -156,6 +178,7 @@ public abstract class Profiler {
                 avg = min = max = delta;
                 populated = true;
             }
+            isDirty = true;
         }
     }
 
@@ -195,6 +218,7 @@ public abstract class Profiler {
 
         public void ping() {
             update(0);
+            updateSummaryStats();
         }
 
         private synchronized void update(int i) {
@@ -208,7 +232,7 @@ public abstract class Profiler {
                 roll[idx] = i;
                 last = now;
             }
-            recalculate();
+            isDirty = true;
         }
     }
 }

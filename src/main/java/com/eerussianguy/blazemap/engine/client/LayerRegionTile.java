@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.function.Consumer;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import net.minecraft.world.level.ChunkPos;
 
@@ -14,21 +16,23 @@ import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.TileResolution;
 import com.eerussianguy.blazemap.api.util.RegionPos;
 import com.eerussianguy.blazemap.engine.StorageAccess;
-import com.eerussianguy.blazemap.engine.async.PriorityLock;
 import com.eerussianguy.blazemap.profiling.Profilers;
 import com.mojang.blaze3d.platform.NativeImage;
 
 public class LayerRegionTile {
     private static final Object MUTEX = new Object();
-    private static int instances = 0, loaded = 0;
+    private static volatile int instances = 0, loaded = 0;
 
-    private final PriorityLock lock = new PriorityLock();
+    private final ReentrantReadWriteLock imageLock = new ReentrantReadWriteLock();
+    private final ReentrantReadWriteLock fileLock = new ReentrantReadWriteLock();
+    private final ReentrantLock bufferLock = new ReentrantLock();
+
     private final File file, buffer;
     private NativeImage image;
     private final TileResolution resolution;
-    private boolean isEmpty = true;
-    private boolean isDirty = false;
-    private boolean destroyed = false;
+    private volatile boolean isEmpty = true;
+    private volatile boolean isDirty = false;
+    private volatile boolean destroyed = false;
 
     public LayerRegionTile(StorageAccess.Internal storage, BlazeRegistry.Key<Layer> layer, RegionPos region, TileResolution resolution) {
         this.file = storage.getMipmap(layer.location, region + ".png", resolution);
@@ -38,8 +42,15 @@ public class LayerRegionTile {
 
     public void tryLoad() {
         if(file.exists()) {
+            Profilers.FileOps.LAYER_READ_LOAD_PROFILER.hit();
             Profilers.FileOps.LAYER_READ_TIME_PROFILER.begin();
-            lock.lockPriority();
+
+            // Trying to greedily acquire the locks with `tryLock()` to minimise delay on game thread
+            // TODO: Figure out a "failure" case so the timed tryLock can be used instead to "give up"
+            // if it's waited too long, thereby not blocking the tick
+            if (!fileLock.readLock().tryLock()) fileLock.readLock().lock();
+            if (!imageLock.writeLock().tryLock()) imageLock.writeLock().lock();
+
             try {
                 image = NativeImage.read(Files.newInputStream(file.toPath()));
                 isEmpty = false;
@@ -49,7 +60,8 @@ public class LayerRegionTile {
                 BlazeMap.LOGGER.error("Error loading LayerRegionTile: {}", file, e);
             }
             finally {
-                lock.unlock();
+                imageLock.writeLock().unlock();
+                fileLock.readLock().unlock();
                 Profilers.FileOps.LAYER_READ_TIME_PROFILER.end();
             }
         }
@@ -63,31 +75,42 @@ public class LayerRegionTile {
         if(isEmpty || !isDirty) return;
 
         // Save image into buffer
+        Profilers.FileOps.LAYER_WRITE_LOAD_PROFILER.hit();
         Profilers.FileOps.LAYER_WRITE_TIME_PROFILER.begin();
-        lock.lock();
-        try {
-            image.writeToFile(buffer);
-            isDirty = false;
-        }
-        catch(IOException e) {
-            // FIXME: this needs to hook into a reporting mechanism
-            BlazeMap.LOGGER.error("Error saving LayerRegionTile buffer: {}", buffer, e);
-            e.printStackTrace();
-        }
-        finally {
-            lock.unlock();
-            Profilers.FileOps.LAYER_WRITE_TIME_PROFILER.end();
-        }
 
-        // Move buffer to real image path
+        bufferLock.lock();
         try {
-            Files.move(buffer.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            buffer.delete();
-        }
-        catch(IOException e) {
-            // FIXME: this needs to hook into a reporting mechanism
-            BlazeMap.LOGGER.error("Error moving LayerRegionTile buffer to image: {} {}", buffer, file, e);
-            e.printStackTrace();
+            imageLock.readLock().lock();
+            try {
+                image.writeToFile(buffer);
+                isDirty = false;
+            }
+            catch(IOException e) {
+                // FIXME: this needs to hook into a reporting mechanism
+                BlazeMap.LOGGER.error("Error saving LayerRegionTile buffer: {}", buffer, e);
+                e.printStackTrace();
+                return;
+            }
+            finally {
+                imageLock.readLock().unlock();
+            }
+
+            // Move buffer to real image path
+            fileLock.writeLock().lock();
+            try {
+                Files.move(buffer.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            }
+            catch(IOException e) {
+                // FIXME: this needs to hook into a reporting mechanism
+                BlazeMap.LOGGER.error("Error moving LayerRegionTile buffer to image: {} {}", buffer, file, e);
+                e.printStackTrace();
+            }
+            finally {
+                fileLock.writeLock().unlock();
+            }
+        } finally {
+            bufferLock.unlock();
+            Profilers.FileOps.LAYER_WRITE_TIME_PROFILER.end();
         }
     }
 
@@ -96,7 +119,11 @@ public class LayerRegionTile {
         int zOffset = (chunk.getRegionLocalZ() << 4) / resolution.pixelWidth;
         boolean wasEmpty = isEmpty;
 
-        lock.lock();
+        // Since isDirty is a volatile bool for thread safety reasons, it's slightly more efficient to only update it once
+        // as updating it flushes the CPU write cache. So using a local var to track dirtiness until final value ready
+        boolean dirty = isDirty;
+
+        imageLock.writeLock().lock();
         try {
             if(isEmpty) {
                 image = new NativeImage(NativeImage.Format.RGBA, resolution.regionWidth, resolution.regionWidth, true);
@@ -109,14 +136,14 @@ public class LayerRegionTile {
                     int pixel = tile.getPixelRGBA(x, z);
                     if(pixel != old) {
                         image.setPixelRGBA(xOffset + x, zOffset + z, pixel);
-                        isDirty = true;
+                        dirty = true;
                     }
                 }
             }
-
         }
         finally {
-            lock.unlock();
+            isDirty = dirty;
+            imageLock.writeLock().unlock();
         }
 
         if(wasEmpty && !isEmpty) {
@@ -130,12 +157,13 @@ public class LayerRegionTile {
 
     public void consume(Consumer<NativeImage> consumer) {
         if(isEmpty) return;
-        lock.lockPriority();
+
+        imageLock.readLock().lock();
         try {
             consumer.accept(image);
         }
         finally {
-            lock.unlock();
+            imageLock.readLock().unlock();
         }
     }
 
@@ -154,33 +182,6 @@ public class LayerRegionTile {
         }
     }
 
-    public void destroy() {
-        if(!destroyed) {
-            synchronized(MUTEX) {
-                instances--;
-                if(!isEmpty) {
-                    loaded -= resolution.regionSizeKb;
-                }
-            }
-        }
-        else return;
-
-        lock.lockPriority();
-        try {
-            save();
-            if(image != null) {
-                image.close();
-                image = null;
-            }
-            isDirty = false;
-            isEmpty = true;
-            destroyed = true;
-        }
-        finally {
-            lock.unlock();
-        }
-    }
-
     public static int getInstances() {
         synchronized(MUTEX) {
             return instances;
@@ -190,6 +191,35 @@ public class LayerRegionTile {
     public static int getLoadedKb() {
         synchronized(MUTEX) {
             return loaded;
+        }
+    }
+
+    public void destroy() {
+        if(destroyed) return;
+
+        // Update static vars
+        synchronized(MUTEX) {
+            instances--;
+            if(!isEmpty) {
+                loaded -= resolution.regionSizeKb;
+            }
+        }
+
+        imageLock.writeLock().lock();
+        try {
+            save();
+
+            if(image != null) {
+                image.close();
+                image = null;
+            }
+
+            isDirty = false;
+            isEmpty = true;
+            destroyed = true;
+        }
+        finally {
+            imageLock.writeLock().unlock();
         }
     }
 }

@@ -65,6 +65,12 @@ public class ProfilingRenderer {
                     .enable(() -> BlazeMapClientEngine.numLayers() > 0).metric(() -> String.valueOf(BlazeMapClientEngine.numLayers())),
                 new SubsystemProfile("Dirty Tiles", Profilers.Client.TILE_LOAD_PROFILER, Profilers.Client.TILE_TIME_PROFILER, "delay")
                     .enable(() -> BlazeMapClientEngine.numLayers() > 0).metric(() -> String.valueOf(BlazeMapClientEngine.dirtyTiles()))
+            ),
+            new Container("FileIO", Style.SECTION,
+                new SubsystemProfile("Layer Load", Profilers.FileOps.CACHE_READ_LOAD_PROFILER, Profilers.FileOps.CACHE_READ_TIME_PROFILER, "delay"),
+                new SubsystemProfile("Layer Save", Profilers.FileOps.CACHE_WRITE_LOAD_PROFILER, Profilers.FileOps.CACHE_WRITE_TIME_PROFILER, "delay"),
+                new SubsystemProfile("Cache Load", Profilers.FileOps.LAYER_READ_LOAD_PROFILER, Profilers.FileOps.LAYER_READ_TIME_PROFILER, "delay"),
+                new SubsystemProfile("Cache Save", Profilers.FileOps.LAYER_WRITE_LOAD_PROFILER, Profilers.FileOps.LAYER_WRITE_TIME_PROFILER, "delay")
             )
         ).metric(() -> String.format("[ %s fps ]", BlazeMapClientEngine.avgFPS())),
 
@@ -149,6 +155,7 @@ public class ProfilingRenderer {
     }
 
     public static void drawTimeProfiler(Profiler.TimeProfiler profiler, float y, String label, Style style, Font fontRenderer, Matrix4f matrix, MultiBufferSource buffers) {
+        profiler.updateSummaryStats();
         double at = profiler.getAvg() / 1000D, nt = profiler.getMin() / 1000D, xt = profiler.getMax() / 1000D;
         String au = "\u03BC", nu = "\u03BC", xu = "\u03BC";
         if(at >= 1000) {
@@ -170,6 +177,7 @@ public class ProfilingRenderer {
     }
 
     public static void drawLoadProfiler(Profiler.LoadProfiler profiler, float y, String label, Style style, Font fontRenderer, Matrix4f matrix, MultiBufferSource buffers) {
+        profiler.updateSummaryStats();
         String u = profiler.unit;
         String avg = String.format("%s : %.2f\u0394/%s", label, profiler.getAvg(), u);
         String dst = String.format("[ %.0f\u0394/%s - %.0f\u0394/%s ]", profiler.getMin(), u, profiler.getMax(), u);
@@ -178,6 +186,8 @@ public class ProfilingRenderer {
     }
 
     public static void drawSubsystemLoad(Profiler.LoadProfiler load, Profiler.TimeProfiler time, float y, String label, String type, Style style, Font fontRenderer, Matrix4f matrix, MultiBufferSource buffers) {
+        load.updateSummaryStats();
+        time.updateSummaryStats();
         double l = load.getAvg();
         double t = time.getAvg() / 1000D;
         double w = l * t;

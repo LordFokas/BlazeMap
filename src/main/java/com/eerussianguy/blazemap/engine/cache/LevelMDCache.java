@@ -47,13 +47,19 @@ public class LevelMDCache {
                     String file = getFilename(key);
 
                     if(storage.exists(NODE, file)){
+                        // Try to greedily acquire file lock
+                        if (!cache.fileLock.readLock().tryLock()) cache.fileLock.readLock().lock();
+
                         try(MinecraftStreams.Input stream = storage.read(NODE, file)) {
                             cache.read(stream);
-
-                        } catch (Exception e) {
+                        }
+                        catch (Exception e) {
                             // Couldn't populate the cache from the existing cache file (corruption?)
                             // so behaving as if no cache file was found
                             cache = new RegionMDCache(key, debouncer);
+                        }
+                        finally {
+                            cache.fileLock.readLock().unlock();
                         }
                     }
 
@@ -67,21 +73,34 @@ public class LevelMDCache {
         asyncChain.runOnDataThread(() -> {
             String buffer = getBufferFile(cache.pos());
             String file = getFilename(cache.pos());
-            try(MinecraftStreams.Output stream = storage.write(NODE, buffer)) {
-                cache.write(stream);
-            }
-            catch(IOException e) {
-                BlazeMap.LOGGER.warn("Error writing cache buffer {}. Will try again later", buffer);
-                e.printStackTrace();
-                debouncer.push(cache);
-            }
+
+            cache.bufferLock.lock();
             try {
-                storage.move(NODE, buffer, file);
+                try(MinecraftStreams.Output stream = storage.write(NODE, buffer)) {
+                    cache.write(stream);
+                }
+                catch(IOException e) {
+                    BlazeMap.LOGGER.warn("Error writing cache buffer {}. Will try again later", buffer);
+                    e.printStackTrace();
+                    debouncer.push(cache);
+                    return;
+                }
+
+                cache.fileLock.writeLock().lock();
+                try {
+                    storage.move(NODE, buffer, file);
+                }
+                catch(IOException e) {
+                    BlazeMap.LOGGER.warn("Error moving buffer to file {}. Will try again later", file);
+                    e.printStackTrace();
+                    debouncer.push(cache);
+                }
+                finally {
+                    cache.fileLock.writeLock().unlock();
+                }
             }
-            catch(IOException e) {
-                BlazeMap.LOGGER.warn("Error moving buffer to file {}. Will try again later", file);
-                e.printStackTrace();
-                debouncer.push(cache);
+            finally {
+                cache.bufferLock.unlock();
             }
         });
     }
