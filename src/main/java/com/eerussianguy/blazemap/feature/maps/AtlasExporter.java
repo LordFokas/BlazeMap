@@ -1,5 +1,6 @@
 package com.eerussianguy.blazemap.feature.maps;
 
+import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.BlazeRegistry;
 import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.MapType;
@@ -19,15 +20,18 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class AtlasExporter {
     private static Task task = null;
 
-    public static synchronized void export(Task task) {
+    public static synchronized void exportAsync(Task task) {
         if(AtlasExporter.task == null) {
             AtlasExporter.task = task;
-            BlazeMapAsync.instance().clientChain.runOnDataThread(AtlasExporter::export);
+            BlazeMapAsync.instance().clientChain.runOnDataThread(AtlasExporter::exportAsync);
+        } else {
+            AtlasExporter.task.flashUntil = 3 + (int)(System.currentTimeMillis() / 1000L);
         }
     }
 
@@ -35,25 +39,30 @@ public class AtlasExporter {
         return task;
     }
 
-    private static void export() {
+    private static synchronized void resetTask() {
+        task = null;
+    }
+
+    private static void exportAsync() {
+        task.setStage(Task.Stage.CALCULATING);
         TileResolution resolution = TileResolution.FULL;
         StorageAccess.Internal storage = BlazeMapClientEngine.getDimensionStorage(task.dimension);
-        AtlasInfo atlasInfo = new AtlasInfo();
-        NativeImage atlas = constructAtlas(storage, resolution, atlasInfo);
+        NativeImage atlas = constructAtlas(storage, resolution);
 
         try(atlas) {
+            task.setStage(Task.Stage.STITCHING);
             var layerKeys = task.map.value().getLayers();
             for(var layerKey : layerKeys) {
                 if(!task.layers.contains(layerKey)) continue;
                 File folder = storage.getMipmap(layerKey.location, ".", resolution);
-                for(int regionX = atlasInfo.atlasStartX; regionX <= atlasInfo.atlasEndX; regionX++) {
-                    for(int regionZ = atlasInfo.atlasStartZ; regionZ <= atlasInfo.atlasEndZ; regionZ++) {
+                for(int regionX = task.atlasStartX; regionX <= task.atlasEndX; regionX++) {
+                    for(int regionZ = task.atlasStartZ; regionZ <= task.atlasEndZ; regionZ++) {
                         File file = new File(folder, LayerRegionTile.getImageName(new RegionPos(regionX, regionZ)));
                         if(!file.exists()) continue;
                         NativeImage tile = NativeImage.read(Files.newInputStream(file.toPath()));
 
-                        int regionOffsetX = (regionX - atlasInfo.atlasStartX) * resolution.regionWidth;
-                        int regionOffsetZ = (regionZ - atlasInfo.atlasStartZ) * resolution.regionWidth;
+                        int regionOffsetX = (regionX - task.atlasStartX) * resolution.regionWidth;
+                        int regionOffsetZ = (regionZ - task.atlasStartZ) * resolution.regionWidth;
                         for(int x = 0; x < resolution.regionWidth; x++) {
                             for(int z = 0; z < resolution.regionWidth; z++) {
                                 int atlasPixelX = regionOffsetX + x;
@@ -65,22 +74,38 @@ public class AtlasExporter {
                         }
 
                         // non-atomic op on volatile int is ok because only 1 thread writes to variable
-                        // Java guarantees r/w access to 32-bit variables is atomic, so there are no mid-write reads
+                        // Java guarantees r/w access to 32-bit variables is atomic, so other threads will read either old or new value with no need for synchronization and no risk of corruption.
                         task.tilesCurrent++;
                     }
                 }
             }
 
-            File file = new File(Minecraft.getInstance().gameDirectory, "screenshots/blazemap-export-"+ (System.currentTimeMillis() / 1000L) +".png");
+            task.setStage(Task.Stage.SAVING);
+            File file = getExportFile();
             file.getParentFile().mkdirs();
             atlas.writeToFile(file);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            BlazeMap.LOGGER.error("Error in AtlasExporter", e);
+            task.errored = true;
+            try { Thread.sleep(500); }
+            catch(InterruptedException ignored){}
+        } finally {
+            resetTask();
         }
-        task = null;
     }
 
-    private static NativeImage constructAtlas(StorageAccess.Internal storage, TileResolution resolution, AtlasInfo atlasInfo) {
+    private static File getExportFile() {
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        int minute = calendar.get(Calendar.MINUTE);
+        int second = calendar.get(Calendar.SECOND);
+        return new File(Minecraft.getInstance().gameDirectory, String.format("screenshots/%04d-%02d-%02d_%02d.%02d.%02d-blazemap-export.png", year, month, day, hour, minute, second));
+    }
+
+    private static NativeImage constructAtlas(StorageAccess.Internal storage, TileResolution resolution) {
         int minX = Integer.MAX_VALUE, maxX = Integer.MIN_VALUE, minZ = Integer.MAX_VALUE, maxZ = Integer.MIN_VALUE;
         int regionsX, regionsZ;
 
@@ -92,10 +117,12 @@ public class AtlasExporter {
             if(images == null) continue;
 
             for(var image : images) {
-                String[] coords = image.getName().replaceAll("(^\\[)|(]\\.png$)", "").split(",");
+                String filename = image.getName();
+                if(!filename.endsWith(".png")) continue; // skip buffers
+                String[] coords = filename.replaceAll("(^\\[)|(]\\.png$)", "").split(",");
                 if(coords.length != 2) continue;
                 // non-atomic op on volatile int is ok because only 1 thread writes to variable
-                // Java guarantees r/w access to 32-bit variables is atomic, so there are no mid-write reads
+                // Java guarantees r/w access to 32-bit variables is atomic, so other threads will read either old or new value with no need for synchronization and no risk of corruption.
                 task.tilesTotal++;
                 int x = Integer.parseInt(coords[0]);
                 int z = Integer.parseInt(coords[1]);
@@ -108,17 +135,12 @@ public class AtlasExporter {
 
         regionsX = 1 + maxX - minX;
         regionsZ = 1 + maxZ - minZ;
-        atlasInfo.atlasStartX = minX;
-        atlasInfo.atlasStartZ = minZ;
-        atlasInfo.atlasEndX = maxX;
-        atlasInfo.atlasEndZ = maxZ;
+        task.atlasStartX = minX;
+        task.atlasStartZ = minZ;
+        task.atlasEndX = maxX;
+        task.atlasEndZ = maxZ;
 
         return new NativeImage(NativeImage.Format.RGBA, resolution.regionWidth*regionsX, resolution.regionWidth*regionsZ, true);
-    }
-
-    private static class AtlasInfo {
-        public int atlasStartX, atlasStartZ;
-        public int atlasEndX, atlasEndZ;
     }
 
     public static class Task {
@@ -126,6 +148,11 @@ public class AtlasExporter {
         public final BlazeRegistry.Key<MapType> map;
         public final List<BlazeRegistry.Key<Layer>> layers;
         private volatile int tilesTotal, tilesCurrent;
+        private volatile Stage stage = Stage.QUEUED;
+        private volatile int flashUntil = 0;
+        private int atlasStartX, atlasStartZ;
+        private int atlasEndX, atlasEndZ;
+        private volatile boolean errored;
 
         public Task(ResourceKey<Level> dimension, BlazeRegistry.Key<MapType> map, List<BlazeRegistry.Key<Layer>> layers) {
             this.dimension = dimension;
@@ -139,6 +166,29 @@ public class AtlasExporter {
 
         public int getTilesCurrent() {
             return tilesCurrent;
+        }
+
+        private synchronized void setStage(Stage stage) {
+            this.stage = stage;
+        }
+
+        public synchronized Stage getStage() {
+            return stage;
+        }
+
+        public int getFlashUntil() {
+            return flashUntil;
+        }
+
+        public boolean isErrored() {
+            return errored;
+        }
+
+        public enum Stage {
+            QUEUED,
+            CALCULATING,
+            STITCHING,
+            SAVING
         }
     }
 }
