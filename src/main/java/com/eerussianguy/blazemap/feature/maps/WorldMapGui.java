@@ -249,7 +249,7 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
         }
 
         if(showWidgets) {
-            renderExportProgress(graphics, scale);
+            renderAtlasExportProgress(graphics, scale);
 
             int maps = mapTypes.size();
             if(maps > 0) {
@@ -282,23 +282,42 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
         }
     }
 
-    private void renderExportProgress(GuiGraphics graphics, float scale) {
+    private void renderAtlasExportProgress(GuiGraphics graphics, float scale) {
         AtlasExporter.Task task = AtlasExporter.getTask();
         if(task == null) return;
         Font font = Minecraft.getInstance().font;
         var stack = graphics.pose();
         stack.pushPose();
-        stack.translate(width - 205, 5, 0);
-        RenderHelper.fillRect(stack.last().pose(), 200, 30, Colors.WIDGET_BACKGROUND);
+
+        stack.translate(width - 205, 5, 0); // Go to corner
+        RenderHelper.fillRect(stack.last().pose(), 200, 30, Colors.WIDGET_BACKGROUND); // draw background
+
+        // Process flashing "animation"
+        int textColor = Colors.WHITE;
+        long flashUntil = ((long)task.getFlashUntil()) * 1000L;
+        long now = System.currentTimeMillis();
+        if(task.isErrored() || (flashUntil >= now && now % 333 < 166)) {
+            textColor = 0xFFFF0000;
+        }
+
+        // Render progress text
         int total = task.getTilesTotal();
         int current = task.getTilesCurrent();
+        graphics.drawString(font, "Exporting", 5, 5, textColor);
+        String operation = switch(task.getStage()){
+            case QUEUED -> "queued";
+            case CALCULATING -> "calculating";
+            case STITCHING -> String.format("stitching %d / %d tiles", current, total);
+            case SAVING -> "saving";
+        };
+        graphics.drawString(font, operation, 195 - font.width(operation), 5, textColor);
+
+        // Render progress bar
         double progress = ((double)current) / ((double)total);
-        String tiles = String.format("%d / %d tiles", current, total);
-        graphics.drawString(font, "Exporting", 5, 5, Colors.WHITE);
-        graphics.drawString(font, tiles, 195 - font.width(tiles), 5, Colors.WHITE);
         stack.translate(5, 17, 0);
         RenderHelper.fillRect(stack.last().pose(), 190, 10, Colors.LABEL_COLOR);
-        RenderHelper.fillRect(stack.last().pose(), (int)(190*progress), 10, Colors.WHITE);
+        RenderHelper.fillRect(stack.last().pose(), (int)(190*progress), 10, textColor);
+
         stack.popPose();
     }
 
@@ -377,7 +396,7 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
         }
 
         if(key == GLFW.GLFW_KEY_F12) {
-            AtlasExporter.export(new AtlasExporter.Task(this.dimension, this.getMapType().getID(), this.mapRenderer.getVisibleLayers()));
+            AtlasExporter.exportAsync(new AtlasExporter.Task(this.dimension, this.getMapType().getID(), this.mapRenderer.getVisibleLayers()));
             return true;
         }
 
