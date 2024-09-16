@@ -249,7 +249,7 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
         }
 
         if(showWidgets) {
-            renderAtlasExportProgress(graphics, scale);
+            renderAtlasExportProgress(stack, scale);
 
             int maps = mapTypes.size();
             if(maps > 0) {
@@ -282,11 +282,10 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
         }
     }
 
-    private void renderAtlasExportProgress(GuiGraphics graphics, float scale) {
+    private void renderAtlasExportProgress(PoseStack stack, float scale) {
         AtlasExporter.Task task = AtlasExporter.getTask();
         if(task == null) return;
         Font font = Minecraft.getInstance().font;
-        var stack = graphics.pose();
         stack.pushPose();
 
         stack.translate(width - 205, 5, 0); // Go to corner
@@ -303,14 +302,14 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
         // Render progress text
         int total = task.getTilesTotal();
         int current = task.getTilesCurrent();
-        graphics.drawString(font, "Exporting", 5, 5, textColor);
+        font.draw(stack, "Exporting", 5, 5, textColor);
         String operation = switch(task.getStage()){
             case QUEUED -> "queued";
             case CALCULATING -> "calculating";
             case STITCHING -> String.format("stitching %d / %d tiles", current, total);
             case SAVING -> "saving";
         };
-        graphics.drawString(font, operation, 195 - font.width(operation), 5, textColor);
+        font.draw(stack, operation, 195 - font.width(operation), 5, textColor);
 
         // Render progress bar
         double progress = ((double)current) / ((double)total);
@@ -321,7 +320,7 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
         stack.popPose();
     }
 
-    private void renderCoordination(GuiGraphics graphics, float scale){
+    private void renderCoordination(PoseStack stack, float scale){
         if(rawMouseX == -1 || rawMouseY == -1) return;
 
         stack.pushPose();
