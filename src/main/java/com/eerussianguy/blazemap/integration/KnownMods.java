@@ -1,6 +1,7 @@
-package com.eerussianguy.blazemap.profiling;
+package com.eerussianguy.blazemap.integration;
 
 import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.function.Function;
@@ -9,20 +10,22 @@ import java.util.stream.Collectors;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import com.eerussianguy.blazemap.BlazeMap;
-import com.eerussianguy.blazemap.api.BlazeMapAPI;
 import com.eerussianguy.blazemap.api.BlazeRegistry;
 import com.eerussianguy.blazemap.api.debug.ModAnnouncementEvent;
-import com.eerussianguy.blazemap.feature.ModIntegration.ModIDs;
 
 public class KnownMods {
     private static final HashMap<String, ModInfo> CORE = new HashMap<>();
     private static final HashMap<String, ModInfo> COMPAT = new HashMap<>();
     private static final HashMap<String, ModInfo> PROBLEM = new HashMap<>();
-    private static final HashMap<String, ModInfo> APICALL = new HashMap<>();
+    private static final HashMap<String, ModInfo> API_CALL = new HashMap<>();
     private static final HashMap<String, ModInfo> ANNOUNCED = new HashMap<>();
     private static final HashSet<String> ALL_KNOWN = new HashSet<>();
+
+    public static final String UNKNOWN_VERSION = "0.0NONE";
+    public static final String DEVELOPMENT_VERSION = "(dev)";
 
     public static void init() {
         add(CORE, ModIDs.MINECRAFT);
@@ -36,25 +39,17 @@ public class KnownMods {
         add(PROBLEM, ModIDs.OPTIFINE);
         add(PROBLEM, ModIDs.CHUNKPREGEN);
 
-        add(BlazeMapAPI.MASTER_DATA);
-        add(BlazeMapAPI.COLLECTORS);
-        add(BlazeMapAPI.TRANSFORMERS);
-        add(BlazeMapAPI.PROCESSORS);
-        add(BlazeMapAPI.LAYERS);
-        add(BlazeMapAPI.MAPTYPES);
-        add(BlazeMapAPI.OBJECT_RENDERERS);
-
         HashSet<String> mods = new HashSet<>();
         MinecraftForge.EVENT_BUS.post(new ModAnnouncementEvent(mods));
+
+        for(var integration : BlazeMap.INTEGRATIONS) {
+            if(!integration.enabled()) continue;
+            mods.addAll(Arrays.asList(integration.dependencies));
+        }
+
         for(String mod : mods){
             add(ANNOUNCED, mod);
         }
-
-        ALL_KNOWN.addAll(CORE.keySet());
-        ALL_KNOWN.addAll(COMPAT.keySet());
-        ALL_KNOWN.addAll(PROBLEM.keySet());
-        ALL_KNOWN.addAll(APICALL.keySet());
-        ALL_KNOWN.addAll(ANNOUNCED.keySet());
     }
 
     @SafeVarargs
@@ -67,6 +62,10 @@ public class KnownMods {
             }
         }
         return false;
+    }
+
+    public static boolean isLoaded(String modID) {
+        return ModList.get().getModContainerById(modID).isPresent();
     }
 
     @SafeVarargs
@@ -86,7 +85,7 @@ public class KnownMods {
 
     @SafeVarargs
     public static <T> T[] getAPICall(Class<T> t, Function<ModInfo, ? extends T> function, T ... fallbacks){
-        return mapEntries(APICALL, t, function, fallbacks);
+        return mapEntries(API_CALL, t, function, fallbacks);
     }
 
     @SafeVarargs
@@ -103,16 +102,22 @@ public class KnownMods {
         }
     }
 
-    private static void add(BlazeRegistry<?> registry){
+    public static void addIntegration(ModIntegration integration) {
+        add(COMPAT, integration.modID);
+    }
+
+    public static void addRegistry(BlazeRegistry<?> registry){
         for(var key : registry.keys()){
             String mod = key.location.getNamespace();
-            APICALL.computeIfAbsent(mod, id -> new ModInfo(ModList.get().getModContainerById(id).get()));
+            add(API_CALL, mod);
         }
     }
 
     private static void add(HashMap<String, ModInfo> map, String modId){
         var container = ModList.get().getModContainerById(modId);
-        container.ifPresent(mod -> map.put(modId, new ModInfo(mod)));
+        if(container.isEmpty()) return;
+        map.put(modId, new ModInfo(container.get()));
+        ALL_KNOWN.add(modId);
     }
 
     public static class ModInfo {
@@ -122,7 +127,14 @@ public class KnownMods {
             this.id = container.getModId();
             var info = container.getModInfo();
             this.name = info.getDisplayName();
-            this.version = info.getVersion().toString();
+            this.version = coalesce(info.getVersion().toString());
+        }
+
+        private static String coalesce(String version) {
+            if(!FMLEnvironment.production && version.equals(UNKNOWN_VERSION)) {
+                return DEVELOPMENT_VERSION;
+            }
+            return version;
         }
     }
 }

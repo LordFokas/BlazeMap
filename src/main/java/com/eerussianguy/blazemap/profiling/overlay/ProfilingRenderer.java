@@ -12,8 +12,8 @@ import com.eerussianguy.blazemap.engine.BlazeMapAsync;
 import com.eerussianguy.blazemap.engine.client.BlazeMapClientEngine;
 import com.eerussianguy.blazemap.engine.client.LayerRegionTile;
 import com.eerussianguy.blazemap.engine.server.BlazeMapServerEngine;
-import com.eerussianguy.blazemap.feature.ModIntegration;
-import com.eerussianguy.blazemap.profiling.KnownMods;
+import com.eerussianguy.blazemap.integration.ModIDs;
+import com.eerussianguy.blazemap.integration.KnownMods;
 import com.eerussianguy.blazemap.feature.maps.WorldMapGui;
 import com.eerussianguy.blazemap.profiling.Profiler;
 import com.eerussianguy.blazemap.profiling.Profilers;
@@ -47,9 +47,9 @@ public class ProfilingRenderer {
                     return String.format("Layer Region Tiles: %d   [ %.2f %sB ]", tiles, size, scale);
                 }),
                 new SubsystemProfile("Chunk Render Mixin", Profilers.Client.Mixin.RENDERCHUNK_LOAD_PROFILER, Profilers.Client.Mixin.RENDERCHUNK_TIME_PROFILER, "tick load")
-                    .enable(() -> !KnownMods.isAnyLoaded(ModIntegration.SODIUM_FAMILY)),
+                    .enable(() -> !KnownMods.isAnyLoaded(ModIDs.SODIUM_FAMILY)),
                 new SubsystemProfile("Sodium Mixin", Profilers.Client.Mixin.SODIUM_LOAD_PROFILER, Profilers.Client.Mixin.SODIUM_TIME_PROFILER, "tick load")
-                    .enable(() -> KnownMods.isAnyLoaded(ModIntegration.SODIUM_FAMILY))
+                    .enable(() -> KnownMods.isAnyLoaded(ModIDs.SODIUM_FAMILY))
             ),
             new Container("Client Pipeline", Style.SECTION,
                 new SubsystemProfile("MD Collect", Profilers.Client.COLLECTOR_LOAD_PROFILER, Profilers.Client.COLLECTOR_TIME_PROFILER, "tick load",
@@ -83,11 +83,11 @@ public class ProfilingRenderer {
         ).metric(() -> String.format("[ %d tps ]", BlazeMapServerEngine.avgTPS())).enable(BlazeMapServerEngine::isRunning),
 
         new Container("Mod Interactions", Style.PANEL,
-            new Container("Core", Style.SECTION, KnownMods.getCore(IDrawable.class, mod -> new StringSource(mod.name).note(mod.version, Colors.WHITE), NO_MODS_FOUND)),
-            new Container("Built-in Support", Style.SECTION, KnownMods.getCompat(IDrawable.class, mod -> new StringSource(mod.name).note(mod.version, Colors.WHITE), NO_MODS_FOUND)),
-            new Container("Known Problematic", Style.SECTION, KnownMods.getProblem(IDrawable.class, mod -> new StringSource(mod.name, 0xFFAAAA).note(mod.version, 0xFFAAAA), NO_BAD_MODS_FOUND)),
-            new Container("Registered API Objects", Style.SECTION, KnownMods.getAPICall(IDrawable.class, mod -> new StringSource(mod.name).note(mod.version, Colors.WHITE), NO_MODS_FOUND)),
-            new Container("Announced", Style.SECTION, KnownMods.getAnnounced(IDrawable.class, mod -> new StringSource(mod.name).note(mod.version, Colors.WHITE), NO_MODS_FOUND))
+            new Container("Core", Style.SECTION, KnownMods.getCore(IDrawable.class, mod -> new VersionString(mod.name).note(mod.version, Colors.WHITE), NO_MODS_FOUND)),
+            new Container("Built-in Support", Style.SECTION, KnownMods.getCompat(IDrawable.class, mod -> new VersionString(mod.name).note(mod.version, Colors.WHITE), NO_MODS_FOUND)),
+            new Container("Known Problematic", Style.SECTION, KnownMods.getProblem(IDrawable.class, mod -> new VersionString(mod.name, 0xFFAAAA).note(mod.version, 0xFFAAAA), NO_BAD_MODS_FOUND)),
+            new Container("Registered API Objects", Style.SECTION, KnownMods.getAPICall(IDrawable.class, mod -> new VersionString(mod.name).note(mod.version, Colors.WHITE), NO_MODS_FOUND)),
+            new Container("Announced", Style.SECTION, KnownMods.getAnnounced(IDrawable.class, mod -> new VersionString(mod.name).note(mod.version, Colors.WHITE), NO_MODS_FOUND))
         )
     );
 

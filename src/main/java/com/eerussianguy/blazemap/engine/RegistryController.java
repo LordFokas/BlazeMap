@@ -7,7 +7,7 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import com.eerussianguy.blazemap.api.BlazeMapAPI;
 import com.eerussianguy.blazemap.api.event.BlazeRegistryEvent;
-import com.eerussianguy.blazemap.profiling.KnownMods;
+import com.eerussianguy.blazemap.integration.KnownMods;
 
 public class RegistryController {
     private static boolean frozenRegistries = false;
@@ -31,7 +31,11 @@ public class RegistryController {
                 ensureClientRegistriesReady();
             }
             frozenRegistries = true;
-            KnownMods.init();
+
+            KnownMods.addRegistry(BlazeMapAPI.MASTER_DATA);
+            KnownMods.addRegistry(BlazeMapAPI.COLLECTORS);
+            KnownMods.addRegistry(BlazeMapAPI.TRANSFORMERS);
+            KnownMods.addRegistry(BlazeMapAPI.PROCESSORS);
         }
     }
 
@@ -46,5 +50,9 @@ public class RegistryController {
 
         bus.post(new BlazeRegistryEvent.ObjectRendererRegistryEvent());
         BlazeMapAPI.OBJECT_RENDERERS.freeze();
+
+        KnownMods.addRegistry(BlazeMapAPI.LAYERS);
+        KnownMods.addRegistry(BlazeMapAPI.MAPTYPES);
+        KnownMods.addRegistry(BlazeMapAPI.OBJECT_RENDERERS);
     }
 }

@@ -1,5 +1,7 @@
 package com.eerussianguy.blazemap;
 
+import java.util.List;
+
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.IExtensionPoint;
@@ -16,6 +18,9 @@ import com.eerussianguy.blazemap.engine.server.BlazeMapServerEngine;
 import com.eerussianguy.blazemap.feature.BlazeMapCommandsClient;
 import com.eerussianguy.blazemap.feature.BlazeMapFeaturesClient;
 import com.eerussianguy.blazemap.feature.BlazeMapFeaturesCommon;
+import com.eerussianguy.blazemap.integration.KnownMods;
+import com.eerussianguy.blazemap.integration.ModIntegration;
+import com.eerussianguy.blazemap.integration.ftbchunks.FTBChunksPlugin;
 import com.mojang.logging.LogUtils;
 import org.slf4j.Logger;
 
@@ -27,6 +32,10 @@ public class BlazeMap {
 
     public static final String MOD_ID = "blazemap";
     public static final String MOD_NAME = "Blaze Map";
+
+    public static final List<ModIntegration> INTEGRATIONS = List.of(
+        new FTBChunksPlugin()
+    );
 
     public BlazeMap() {
         ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> "Nothing", (remote, isServer) -> true));
@@ -52,6 +61,8 @@ public class BlazeMap {
     }
 
     public void setup(FMLCommonSetupEvent event) {
+        KnownMods.init();
+
         // We are client side, enable client engine. Required on client.
         if(FMLEnvironment.dist == Dist.CLIENT) {
             BlazeMapClientEngine.init();
@@ -74,6 +85,10 @@ public class BlazeMap {
             BlazeMapFeaturesClient.initMaps();
             BlazeMapFeaturesClient.initWaypoints();
             BlazeMapCommandsClient.init();
+        }
+
+        for(var integration : INTEGRATIONS) {
+            integration.init();
         }
     }
 }
