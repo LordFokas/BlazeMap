@@ -11,6 +11,7 @@ import com.eerussianguy.blazemap.engine.StorageAccess;
 import com.eerussianguy.blazemap.engine.client.BlazeMapClientEngine;
 import com.eerussianguy.blazemap.engine.client.LayerRegionTile;
 import com.eerussianguy.blazemap.util.Colors;
+import com.eerussianguy.blazemap.util.Helpers;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceKey;
@@ -44,26 +45,31 @@ public class AtlasExporter {
     }
 
     private static void exportAsync() {
-        task.setStage(Task.Stage.CALCULATING);
-        TileResolution resolution = TileResolution.FULL;
-        StorageAccess.Internal storage = BlazeMapClientEngine.getDimensionStorage(task.dimension);
-        NativeImage atlas = constructAtlas(storage, resolution);
+        NativeImage atlas = null;
 
-        try(atlas) {
+        try {
+            // Calculation stage: figure out image size and corner regions, create canvas of appropriate size
+            task.setStage(Task.Stage.CALCULATING);
+            TileResolution resolution = TileResolution.FULL;
+            StorageAccess.Internal storage = BlazeMapClientEngine.getDimensionStorage(task.dimension);
+            atlas = constructAtlas(storage, resolution);
+
+            // Stitching stage: open tiles and transfer pixels to the correct place in the atlas
             task.setStage(Task.Stage.STITCHING);
             var layerKeys = task.map.value().getLayers();
-            for(var layerKey : layerKeys) {
+            for(var layerKey : layerKeys) { // Loop layers
                 if(!task.layers.contains(layerKey)) continue;
                 File folder = storage.getMipmap(layerKey.location, ".", resolution);
-                for(int regionX = task.atlasStartX; regionX <= task.atlasEndX; regionX++) {
+                for(int regionX = task.atlasStartX; regionX <= task.atlasEndX; regionX++) { // Loop regions
                     for(int regionZ = task.atlasStartZ; regionZ <= task.atlasEndZ; regionZ++) {
                         File file = new File(folder, LayerRegionTile.getImageName(new RegionPos(regionX, regionZ)));
                         if(!file.exists()) continue;
-                        NativeImage tile = NativeImage.read(Files.newInputStream(file.toPath()));
+                        NativeImage tile = readTile(file);
 
                         int regionOffsetX = (regionX - task.atlasStartX) * resolution.regionWidth;
                         int regionOffsetZ = (regionZ - task.atlasStartZ) * resolution.regionWidth;
-                        for(int x = 0; x < resolution.regionWidth; x++) {
+
+                        for(int x = 0; x < resolution.regionWidth; x++) { // Loop pixels
                             for(int z = 0; z < resolution.regionWidth; z++) {
                                 int atlasPixelX = regionOffsetX + x;
                                 int atlasPixelZ = regionOffsetZ + z;
@@ -80,24 +86,49 @@ public class AtlasExporter {
                 }
             }
 
+            // Saving stage: flush atlas to disk
             task.setStage(Task.Stage.SAVING);
             File file = getExportFile();
             file.getParentFile().mkdirs();
             atlas.writeToFile(file);
-        } catch (IOException e) {
+        } catch (Exception e) {
             BlazeMap.LOGGER.error("Error in AtlasExporter", e);
             task.errored = true;
-            try { Thread.sleep(500); }
+            try { Thread.sleep(2500); }
             catch(InterruptedException ignored){}
         } finally {
             resetTask();
+            Helpers.closeQuietly(atlas);
+        }
+    }
+
+    /**
+     * Tries to open a tile.
+     * If it fails, waits 250ms and tries again.
+     * The 5th failed attempt will abort and throw an IOException.
+     */
+    private static NativeImage readTile(File file) throws IOException {
+        int attempt = 1;
+        while(true) {
+            try {
+                return NativeImage.read(Files.newInputStream(file.toPath()));
+            } catch(IOException e) {
+                if(attempt < 5) { // we start counting at 1, so 5th attempt throws
+                    BlazeMap.LOGGER.warn(String.format("Failed to open file \"%s\" %d times, retrying", file, attempt), e);
+                    try { Thread.sleep(250); }
+                    catch(InterruptedException ignored){}
+                    attempt++;
+                } else {
+                    throw new IOException(String.format("Failed to open file \"%s\" %d times, aborting", file, attempt), e);
+                }
+            }
         }
     }
 
     private static File getExportFile() {
         Calendar calendar = Calendar.getInstance();
         int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
+        int month = calendar.get(Calendar.MONTH) + 1; // fuck you too Java
         int day = calendar.get(Calendar.DAY_OF_MONTH);
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
         int minute = calendar.get(Calendar.MINUTE);

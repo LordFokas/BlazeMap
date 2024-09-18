@@ -102,4 +102,11 @@ public class Helpers {
     public static double clamp(double min, double var, double max) {
         return Math.max(min, Math.min(var, max));
     }
+
+    public static void closeQuietly(AutoCloseable closeable) {
+        if(closeable != null) {
+            try {closeable.close();}
+            catch(Exception ignored) {}
+        }
+    }
 }
