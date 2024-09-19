@@ -51,6 +51,10 @@ public class RegistryController {
         bus.post(new BlazeRegistryEvent.ObjectRendererRegistryEvent());
         BlazeMapAPI.OBJECT_RENDERERS.freeze();
 
+        for(var key : BlazeMapAPI.MAPTYPES.keys()) {
+            key.value().inflate();
+        }
+
         KnownMods.addRegistry(BlazeMapAPI.LAYERS);
         KnownMods.addRegistry(BlazeMapAPI.MAPTYPES);
         KnownMods.addRegistry(BlazeMapAPI.OBJECT_RENDERERS);

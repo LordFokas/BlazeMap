@@ -39,23 +39,26 @@ public abstract class Layer implements RegistryEntry, Consumer {
     private final TranslatableComponent name;
     private final ResourceLocation icon;
     private final boolean opaque;
+    public final Type type;
 
     @SafeVarargs
     public Layer(Key<Layer> id, TranslatableComponent name, Key<DataType<MasterDatum>>... inputs) {
-        this.id = id;
-        this.name = name;
-        this.icon = null;
-        this.inputs = Arrays.stream(inputs).collect(Collectors.toUnmodifiableSet());
-        this.opaque = true;
+        this(id, Type.PHYSICAL, name, null, inputs);
     }
 
     @SafeVarargs
     public Layer(Key<Layer> id, TranslatableComponent name, ResourceLocation icon, Key<DataType<MasterDatum>>... inputs) {
+        this(id, Type.PHYSICAL, name, icon, inputs);
+    }
+
+    @SafeVarargs
+    Layer(Key<Layer> id, Type type, TranslatableComponent name, ResourceLocation icon, Key<DataType<MasterDatum>>... inputs) {
         this.id = id;
+        this.type = type;
         this.name = name;
         this.icon = icon;
         this.inputs = Arrays.stream(inputs).collect(Collectors.toUnmodifiableSet());
-        this.opaque = false;
+        this.opaque = icon == null; // FIXME: this is bullshit
     }
 
     public Key<Layer> getID() {
@@ -97,6 +100,26 @@ public abstract class Layer implements RegistryEntry, Consumer {
      */
     public Widget getLegendWidget() {
         return null;
+    }
+
+    /**
+     * Determines the capabilities and limitations of layers.
+     */
+    public enum Type {
+        PHYSICAL(true, true),
+        SYNTHETIC(false, true),
+        INVISIBLE(false, false);
+
+        /** Whether this layer runs through the pipeline and saves to disk */
+        public final boolean isPipelined;
+
+        /** Whether this layer has pixels to display */
+        public final boolean isVisible;
+
+        Type(boolean isPipelined, boolean isVisible) {
+            this.isPipelined = isPipelined;
+            this.isVisible = isVisible;
+        }
     }
 
 

@@ -438,7 +438,7 @@ public class MapRenderer implements AutoCloseable {
 
     private void generateMapTile(NativeImage texture, TileResolution resolution, int textureW, int textureH, int cornerXOffset, int cornerZOffset, int regionIndexX, int regionIndexZ) {
         for(BlazeRegistry.Key<Layer> layer : visible) {
-            if(layer.value() instanceof FakeLayer) return;
+            if(!layer.value().type.isVisible) return;
 
             // Precomputing values so they don't waste CPU cycles recalculating for each pixel
             final RegionPos region = offsets[regionIndexX][regionIndexZ];
@@ -474,7 +474,7 @@ public class MapRenderer implements AutoCloseable {
 
                         if(textureY >= textureH) break;
 
-                        int color = Colors.layerBlend(texture.getPixelRGBA(textureX, textureY), source.getPixelRGBA(x, y));
+                        int color = Colors.layerBlend(texture.getPixelRGBA(textureX, textureY), source.getPixel(x, y));
                         texture.setPixelRGBA(textureX, textureY, color);
                     }
                 }
