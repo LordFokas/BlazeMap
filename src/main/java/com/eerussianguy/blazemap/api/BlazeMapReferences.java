@@ -46,6 +46,8 @@ public class BlazeMapReferences {
         public static final Key<Layer> TERRAIN_ISOLINES = new Key<>(LAYERS, MODID, "terrain_isolines");
         public static final Key<Layer> BLOCK_COLOR = new Key<>(LAYERS, MODID, "block_color");
         public static final Key<Layer> NETHER = new Key<>(LAYERS, MODID, "nether");
+
+        public static final Key<Layer> FTBCHUNKS = new Key<>(LAYERS, MODID, "ftbchunks");
     }
 
     public static class MapTypes {
