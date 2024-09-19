@@ -457,7 +457,7 @@ public class MapRenderer implements AutoCloseable {
 
                 if (regWidthbyIndexX + startX - cxo < 0) {
                     // Set x to be the value it should be when textureX == 0
-                    startX = czo - regWidthbyIndexX;
+                    startX = cxo - regWidthbyIndexX;
                 }
                 if (regWidthbyIndexZ + startY - czo < 0) {
                     // Set y to be the value it should be when textureY == 0
