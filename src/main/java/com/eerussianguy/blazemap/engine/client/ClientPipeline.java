@@ -15,7 +15,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 
-import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.BlazeMapAPI;
 import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
 import com.eerussianguy.blazemap.api.maps.*;
@@ -69,7 +68,7 @@ class ClientPipeline extends Pipeline {
         // Set up views (immutable sets) for the available maps and layers.
         this.availableMapTypes = BlazeMapAPI.MAPTYPES.keys().stream().filter(m -> m.value().shouldRenderInDimension(dimension)).collect(Collectors.toUnmodifiableSet());
         this.availableLayers = availableMapTypes.stream().map(k -> k.value().getLayers()).flatMap(Set::stream).filter(l -> l.value().shouldRenderInDimension(dimension)).collect(Collectors.toUnmodifiableSet());
-        this.layers = availableLayers.stream().map(Key::value).filter(l -> !(l instanceof FakeLayer)).toArray(Layer[]::new);
+        this.layers = availableLayers.stream().map(Key::value).filter(l -> l.type.isPipelined).toArray(Layer[]::new);
         this.numLayers = layers.length;
 
         // Set up debouncing mechanisms
