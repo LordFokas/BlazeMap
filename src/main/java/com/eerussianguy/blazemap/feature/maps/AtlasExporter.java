@@ -59,23 +59,26 @@ public class AtlasExporter {
             var layerKeys = task.map.value().getLayers();
             for(var layerKey : layerKeys) { // Loop layers
                 if(!task.layers.contains(layerKey)) continue;
+
                 File folder = storage.getMipmap(layerKey.location, ".", resolution);
                 for(int regionX = task.atlasStartX; regionX <= task.atlasEndX; regionX++) { // Loop regions
                     for(int regionZ = task.atlasStartZ; regionZ <= task.atlasEndZ; regionZ++) {
                         File file = new File(folder, LayerRegionTile.getImageName(new RegionPos(regionX, regionZ)));
                         if(!file.exists()) continue;
+
                         NativeImage tile = readTile(file);
+                        if(tile != null) {
+                            int regionOffsetX = (regionX - task.atlasStartX) * resolution.regionWidth;
+                            int regionOffsetZ = (regionZ - task.atlasStartZ) * resolution.regionWidth;
 
-                        int regionOffsetX = (regionX - task.atlasStartX) * resolution.regionWidth;
-                        int regionOffsetZ = (regionZ - task.atlasStartZ) * resolution.regionWidth;
-
-                        for(int x = 0; x < resolution.regionWidth; x++) { // Loop pixels
-                            for(int z = 0; z < resolution.regionWidth; z++) {
-                                int atlasPixelX = regionOffsetX + x;
-                                int atlasPixelZ = regionOffsetZ + z;
-                                int atlasPixel = atlas.getPixelRGBA(atlasPixelX, atlasPixelZ);
-                                int tilePixel = tile.getPixelRGBA(x, z);
-                                atlas.setPixelRGBA(atlasPixelX, atlasPixelZ, Colors.layerBlend(atlasPixel, tilePixel));
+                            for(int x = 0; x < resolution.regionWidth; x++) { // Loop pixels
+                                for(int z = 0; z < resolution.regionWidth; z++) {
+                                    int atlasPixelX = regionOffsetX + x;
+                                    int atlasPixelZ = regionOffsetZ + z;
+                                    int atlasPixel = atlas.getPixelRGBA(atlasPixelX, atlasPixelZ);
+                                    int tilePixel = tile.getPixelRGBA(x, z);
+                                    atlas.setPixelRGBA(atlasPixelX, atlasPixelZ, Colors.layerBlend(atlasPixel, tilePixel));
+                                }
                             }
                         }
 
@@ -107,19 +110,20 @@ public class AtlasExporter {
      * If it fails, waits 250ms and tries again.
      * The 5th failed attempt will abort and throw an IOException.
      */
-    private static NativeImage readTile(File file) throws IOException {
+    private static NativeImage readTile(File file) {
         int attempt = 1;
         while(true) {
             try {
                 return NativeImage.read(Files.newInputStream(file.toPath()));
-            } catch(IOException e) {
+            } catch(Exception e) {
                 if(attempt < 5) { // we start counting at 1, so 5th attempt throws
                     BlazeMap.LOGGER.warn(String.format("Failed to open file \"%s\" %d times, retrying", file, attempt), e);
                     try { Thread.sleep(250); }
                     catch(InterruptedException ignored){}
                     attempt++;
                 } else {
-                    throw new IOException(String.format("Failed to open file \"%s\" %d times, aborting", file, attempt), e);
+                    BlazeMap.LOGGER.error(String.format("Failed to open file \"%s\" %d times, aborting", file, attempt), e);
+                    return null;
                 }
             }
         }
@@ -152,15 +156,16 @@ public class AtlasExporter {
                 if(!filename.endsWith(".png")) continue; // skip buffers
                 String[] coords = filename.replaceAll("(^\\[)|(]\\.png$)", "").split(",");
                 if(coords.length != 2) continue;
-                // non-atomic op on volatile int is ok because only 1 thread writes to variable
-                // Java guarantees r/w access to 32-bit variables is atomic, so other threads will read either old or new value with no need for synchronization and no risk of corruption.
-                task.tilesTotal++;
                 int x = Integer.parseInt(coords[0]);
                 int z = Integer.parseInt(coords[1]);
                 if(x < minX) minX = x;
                 if(x > maxX) maxX = x;
                 if(z < minZ) minZ = z;
                 if(z > maxZ) maxZ = z;
+
+                // non-atomic op on volatile int is ok because only 1 thread writes to variable
+                // Java guarantees r/w access to 32-bit variables is atomic, so other threads will read either old or new value with no need for synchronization and no risk of corruption.
+                task.tilesTotal++;
             }
         }
 
