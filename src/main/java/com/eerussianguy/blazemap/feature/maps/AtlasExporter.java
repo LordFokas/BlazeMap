@@ -65,26 +65,31 @@ public class AtlasExporter {
                         File file = new File(folder, LayerRegionTile.getImageName(new RegionPos(regionX, regionZ)));
                         if(!file.exists()) continue;
 
-                        try(NativeImage tile = readTile(file)) {
-                            if(tile != null) {
-                                int regionOffsetX = (regionX - task.atlasStartX) * resolution.regionWidth;
-                                int regionOffsetZ = (regionZ - task.atlasStartZ) * resolution.regionWidth;
-
-                                for(int x = 0; x < resolution.regionWidth; x++) { // Loop pixels
-                                    for(int z = 0; z < resolution.regionWidth; z++) {
-                                        int atlasPixelX = regionOffsetX + x;
-                                        int atlasPixelZ = regionOffsetZ + z;
-                                        int atlasPixel = atlas.getPixelRGBA(atlasPixelX, atlasPixelZ);
-                                        int tilePixel = tile.getPixelRGBA(x, z);
-                                        atlas.setPixelRGBA(atlasPixelX, atlasPixelZ, Colors.layerBlend(atlasPixel, tilePixel));
-                                    }
-                                }
-                            }
-                        }
-
                         // non-atomic op on volatile int is ok because only 1 thread writes to variable
                         // Java guarantees r/w access to 32-bit variables is atomic, so other threads will read either old or new value with no need for synchronization and no risk of corruption.
                         task.tilesCurrent++;
+
+                        try(NativeImage tile = readTile(file)) {
+                            if(tile == null) continue;
+                            int width = tile.getWidth(), height = tile.getHeight();
+                            if(width != resolution.regionWidth || height != resolution.regionWidth){
+                                BlazeMap.LOGGER.error("Tile {} ({} x {}) mismatches expectation ({} x {}), skipping", file, width, height, resolution.regionWidth, resolution.regionWidth);
+                                continue;
+                            }
+
+                            int regionOffsetX = (regionX - task.atlasStartX) * resolution.regionWidth;
+                            int regionOffsetZ = (regionZ - task.atlasStartZ) * resolution.regionWidth;
+
+                            for(int x = 0; x < resolution.regionWidth; x++) { // Loop pixels
+                                for(int z = 0; z < resolution.regionWidth; z++) {
+                                    int atlasPixelX = regionOffsetX + x;
+                                    int atlasPixelZ = regionOffsetZ + z;
+                                    int atlasPixel = atlas.getPixelRGBA(atlasPixelX, atlasPixelZ);
+                                    int tilePixel = tile.getPixelRGBA(x, z);
+                                    atlas.setPixelRGBA(atlasPixelX, atlasPixelZ, Colors.layerBlend(atlasPixel, tilePixel));
+                                }
+                            }
+                        }
                     }
                 }
             }
