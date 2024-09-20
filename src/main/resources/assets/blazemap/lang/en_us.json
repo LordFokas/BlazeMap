@@ -30,5 +30,8 @@
   "blazemap.gui.worldmap.menu.waypoint.delete": "Delete",
   "blazemap.gui.worldmap.menu.debug": "Debug",
   "blazemap.gui.worldmap.menu.debug.redraw_chunk_md": "Redraw Chunk from MD Cache",
-  "blazemap.gui.worldmap.menu.debug.inspect_chunk_md": "Inspect Chunk Master Data"
+  "blazemap.gui.worldmap.menu.debug.inspect_chunk_md": "Inspect Chunk Master Data",
+  "blazemap.gui.worldmap.menu.ftbchunks.claim": "Claim Chunk",
+  "blazemap.gui.worldmap.menu.ftbchunks.unclaim": "Unclaim Chunk",
+  "blazemap.gui.worldmap.menu.ftbchunks.claimed": "Claimed by others"
 }

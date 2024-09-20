@@ -39,7 +39,12 @@ public class WorldMapPopup implements Widget {
     public WorldMapPopup(Coordination coordination, int width, int height, List<BlazeRegistry.Key<Layer>> layers) {
         // Kick off menu creation
         MapMenuSetupEvent.MenuFolder container = new MapMenuSetupEvent.MenuFolder(MENU_ROOT, null, MENU_ROOT_TEXT);
-        MinecraftForge.EVENT_BUS.post(new MapMenuSetupEvent(container, layers, coordination.blockX, coordination.blockZ, coordination.chunkX, coordination.chunkZ, coordination.regionX, coordination.regionZ));
+        MinecraftForge.EVENT_BUS.post(new MapMenuSetupEvent(
+            container, layers, Minecraft.getInstance().level.dimension(),
+            coordination.blockX, coordination.blockZ,
+            coordination.chunkX, coordination.chunkZ,
+            coordination.regionX, coordination.regionZ)
+        );
         if(container.size() == 0) {
             container.add(WorldMapMenu.NOOP);
         }
