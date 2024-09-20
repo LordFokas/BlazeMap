@@ -18,7 +18,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -66,18 +65,19 @@ public class AtlasExporter {
                         File file = new File(folder, LayerRegionTile.getImageName(new RegionPos(regionX, regionZ)));
                         if(!file.exists()) continue;
 
-                        NativeImage tile = readTile(file);
-                        if(tile != null) {
-                            int regionOffsetX = (regionX - task.atlasStartX) * resolution.regionWidth;
-                            int regionOffsetZ = (regionZ - task.atlasStartZ) * resolution.regionWidth;
+                        try(NativeImage tile = readTile(file)) {
+                            if(tile != null) {
+                                int regionOffsetX = (regionX - task.atlasStartX) * resolution.regionWidth;
+                                int regionOffsetZ = (regionZ - task.atlasStartZ) * resolution.regionWidth;
 
-                            for(int x = 0; x < resolution.regionWidth; x++) { // Loop pixels
-                                for(int z = 0; z < resolution.regionWidth; z++) {
-                                    int atlasPixelX = regionOffsetX + x;
-                                    int atlasPixelZ = regionOffsetZ + z;
-                                    int atlasPixel = atlas.getPixelRGBA(atlasPixelX, atlasPixelZ);
-                                    int tilePixel = tile.getPixelRGBA(x, z);
-                                    atlas.setPixelRGBA(atlasPixelX, atlasPixelZ, Colors.layerBlend(atlasPixel, tilePixel));
+                                for(int x = 0; x < resolution.regionWidth; x++) { // Loop pixels
+                                    for(int z = 0; z < resolution.regionWidth; z++) {
+                                        int atlasPixelX = regionOffsetX + x;
+                                        int atlasPixelZ = regionOffsetZ + z;
+                                        int atlasPixel = atlas.getPixelRGBA(atlasPixelX, atlasPixelZ);
+                                        int tilePixel = tile.getPixelRGBA(x, z);
+                                        atlas.setPixelRGBA(atlasPixelX, atlasPixelZ, Colors.layerBlend(atlasPixel, tilePixel));
+                                    }
                                 }
                             }
                         }
