@@ -68,6 +68,10 @@ public class KnownMods {
         return ModList.get().getModContainerById(modID).isPresent();
     }
 
+    public static String getOwnerName(BlazeRegistry.Key<?> key) {
+        return API_CALL.get(key.location.getNamespace()).name;
+    }
+
     @SafeVarargs
     public static <T> T[] getCore(Class<T> t, Function<ModInfo, ? extends T> function, T ... fallbacks){
         return mapEntries(CORE, t, function, fallbacks);

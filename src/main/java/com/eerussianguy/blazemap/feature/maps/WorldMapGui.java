@@ -1,5 +1,6 @@
 package com.eerussianguy.blazemap.feature.maps;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -113,8 +114,8 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
     }
 
     @Override
-    public void drawTooltip(PoseStack stack, Component component, int x, int y) {
-        renderTooltip(stack, component, x, y);
+    public void drawTooltip(PoseStack stack, int x, int y, Component... lines) {
+        renderTooltip(stack, Arrays.stream(lines).map(Component::getVisualOrderText).toList(), x, y);
     }
 
     @Override

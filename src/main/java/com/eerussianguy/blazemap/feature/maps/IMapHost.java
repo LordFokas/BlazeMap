@@ -9,7 +9,7 @@ import com.eerussianguy.blazemap.api.maps.MapType;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 public interface IMapHost {
-    void drawTooltip(PoseStack stack, Component component, int x, int y);
+    void drawTooltip(PoseStack stack, int x, int y, Component... lines);
 
     boolean isLayerVisible(Key<Layer> layerID);
 
