@@ -24,6 +24,7 @@ import com.eerussianguy.blazemap.util.MapTypeAdapter;
  */
 public class ClientConfig {
     public final BooleanValue enableDebug;
+    public final IntValue atlasMaxSize;
     public final FeaturesConfig clientFeatures;
     public final MapConfig worldMap;
     public final MinimapConfig minimap;
@@ -33,6 +34,7 @@ public class ClientConfig {
 
         innerBuilder.push("general");
         enableDebug = builder.apply("enableDebug").comment("Enable debug mode?").define("enableDebug", !FMLEnvironment.production);
+        atlasMaxSize = builder.apply("atlasMaxSize").comment("Max memory allocation for atlas export, in Megabytes").defineInRange("atlasMaxSize", 1024, 256, 16384);
         innerBuilder.pop();
 
         innerBuilder.comment("Enable or disable (un)desired features");
