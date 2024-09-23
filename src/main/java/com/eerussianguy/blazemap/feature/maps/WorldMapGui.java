@@ -20,7 +20,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 
 import com.eerussianguy.blazemap.api.maps.TileResolution;
-import com.eerussianguy.blazemap.api.util.RegionPos;
 import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.api.BlazeMapAPI;
 import com.eerussianguy.blazemap.api.BlazeRegistry;
@@ -306,7 +305,7 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
         // Render progress text
         int total = task.getTilesTotal();
         int current = task.getTilesCurrent();
-        font.draw(stack, "Exporting", 5, 5, textColor);
+        font.draw(stack, String.format("Exporting  1:%d", task.resolution.pixelWidth), 5, 5, textColor);
         String operation = switch(task.getStage()){
             case QUEUED -> "queued";
             case CALCULATING -> "calculating";
