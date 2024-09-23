@@ -399,7 +399,7 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
         }
 
         if(key == GLFW.GLFW_KEY_F12) {
-            AtlasExporter.exportAsync(new AtlasTask(this.dimension, this.getMapType().getID(), this.mapRenderer.getVisibleLayers(), TileResolution.FULL, RegionPos.ORIGIN));
+            AtlasExporter.exportAsync(new AtlasTask(this.dimension, this.getMapType().getID(), this.mapRenderer.getVisibleLayers(), TileResolution.FULL, this.mapRenderer.getCenterRegion()));
             return true;
         }
 
