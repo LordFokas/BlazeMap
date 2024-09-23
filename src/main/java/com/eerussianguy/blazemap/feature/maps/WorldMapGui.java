@@ -19,6 +19,8 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 
+import com.eerussianguy.blazemap.api.maps.TileResolution;
+import com.eerussianguy.blazemap.api.util.RegionPos;
 import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.api.BlazeMapAPI;
 import com.eerussianguy.blazemap.api.BlazeRegistry;
@@ -27,6 +29,9 @@ import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.MapType;
 import com.eerussianguy.blazemap.engine.BlazeMapAsync;
 import com.eerussianguy.blazemap.feature.BlazeMapFeaturesClient;
+import com.eerussianguy.blazemap.feature.atlas.AtlasExporter;
+import com.eerussianguy.blazemap.feature.atlas.AtlasTask;
+import com.eerussianguy.blazemap.gui.Image;
 import com.eerussianguy.blazemap.gui.MouseSubpixelSmoother;
 import com.eerussianguy.blazemap.gui.primitives.Image;
 import com.eerussianguy.blazemap.profiling.overlay.ProfilingRenderer;
@@ -400,7 +405,7 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
         }
 
         if(key == GLFW.GLFW_KEY_F12) {
-            AtlasExporter.exportAsync(new AtlasExporter.Task(this.dimension, this.getMapType().getID(), this.mapRenderer.getVisibleLayers()));
+            AtlasExporter.exportAsync(new AtlasTask(this.dimension, this.getMapType().getID(), this.mapRenderer.getVisibleLayers(), TileResolution.FULL, RegionPos.ORIGIN));
             return true;
         }
 
