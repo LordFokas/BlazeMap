@@ -4,6 +4,7 @@ import java.util.function.Consumer;
 
 import com.eerussianguy.blazemap.api.BlazeRegistry;
 import com.eerussianguy.blazemap.api.util.RegionPos;
+import com.mojang.blaze3d.platform.NativeImage;
 
 @FunctionalInterface
 public interface DimensionTileStorage {
@@ -15,7 +16,7 @@ public interface DimensionTileStorage {
      * <br>
      * <b>  WARNING!  </b><br>
      * <br>
-     * In order to ensure thread safety please do all image related processing inside the Consumer code. <br>
+     * In order to ensure thread safety please do all NativeImage related processing inside the Consumer code. <br>
      * <b>DO NOT</b> attempt to save a reference to the image to handle it later.<br>
      * <br>
      * You have been warned.<br>
@@ -24,5 +25,5 @@ public interface DimensionTileStorage {
      * @throws IllegalArgumentException if the layer is not in the availableLayers Set.
      * @author LordFokas
      */
-    void consumeTile(BlazeRegistry.Key<Layer> layer, RegionPos region, TileResolution resolution, Consumer<PixelSource> consumer);
+    void consumeTile(BlazeRegistry.Key<Layer> layer, RegionPos region, TileResolution resolution, Consumer<NativeImage> consumer);
 }

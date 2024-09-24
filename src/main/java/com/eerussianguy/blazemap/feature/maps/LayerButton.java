@@ -1,14 +1,10 @@
 package com.eerussianguy.blazemap.feature.maps;
 
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.ImageButton;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 
 import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
 import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.MapType;
-import com.eerussianguy.blazemap.integration.KnownMods;
 import com.eerussianguy.blazemap.util.Colors;
 import com.eerussianguy.blazemap.util.RenderHelper;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -18,7 +14,6 @@ public class LayerButton extends ImageButton {
     private final Key<Layer> key;
     private final MapType parent;
     private final IMapHost host;
-    private final Component owner;
 
     public LayerButton(int px, int py, int w, int h, Key<Layer> key, MapType parent, IMapHost host) {
         super(px, py, w, h, 0, 0, 0, key.value().getIcon(), w, h, button -> {
@@ -26,7 +21,6 @@ public class LayerButton extends ImageButton {
         }, key.value().getName());
         this.key = key;
         this.parent = parent;
-        this.owner = new TextComponent(KnownMods.getOwnerName(key)).withStyle(ChatFormatting.BLUE);
         this.host = host;
         checkVisible();
     }
@@ -44,7 +38,7 @@ public class LayerButton extends ImageButton {
     @Override
     public void renderToolTip(PoseStack stack, int x, int y) {
         RenderSystem.setShaderColor(1, 1, 1, 1);
-        host.drawTooltip(stack, x, y, key.value().getName(), owner);
+        host.drawTooltip(stack, key.value().getName(), x, y);
     }
 
     public void checkVisible() {

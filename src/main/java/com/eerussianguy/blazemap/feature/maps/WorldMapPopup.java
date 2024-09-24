@@ -9,6 +9,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 
 import net.minecraftforge.common.MinecraftForge;
@@ -16,7 +17,6 @@ import net.minecraftforge.common.MinecraftForge;
 import com.eerussianguy.blazemap.api.BlazeRegistry;
 import com.eerussianguy.blazemap.api.event.MapMenuSetupEvent;
 import com.eerussianguy.blazemap.api.maps.Layer;
-import com.eerussianguy.blazemap.api.maps.Overlay;
 import com.eerussianguy.blazemap.util.Colors;
 import com.eerussianguy.blazemap.util.Helpers;
 import com.eerussianguy.blazemap.util.IntHolder;
@@ -36,15 +36,10 @@ public class WorldMapPopup implements Widget {
     private WorldMapPopup activeChild = null;
     private PopupItem lastClicked, hovered;
 
-    public WorldMapPopup(Coordination coordination, int width, int height, List<BlazeRegistry.Key<Layer>> layers, List<BlazeRegistry.Key<Overlay>> overlays) {
+    public WorldMapPopup(Coordination coordination, int width, int height, List<BlazeRegistry.Key<Layer>> layers) {
         // Kick off menu creation
         MapMenuSetupEvent.MenuFolder container = new MapMenuSetupEvent.MenuFolder(MENU_ROOT, null, MENU_ROOT_TEXT);
-        MinecraftForge.EVENT_BUS.post(new MapMenuSetupEvent(
-            container, layers, overlays, Minecraft.getInstance().level.dimension(),
-            coordination.blockX, coordination.blockZ,
-            coordination.chunkX, coordination.chunkZ,
-            coordination.regionX, coordination.regionZ)
-        );
+        MinecraftForge.EVENT_BUS.post(new MapMenuSetupEvent(container, layers, coordination.blockX, coordination.blockZ, coordination.chunkX, coordination.chunkZ, coordination.regionX, coordination.regionZ));
         if(container.size() == 0) {
             container.add(WorldMapMenu.NOOP);
         }

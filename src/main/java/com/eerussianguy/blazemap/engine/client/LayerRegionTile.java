@@ -13,7 +13,6 @@ import net.minecraft.world.level.ChunkPos;
 import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.BlazeRegistry;
 import com.eerussianguy.blazemap.api.maps.Layer;
-import com.eerussianguy.blazemap.api.maps.PixelSource;
 import com.eerussianguy.blazemap.api.maps.TileResolution;
 import com.eerussianguy.blazemap.api.util.RegionPos;
 import com.eerussianguy.blazemap.engine.StorageAccess;
@@ -30,7 +29,6 @@ public class LayerRegionTile {
 
     private final File file, buffer;
     private NativeImage image;
-    private final PixelSource imageWrapper;
     private final TileResolution resolution;
     private volatile boolean isEmpty = true;
     private volatile boolean isDirty = false;
@@ -48,23 +46,6 @@ public class LayerRegionTile {
         this.file = storage.getMipmap(layer.location, getImageName(region), resolution);
         this.buffer = storage.getMipmap(layer.location, getBufferName(region), resolution);
         this.resolution = resolution;
-
-        imageWrapper = new PixelSource() {
-            @Override
-            public int getPixel(int x, int y) {
-                return image.getPixelRGBA(x, y);
-            }
-
-            @Override
-            public int getWidth() {
-                return image.getWidth();
-            }
-
-            @Override
-            public int getHeight() {
-                return image.getHeight();
-            }
-        };
     }
 
     public void tryLoad() {
@@ -180,12 +161,12 @@ public class LayerRegionTile {
         return isDirty;
     }
 
-    public void consume(Consumer<PixelSource> consumer) {
+    public void consume(Consumer<NativeImage> consumer) {
         if(isEmpty) return;
 
         imageLock.readLock().lock();
         try {
-            consumer.accept(imageWrapper);
+            consumer.accept(image);
         }
         finally {
             imageLock.readLock().unlock();

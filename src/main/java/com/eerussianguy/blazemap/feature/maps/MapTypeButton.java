@@ -1,14 +1,11 @@
 package com.eerussianguy.blazemap.feature.maps;
 
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 
 import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
 import com.eerussianguy.blazemap.api.maps.MapType;
-import com.eerussianguy.blazemap.integration.KnownMods;
 import com.eerussianguy.blazemap.util.Colors;
 import com.eerussianguy.blazemap.util.RenderHelper;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -17,7 +14,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 public class MapTypeButton extends ImageButton {
     private final Key<MapType> key;
     private final IMapHost host;
-    private final Component owner;
 
     public MapTypeButton(int px, int py, int w, int h, Key<MapType> key, IMapHost host) {
         super(px, py, w, h, 0, 0, 0, key.value().getIcon(), w, h, button -> {
@@ -31,13 +27,13 @@ public class MapTypeButton extends ImageButton {
 
         this.host = host;
         this.key = key;
-        this.owner = new TextComponent(KnownMods.getOwnerName(key)).withStyle(ChatFormatting.BLUE);
     }
 
     @Override
     public void renderToolTip(PoseStack stack, int x, int y) {
         RenderSystem.setShaderColor(1, 1, 1, 1);
-        host.drawTooltip(stack, x, y, key.value().getName(), owner);
+        TranslatableComponent component = key.value().getName();
+        host.drawTooltip(stack, component, x, y);
     }
 
     @Override

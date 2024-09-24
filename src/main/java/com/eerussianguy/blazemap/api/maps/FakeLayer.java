@@ -20,14 +20,15 @@ import com.mojang.blaze3d.platform.NativeImage;
  *
  * @author LordFokas
  */
-public class FakeLayer extends Layer { // FIXME: rename to GhostLayer in next break (port to 1.21)
+public class FakeLayer extends Layer {
+
     public FakeLayer(BlazeRegistry.Key<Layer> id, TranslatableComponent name, ResourceLocation icon) {
-        super(id, Type.INVISIBLE, name, icon);
+        super(id, name, icon);
     }
 
     @Override // can't render
     public boolean renderTile(NativeImage tile, TileResolution resolution, IDataSource data, int xGridOffset, int zGridOffset) {
-        throw new UnsupportedOperationException("FakeLayers do not render tiles: " + getID());
+        throw new UnsupportedOperationException("FakeLayers do not render: " + getID());
     }
 
     @Override // can't have a legend

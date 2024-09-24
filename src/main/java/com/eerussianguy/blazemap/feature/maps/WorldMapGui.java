@@ -1,6 +1,5 @@
 package com.eerussianguy.blazemap.feature.maps;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -21,7 +20,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 
 import com.eerussianguy.blazemap.api.maps.TileResolution;
-import com.eerussianguy.blazemap.api.maps.Overlay;
 import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.api.BlazeMapAPI;
 import com.eerussianguy.blazemap.api.BlazeRegistry;
@@ -70,7 +68,6 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
     private final MapRenderer mapRenderer;
     private final MapConfigSynchronizer synchronizer;
     private final List<MapType> mapTypes;
-    private final List<Overlay> overlays;
     private final int layersBegin;
     private final MouseSubpixelSmoother mouse;
     private Widget legend;
@@ -85,7 +82,6 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
         synchronizer = new MapConfigSynchronizer(mapRenderer, BlazeMapConfig.CLIENT.worldMap);
         dimension = Minecraft.getInstance().level.dimension();
         mapTypes = BlazeMapAPI.MAPTYPES.keys().stream().map(BlazeRegistry.Key::value).filter(m -> m.shouldRenderInDimension(dimension)).collect(Collectors.toUnmodifiableList());
-        overlays = BlazeMapFeaturesClient.OVERLAYS.stream().map(BlazeRegistry.Key::value).filter(o -> o.shouldRenderInDimension(dimension)).collect(Collectors.toUnmodifiableList());
         layersBegin = 50 + (mapTypes.size() * 20);
         mouse = new MouseSubpixelSmoother();
         zoom = mapRenderer.getZoom();
@@ -108,16 +104,6 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
     }
 
     @Override
-    public boolean isOverlayVisible(BlazeRegistry.Key<Overlay> overlayID) {
-        return mapRenderer.isOverlayVisible(overlayID);
-    }
-
-    @Override
-    public void toggleOverlay(BlazeRegistry.Key<Overlay> overlayID) {
-        synchronizer.toggleOverlay(overlayID);
-    }
-
-    @Override
     public MapType getMapType() {
         return mapRenderer.getMapType();
     }
@@ -130,8 +116,8 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
     }
 
     @Override
-    public void drawTooltip(PoseStack stack, int x, int y, Component... lines) {
-        renderTooltip(stack, Arrays.stream(lines).map(Component::getVisualOrderText).toList(), x, y);
+    public void drawTooltip(PoseStack stack, Component component, int x, int y) {
+        renderTooltip(stack, component, x, y);
     }
 
     @Override
@@ -146,7 +132,6 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
 
         addRenderableOnly(new Image(ICON, 5, 5, 20, 20));
         addRenderableOnly(new Image(NAME, 30, 5, 110, 20));
-
         int y = 20;
         for(MapType mapType : mapTypes) {
             BlazeRegistry.Key<MapType> key = mapType.getID();
@@ -163,11 +148,6 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
                 lb.checkVisible();
                 addRenderableWidget(lb);
             }
-        }
-
-        y=20;
-        for(Overlay overlay : overlays) {
-            addRenderableWidget(new OverlayButton(32, y+=20, 16, 16, overlay.getID(), this));
         }
 
         search = addRenderableWidget(new EditBox(getMinecraft().font, (width - 120) / 2, height - 15, 120, 12, EMPTY));
@@ -233,7 +213,7 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
 
         if(button == GLFW.GLFW_MOUSE_BUTTON_2) { // If right click open new menu
             int scale = (int) getMinecraft().getWindow().getGuiScale();
-            contextMenu = new WorldMapPopup(coordination, width * scale, height * scale, mapRenderer.getVisibleLayers(), mapRenderer.getVisibleOverlays());
+            contextMenu = new WorldMapPopup(coordination, width * scale, height * scale, mapRenderer.getVisibleLayers());
             return true;
         }
 
@@ -286,13 +266,6 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
                 stack.pushPose();
                 stack.translate(5, layersBegin - 2, 0);
                 RenderHelper.fillRect(stack.last().pose(), 20, layers * 20, Colors.WIDGET_BACKGROUND);
-                stack.popPose();
-            }
-            int overlays = this.overlays.size();
-            if(overlays > 0) {
-                stack.pushPose();
-                stack.translate(30, 38, 0);
-                RenderHelper.fillRect(stack.last().pose(), 20, overlays * 20, Colors.WIDGET_BACKGROUND);
                 stack.popPose();
             }
             stack.pushPose();
