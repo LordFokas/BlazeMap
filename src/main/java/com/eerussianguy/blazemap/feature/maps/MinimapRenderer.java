@@ -7,7 +7,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraftforge.client.gui.ForgeIngameGui;
 
 import com.eerussianguy.blazemap.config.BlazeMapConfig;
-import com.eerussianguy.blazemap.api.maps.IScreenSkipsMinimap;
 import com.eerussianguy.blazemap.util.Helpers;
 import com.eerussianguy.blazemap.profiling.Profilers;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -30,7 +29,7 @@ public class MinimapRenderer implements AutoCloseable {
 
     public void draw(PoseStack stack, MultiBufferSource buffers, ForgeIngameGui gui, int width, int height) {
         Minecraft mc = Minecraft.getInstance();
-        if(mc.screen instanceof IScreenSkipsMinimap) return;
+        if(mc.screen != null) return;
 
         LocalPlayer player = Helpers.getPlayer();
         if(player == null) return;

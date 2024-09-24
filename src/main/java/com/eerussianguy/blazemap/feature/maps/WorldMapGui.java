@@ -25,7 +25,6 @@ import com.eerussianguy.blazemap.api.maps.TileResolution;
 import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.api.BlazeMapAPI;
 import com.eerussianguy.blazemap.api.BlazeRegistry;
-import com.eerussianguy.blazemap.api.maps.IScreenSkipsMinimap;
 import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.MapType;
 import com.eerussianguy.blazemap.engine.BlazeMapAsync;
@@ -42,7 +41,7 @@ import com.eerussianguy.blazemap.util.RenderHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 
-public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost {
+public class WorldMapGui extends Screen implements IMapHost {
     private static final TextComponent EMPTY = new TextComponent("");
     private static final ResourceLocation ICON = Helpers.identifier("textures/mod_icon.png");
     private static final ResourceLocation NAME = Helpers.identifier("textures/mod_name.png");
