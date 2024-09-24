@@ -6,11 +6,12 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.Level;
+
+import net.minecraftforge.common.MinecraftForge;
 
 import com.eerussianguy.blazemap.api.BlazeRegistry;
+import com.eerussianguy.blazemap.api.event.ComponentOrderingEvent.LayerOrderingEvent;
 
 /**
  * Each available map in Blaze Map is defined by MapType.
@@ -20,38 +21,29 @@ import com.eerussianguy.blazemap.api.BlazeRegistry;
  *
  * @author LordFokas
  */
-public abstract class MapType implements BlazeRegistry.RegistryEntry {
-    private final BlazeRegistry.Key<MapType> id;
-    private final Set<BlazeRegistry.Key<Layer>> layers;
-    private final TranslatableComponent name;
-    private final ResourceLocation icon;
+public class MapType extends NamedMapComponent<MapType> {
+    private final LinkedHashSet<BlazeRegistry.Key<Layer>> layers;
+    private final Set<BlazeRegistry.Key<Layer>> layerView;
+    private boolean inflated;
 
     @SafeVarargs
     public MapType(BlazeRegistry.Key<MapType> id, TranslatableComponent name, ResourceLocation icon, BlazeRegistry.Key<Layer>... layers) {
-        this.id = id;
-        this.name = name;
-        this.icon = icon;
-        this.layers = Collections.unmodifiableSet(new LinkedHashSet<>(Arrays.asList(layers)));
+        super(id, name, icon);
+        this.layers = new LinkedHashSet<>(Arrays.asList(layers));
+        this.layerView = Collections.unmodifiableSet(this.layers);
     }
 
     public Set<BlazeRegistry.Key<Layer>> getLayers() {
-        return layers;
+        return layerView;
     }
 
-    @Override
-    public BlazeRegistry.Key<MapType> getID() {
-        return id;
-    }
+    /** Used by the engine to give addons a chance to contribute to an external map type, do not call this method. */
+    public void inflate() {
+        if(inflated) throw new IllegalStateException("MapType " + id + "already inflated");
+        inflated = true;
 
-    public boolean shouldRenderInDimension(ResourceKey<Level> dimension) {
-        return true;
-    }
-
-    public TranslatableComponent getName() {
-        return name;
-    }
-
-    public ResourceLocation getIcon() {
-        return icon;
+        var event = new LayerOrderingEvent(id, layers);
+        MinecraftForge.EVENT_BUS.post(event);
+        event.finish();
     }
 }

@@ -1,5 +1,7 @@
 package com.eerussianguy.blazemap.feature.maps;
 
+import java.util.Arrays;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -13,6 +15,7 @@ import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
 import com.eerussianguy.blazemap.api.maps.IScreenSkipsMinimap;
 import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.MapType;
+import com.eerussianguy.blazemap.api.maps.Overlay;
 import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.config.ClientConfig;
 import com.eerussianguy.blazemap.config.MinimapConfigFacade;
@@ -49,6 +52,16 @@ public class MinimapOptionsGui extends BlazeGui implements IScreenSkipsMinimap, 
     }
 
     @Override
+    public boolean isOverlayVisible(Key<Overlay> overlayID) {
+        return mapRenderer.isOverlayVisible(overlayID);
+    }
+
+    @Override
+    public void toggleOverlay(Key<Overlay> overlayID) {
+        synchronizer.toggleOverlay(overlayID);
+    }
+
+    @Override
     public MapType getMapType() {
         return mapRenderer.getMapType();
     }
@@ -59,8 +72,8 @@ public class MinimapOptionsGui extends BlazeGui implements IScreenSkipsMinimap, 
     }
 
     @Override
-    public void drawTooltip(PoseStack stack, Component component, int x, int y) {
-        renderTooltip(stack, component, x, y);
+    public void drawTooltip(PoseStack stack, int x, int y, Component ... lines) {
+        renderTooltip(stack, Arrays.stream(lines).map(Component::getVisualOrderText).toList(), x, y);
     }
 
     @Override

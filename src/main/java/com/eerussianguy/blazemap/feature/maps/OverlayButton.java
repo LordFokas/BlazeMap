@@ -2,31 +2,25 @@ package com.eerussianguy.blazemap.feature.maps;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.ImageButton;
-import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 
 import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
-import com.eerussianguy.blazemap.api.maps.MapType;
+import com.eerussianguy.blazemap.api.maps.Overlay;
 import com.eerussianguy.blazemap.integration.KnownMods;
 import com.eerussianguy.blazemap.util.Colors;
 import com.eerussianguy.blazemap.util.RenderHelper;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
-public class MapTypeButton extends ImageButton {
-    private final Key<MapType> key;
+public class OverlayButton extends ImageButton {
+    private final Key<Overlay> key;
     private final IMapHost host;
     private final Component owner;
 
-    public MapTypeButton(int px, int py, int w, int h, Key<MapType> key, IMapHost host) {
+    public OverlayButton(int px, int py, int w, int h, Key<Overlay> key, IMapHost host) {
         super(px, py, w, h, 0, 0, 0, key.value().getIcon(), w, h, button -> {
-            host.setMapType(key.value());
-            for(GuiEventListener widget : host.getChildren()) {
-                if(widget instanceof LayerButton lb) {
-                    lb.checkVisible();
-                }
-            }
+            host.toggleOverlay(key);
         }, key.value().getName());
 
         this.host = host;
@@ -42,7 +36,7 @@ public class MapTypeButton extends ImageButton {
 
     @Override
     public void render(PoseStack stack, int mx, int my, float partial) {
-        if(key.equals(host.getMapType().getID()))
+        if(host.isOverlayVisible(key))
             RenderHelper.setShaderColor(0xFFFFDD00);
         else
             RenderHelper.setShaderColor(Colors.NO_TINT);

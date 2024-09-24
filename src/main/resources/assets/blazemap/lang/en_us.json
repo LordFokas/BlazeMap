@@ -10,6 +10,8 @@
   "blazemap.terrain_slope": "Terrain Slope",
   "blazemap.aerial_view": "Aerial View",
   "blazemap.nether": "Nether",
+  "blazemap.grid": "Chunk Grid",
+  "blazemap.ftbchunks": "FTB Chunks",
   "blazemap.topography": "Topography",
   "blazemap.enabled": " §aENABLED",
   "blazemap.gui.minimap_options.title": "Minimap Options",
@@ -29,5 +31,8 @@
   "blazemap.gui.worldmap.menu.waypoint.delete": "Delete",
   "blazemap.gui.worldmap.menu.debug": "Debug",
   "blazemap.gui.worldmap.menu.debug.redraw_chunk_md": "Redraw Chunk from MD Cache",
-  "blazemap.gui.worldmap.menu.debug.inspect_chunk_md": "Inspect Chunk Master Data"
+  "blazemap.gui.worldmap.menu.debug.inspect_chunk_md": "Inspect Chunk Master Data",
+  "blazemap.gui.worldmap.menu.ftbchunks.claim": "Claim Chunk",
+  "blazemap.gui.worldmap.menu.ftbchunks.unclaim": "Unclaim Chunk",
+  "blazemap.gui.worldmap.menu.ftbchunks.claimed": "Claimed by others"
 }

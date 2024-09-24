@@ -33,6 +33,10 @@ public class Colors {
         return Math.max(0, Math.min(255, a + b));
     }
 
+    public static int setAlpha(int color, byte alpha) {
+        return (alpha << 24) | (color & 0x00FFFFFF);
+    }
+
     public static int abgr(Color color) {
         return color.getAlpha() << 24 | color.getBlue() << 16 | color.getGreen() << 8 | color.getRed();
     }

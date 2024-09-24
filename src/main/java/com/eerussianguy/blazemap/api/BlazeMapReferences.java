@@ -6,6 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 
 import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.MapType;
+import com.eerussianguy.blazemap.api.maps.Overlay;
 import com.eerussianguy.blazemap.api.markers.ObjectRenderer;
 import com.eerussianguy.blazemap.api.pipeline.Collector;
 import com.eerussianguy.blazemap.api.pipeline.DataType;
@@ -52,6 +53,11 @@ public class BlazeMapReferences {
         public static final Key<MapType> AERIAL_VIEW = new Key<>(MAPTYPES, MODID, "aerial_view");
         public static final Key<MapType> TOPOGRAPHY = new Key<>(MAPTYPES, MODID, "topography");
         public static final Key<MapType> NETHER = new Key<>(MAPTYPES, MODID, "nether");
+    }
+
+    public static class Overlays {
+        public static final Key<Overlay> GRID = new Key<>(OVERLAYS, MODID, "grid");
+        public static final Key<Overlay> FTBCHUNKS = new Key<>(OVERLAYS, MODID, "ftbchunks");
     }
 
     public static class ObjectRenderers {
