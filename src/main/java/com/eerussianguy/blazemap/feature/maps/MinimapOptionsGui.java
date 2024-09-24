@@ -15,6 +15,7 @@ import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
 import com.eerussianguy.blazemap.api.maps.IScreenSkipsMinimap;
 import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.MapType;
+import com.eerussianguy.blazemap.api.maps.Overlay;
 import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.config.ClientConfig;
 import com.eerussianguy.blazemap.config.MinimapConfigFacade;
@@ -48,6 +49,16 @@ public class MinimapOptionsGui extends BlazeGui implements IScreenSkipsMinimap, 
     @Override
     public void toggleLayer(Key<Layer> layerID) {
         synchronizer.toggleLayer(layerID);
+    }
+
+    @Override
+    public boolean isOverlayVisible(Key<Overlay> overlayID) {
+        return mapRenderer.isOverlayVisible(overlayID);
+    }
+
+    @Override
+    public void toggleOverlay(Key<Overlay> overlayID) {
+        synchronizer.toggleOverlay(overlayID);
     }
 
     @Override

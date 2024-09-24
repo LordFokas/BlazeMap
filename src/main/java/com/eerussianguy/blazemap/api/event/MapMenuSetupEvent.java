@@ -14,18 +14,21 @@ import net.minecraftforge.eventbus.api.Event;
 
 import com.eerussianguy.blazemap.api.BlazeRegistry;
 import com.eerussianguy.blazemap.api.maps.Layer;
+import com.eerussianguy.blazemap.api.maps.Overlay;
 
 public class MapMenuSetupEvent extends Event {
     public final MenuFolder root;
     public final List<BlazeRegistry.Key<Layer>> layers;
+    public final List<BlazeRegistry.Key<Overlay>> overlays;
     public final ResourceKey<Level> dimension;
     public final int blockPosX, blockPosZ;
     public final int chunkPosX, chunkPosZ;
     public final int regionPosX, regionPosZ;
 
-    public MapMenuSetupEvent(MenuFolder root, List<BlazeRegistry.Key<Layer>> layers, ResourceKey<Level> dimension, int blockPosX, int blockPosZ, int chunkPosX, int chunkPosZ, int regionPosX, int regionPosZ) {
+    public MapMenuSetupEvent(MenuFolder root, List<BlazeRegistry.Key<Layer>> layers, List<BlazeRegistry.Key<Overlay>> overlays, ResourceKey<Level> dimension, int blockPosX, int blockPosZ, int chunkPosX, int chunkPosZ, int regionPosX, int regionPosZ) {
         this.root = root;
         this.layers = Collections.unmodifiableList(layers);
+        this.overlays = Collections.unmodifiableList(overlays);
         this.dimension = dimension;
         this.blockPosX = blockPosX;
         this.blockPosZ = blockPosZ;

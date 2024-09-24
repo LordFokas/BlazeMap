@@ -1,5 +1,6 @@
 package com.eerussianguy.blazemap.feature.maps;
 
+import com.eerussianguy.blazemap.api.maps.Overlay;
 import com.eerussianguy.blazemap.config.ClientConfig.MapConfig;
 import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
 import com.eerussianguy.blazemap.api.maps.Layer;
@@ -39,6 +40,12 @@ public class MapConfigSynchronizer {
     public boolean toggleLayer(Key<Layer> layerID) {
         if(!renderer.toggleLayer(layerID)) return false;
         config.disabledLayers.set(renderer.getDisabledLayers());
+        return true;
+    }
+
+    public boolean toggleOverlay(Key<Overlay> overlayID) {
+        if(!renderer.toggleOverlay(overlayID)) return false;
+        config.disabledOverlays.set(renderer.getDisabledOverlays());
         return true;
     }
 

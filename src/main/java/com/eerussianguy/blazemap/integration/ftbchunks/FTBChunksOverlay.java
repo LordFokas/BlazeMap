@@ -7,8 +7,8 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
+import com.eerussianguy.blazemap.api.maps.Overlay;
 import com.eerussianguy.blazemap.api.maps.PixelSource;
-import com.eerussianguy.blazemap.api.maps.SyntheticLayer;
 import com.eerussianguy.blazemap.api.maps.TileResolution;
 import com.eerussianguy.blazemap.api.util.RegionPos;
 import com.eerussianguy.blazemap.util.Colors;
@@ -18,14 +18,14 @@ import dev.ftb.mods.ftbchunks.data.FTBChunksAPI;
 import dev.ftb.mods.ftblibrary.math.ChunkDimPos;
 import dev.ftb.mods.ftbteams.data.Team;
 
-public class ClaimedChunksLayer extends SyntheticLayer {
+public class FTBChunksOverlay extends Overlay {
     private final EnumMap<TileResolution, HashMap<ResourceKey<Level>, FTBChunksPixelSource>> SOURCES = new EnumMap<>(TileResolution.class);
 
-    public ClaimedChunksLayer() {
+    public FTBChunksOverlay() {
         super(
-            BlazeMapReferences.Layers.FTBCHUNKS,
+            BlazeMapReferences.Overlays.FTBCHUNKS,
             Helpers.translate("blazemap.ftbchunks"),
-            BlazeMapReferences.Icons.HOUSE
+            Helpers.identifier("textures/map_icons/overlay_ftbchunks.png")
         );
     }
 

@@ -1,13 +1,15 @@
 package com.eerussianguy.blazemap.integration.ftbchunks;
 
+import java.util.Set;
+
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
-import com.eerussianguy.blazemap.api.event.BlazeRegistryEvent.LayerRegistryEvent;
+import com.eerussianguy.blazemap.api.event.BlazeRegistryEvent.OverlayRegistryEvent;
+import com.eerussianguy.blazemap.api.event.ComponentOrderingEvent.OverlayOrderingEvent;
 import com.eerussianguy.blazemap.api.event.MapMenuSetupEvent;
-import com.eerussianguy.blazemap.api.event.MapTypeInflationEvent;
 import com.eerussianguy.blazemap.integration.ModIDs;
 import com.eerussianguy.blazemap.integration.ModIntegration;
 import com.eerussianguy.blazemap.util.Helpers;
@@ -24,7 +26,6 @@ public class FTBChunksPlugin extends ModIntegration {
     private static final TranslatableComponent CLAIMED_TEXT = Helpers.translate("blazemap.gui.worldmap.menu.ftbchunks.claimed");
     private static final MapMenuSetupEvent.MenuAction CLAIMED = new MapMenuSetupEvent.MenuAction(CLAIMED_ID, null, CLAIMED_TEXT, null);
 
-
     public FTBChunksPlugin() {
         super(
             ModIDs.FTB_CHUNKS,
@@ -34,17 +35,16 @@ public class FTBChunksPlugin extends ModIntegration {
 
     @Override
     public void setup() {
-        MinecraftForge.EVENT_BUS.addListener((LayerRegistryEvent event) -> {
-            event.registry.register(new ClaimedChunksLayer());
+        MinecraftForge.EVENT_BUS.addListener((OverlayRegistryEvent event) -> {
+            event.registry.register(new FTBChunksOverlay());
         });
 
-        MinecraftForge.EVENT_BUS.addListener((MapTypeInflationEvent event) -> {
-            event.add(BlazeMapReferences.Layers.FTBCHUNKS);
+        MinecraftForge.EVENT_BUS.addListener((OverlayOrderingEvent event) -> {
+            event.addAfter(BlazeMapReferences.Overlays.FTBCHUNKS, Set.of(BlazeMapReferences.Overlays.GRID));
         });
-
 
         MinecraftForge.EVENT_BUS.addListener((MapMenuSetupEvent event) -> {
-            if(!event.layers.contains(BlazeMapReferences.Layers.FTBCHUNKS)) return;
+            if(!event.overlays.contains(BlazeMapReferences.Overlays.FTBCHUNKS)) return;
 
             final var uuid = Helpers.getPlayer().getUUID();
             final var manager = FTBChunksAPI.getManager();

@@ -42,6 +42,7 @@ import com.eerussianguy.blazemap.api.util.RegionPos;
 import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.engine.BlazeMapAsync;
 import com.eerussianguy.blazemap.engine.async.AsyncAwaiter;
+import com.eerussianguy.blazemap.feature.BlazeMapFeaturesClient;
 import com.eerussianguy.blazemap.util.Colors;
 import com.eerussianguy.blazemap.util.Helpers;
 import com.eerussianguy.blazemap.profiling.Profiler;
@@ -85,7 +86,7 @@ public class MapRenderer implements AutoCloseable {
     }
 
     private static void onTileChanged(LayerRegion tile) {
-        RENDERERS.forEach(r -> r.changed(tile.layer, tile.region));
+        RENDERERS.forEach(r -> r.onLayerChanged(tile.layer, tile.region));
     }
 
 
@@ -97,7 +98,8 @@ public class MapRenderer implements AutoCloseable {
     private Profiler.TimeProfiler uploadTimer = new Profiler.TimeProfiler.Dummy();
 
     private MapType mapType;
-    private List<BlazeRegistry.Key<Layer>> disabled, visible;
+    private List<BlazeRegistry.Key<Layer>> layers_on, layers_off;
+    private List<BlazeRegistry.Key<Overlay>> overlays_on, overlays_off = new LinkedList<>();
     private final HashMap<BlazeRegistry.Key<MapType>, List<BlazeRegistry.Key<Layer>>> disabledLayers = new HashMap<>();
     private final List<Waypoint> waypoints = new ArrayList<>(16);
     private final List<Waypoint> waypoints_on = new ArrayList<>(16);
@@ -133,6 +135,7 @@ public class MapRenderer implements AutoCloseable {
         this.maxZoom = maxZoom;
         resolution = TileResolution.FULL;
 
+        updateVisibleOverlays();
         selectMapType();
         centerOnPlayer();
 
@@ -240,14 +243,14 @@ public class MapRenderer implements AutoCloseable {
 
     public void updateLabels() {
         labels.clear();
-        visible.forEach(layer -> labels.addAll(labelStorage.getInLayer(layer).stream().filter(l -> inRange(l.getPosition())).collect(Collectors.toList())));
+        layers_on.forEach(layer -> labels.addAll(labelStorage.getInLayer(layer).stream().filter(l -> inRange(l.getPosition())).collect(Collectors.toList())));
         debug.labels = labels.size();
         labels.forEach(this::matchLabel);
         pingSearchHost();
     }
 
     private void add(MapLabel label) {
-        if(inRange(label.getPosition()) && visible.contains(label.getLayerID())) {
+        if(inRange(label.getPosition()) && layers_on.contains(label.getLayerID())) {
             labels.add(label);
             debug.labels++;
             matchLabel(label);
@@ -264,8 +267,8 @@ public class MapRenderer implements AutoCloseable {
         }
     }
 
-    private void changed(BlazeRegistry.Key<Layer> layer, RegionPos region) {
-        if(!visible.contains(layer)) return;
+    private void onLayerChanged(BlazeRegistry.Key<Layer> layer, RegionPos region) {
+        if(!layers_on.contains(layer)) return;
         RegionPos r0 = offsets[0][0];
         if(r0.x > region.x || r0.z > region.z) return;
         RegionPos[] arr = offsets[offsets.length - 1];
@@ -275,9 +278,14 @@ public class MapRenderer implements AutoCloseable {
     }
 
     private void updateVisibleLayers() {
-        visible = mapType.getLayers().stream().filter(l -> !disabled.contains(l) && l.value().shouldRenderInDimension(dimension)).collect(Collectors.toList());
+        layers_on = mapType.getLayers().stream().filter(l -> !layers_off.contains(l) && l.value().shouldRenderInDimension(dimension)).collect(Collectors.toList());
         updateLabels();
-        debug.layers = visible.size();
+        debug.layers = layers_on.size();
+    }
+
+    private void updateVisibleOverlays() {
+        overlays_on = BlazeMapFeaturesClient.OVERLAYS.stream().filter(o -> !overlays_off.contains(o) && o.value().shouldRenderInDimension(dimension)).collect(Collectors.toList());
+        debug.overlays = overlays_on.size();
     }
 
     private boolean inRange(BlockPos pos) {
@@ -437,55 +445,65 @@ public class MapRenderer implements AutoCloseable {
     }
 
     private void generateMapTile(NativeImage texture, TileResolution resolution, int textureW, int textureH, int cornerXOffset, int cornerZOffset, int regionIndexX, int regionIndexZ) {
-        for(BlazeRegistry.Key<Layer> layer : visible) {
+        // Precomputing values so they don't waste CPU cycles recalculating for each pixel
+        final RegionPos region = offsets[regionIndexX][regionIndexZ];
+        final int cornerXOffsetScaled = cornerXOffset / resolution.pixelWidth;
+        final int cornerZOffsetScaled = cornerZOffset / resolution.pixelWidth;
+        final int regionFirstPixelX = (regionIndexX * resolution.regionWidth);
+        final int regionFirstPixelY = (regionIndexZ * resolution.regionWidth);
+
+        int startX = (region.x * 512) < begin.getX() ? cornerXOffsetScaled : 0;
+        int startY = (region.z * 512) < begin.getZ() ? cornerZOffsetScaled : 0;
+
+        if (regionFirstPixelX + startX - cornerXOffsetScaled < 0) {
+            // Set x to be the value it should be when textureX == 0
+            startX = cornerXOffsetScaled - regionFirstPixelX;
+        }
+        if (regionFirstPixelY + startY - cornerZOffsetScaled < 0) {
+            // Set y to be the value it should be when textureY == 0
+            startY = cornerZOffsetScaled - regionFirstPixelY;
+        }
+
+        final int _startX = startX, _startY = startY;
+        final int textureFirstPixelX = regionFirstPixelX - cornerXOffsetScaled;
+        final int textureFirstPixelY = regionFirstPixelY - cornerZOffsetScaled;
+
+        // Paint map layers on the canvas
+        for(BlazeRegistry.Key<Layer> layer : layers_on) {
             if(!layer.value().type.isVisible) return;
+            tileStorage.consumeTile(layer, region, resolution, source -> transferPixels(texture, source, _startX, _startY, textureFirstPixelX, textureFirstPixelY, textureW, textureH));
+        }
 
-            // Precomputing values so they don't waste CPU cycles recalculating for each pixel
-            final RegionPos region = offsets[regionIndexX][regionIndexZ];
-            final int cxo = cornerXOffset / resolution.pixelWidth;
-            final int czo = cornerZOffset / resolution.pixelWidth;
+        // Paint global overlays on top of the layers
+        for(BlazeRegistry.Key<Overlay> overlay : overlays_on) {
+            PixelSource source = overlay.value().getPixelSource(dimension, region, resolution);
+            transferPixels(texture, source, _startX, _startY, textureFirstPixelX, textureFirstPixelY, textureW, textureH);
+        }
+    }
 
-            final int regWidthbyIndexX = (regionIndexX * resolution.regionWidth);
-            final int regWidthbyIndexZ = (regionIndexZ * resolution.regionWidth);
+    private void transferPixels(NativeImage texture, PixelSource source, int startX, int startY, int textureFirstPixelX, int textureFirstPixelY, int textureW, int textureH) {
+        final int sourceWidth = source.getWidth();
+        final int sourceHeight = source.getHeight();
 
-            tileStorage.consumeTile(layer, region, resolution, source -> {
-                final int sourceWidth = source.getWidth();
-                final int sourceHeight = source.getHeight();
+        for(int x = startX; x < sourceWidth; x++) {
+            int textureX = textureFirstPixelX + x;
 
-                int startX = (region.x * 512) < begin.getX() ? cxo : 0;
-                int startY = (region.z * 512) < begin.getZ() ? czo : 0;
+            if(textureX >= textureW) break;
 
-                if (regWidthbyIndexX + startX - cxo < 0) {
-                    // Set x to be the value it should be when textureX == 0
-                    startX = cxo - regWidthbyIndexX;
-                }
-                if (regWidthbyIndexZ + startY - czo < 0) {
-                    // Set y to be the value it should be when textureY == 0
-                    startY = czo - regWidthbyIndexZ;
-                }
+            for(int y = startY; y < sourceHeight; y++) {
+                int textureY = textureFirstPixelY + y;
 
-                for(int x = startX; x < sourceWidth; x++) {
-                    int textureX = regWidthbyIndexX + x - cxo;
+                if(textureY >= textureH) break;
 
-                    if(textureX >= textureW) break;
-
-                    for(int y = startY; y < sourceHeight; y++) {
-                        int textureY = regWidthbyIndexZ + y - czo;
-
-                        if(textureY >= textureH) break;
-
-                        int color = Colors.layerBlend(texture.getPixelRGBA(textureX, textureY), source.getPixel(x, y));
-                        texture.setPixelRGBA(textureX, textureY, color);
-                    }
-                }
-            });
+                int color = Colors.layerBlend(texture.getPixelRGBA(textureX, textureY), source.getPixel(x, y));
+                texture.setPixelRGBA(textureX, textureY, color);
+            }
         }
     }
 
     private void renderMarker(MultiBufferSource buffers, PoseStack stack, BlockPos position, ResourceLocation marker, int color, double width, double height, float rotation, boolean zoom, String name, SearchTargeting search) {
         renderMarker(buffers, stack, position, marker, color, width, height, 0, rotation, zoom, name, search);
     }
-
 
     private void renderMarker(MultiBufferSource buffers, PoseStack stack, BlockPos position, ResourceLocation marker, int color, double width, double height, double zHeight, float rotation, boolean zoom, String name, SearchTargeting search) {
         stack.pushPose();
@@ -599,7 +617,7 @@ public class MapRenderer implements AutoCloseable {
             if(!mapType.shouldRenderInDimension(dimension)) return false;
             this.mapType = mapType;
         }
-        this.disabled = disabledLayers.computeIfAbsent(this.mapType.getID(), $ -> new LinkedList<>());
+        this.layers_off = disabledLayers.computeIfAbsent(this.mapType.getID(), $ -> new LinkedList<>());
         updateVisibleLayers();
         this.needsUpdate = true;
         return true;
@@ -610,13 +628,24 @@ public class MapRenderer implements AutoCloseable {
     }
 
     List<BlazeRegistry.Key<Layer>> getDisabledLayers() {
-        return this.disabled;
+        return this.layers_off;
     }
 
     void setDisabledLayers(List<BlazeRegistry.Key<Layer>> layers) {
-        this.disabled.clear();
-        this.disabled.addAll(layers);
+        this.layers_off.clear();
+        this.layers_off.addAll(layers);
         updateVisibleLayers();
+        this.needsUpdate = true;
+    }
+
+    List<BlazeRegistry.Key<Overlay>> getDisabledOverlays() {
+        return this.overlays_off;
+    }
+
+    void setDisabledOverlays(List<BlazeRegistry.Key<Overlay>> overlays) {
+        this.overlays_off.clear();
+        this.overlays_off.addAll(overlays);
+        updateVisibleOverlays();
         this.needsUpdate = true;
     }
 
@@ -651,19 +680,36 @@ public class MapRenderer implements AutoCloseable {
 
     public boolean toggleLayer(BlazeRegistry.Key<Layer> layer) {
         if(!mapType.getLayers().contains(layer)) return false;
-        if(disabled.contains(layer)) disabled.remove(layer);
-        else disabled.add(layer);
+        if(layers_off.contains(layer)) layers_off.remove(layer);
+        else layers_off.add(layer);
         updateVisibleLayers();
         needsUpdate = true;
         return true;
     }
 
     List<BlazeRegistry.Key<Layer>> getVisibleLayers() {
-        return visible;
+        return layers_on;
     }
 
     public boolean isLayerVisible(BlazeRegistry.Key<Layer> layer) {
-        return !disabled.contains(layer);
+        return !layers_off.contains(layer);
+    }
+
+    public boolean toggleOverlay(BlazeRegistry.Key<Overlay> overlay) {
+        if(!overlay.value().shouldRenderInDimension(dimension)) return false;
+        if(overlays_off.contains(overlay)) overlays_off.remove(overlay);
+        else overlays_off.add(overlay);
+        updateVisibleOverlays();
+        needsUpdate = true;
+        return true;
+    }
+
+    List<BlazeRegistry.Key<Overlay>> getVisibleOverlays() {
+        return overlays_on;
+    }
+
+    public boolean isOverlayVisible(BlazeRegistry.Key<Overlay> overlay) {
+        return !overlays_off.contains(overlay);
     }
 
     public void setCenter(int x, int z) {
@@ -705,7 +751,7 @@ public class MapRenderer implements AutoCloseable {
         int bx, bz, ex, ez;
         double zoom;
         int ox, oz;
-        int layers, labels, waypoints;
+        int layers, overlays, labels, waypoints;
         String stitching;
     }
 }

@@ -7,12 +7,9 @@ import java.util.stream.Collectors;
 
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.Level;
 
 import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
-import com.eerussianguy.blazemap.api.BlazeRegistry.RegistryEntry;
 import com.eerussianguy.blazemap.api.pipeline.Consumer;
 import com.eerussianguy.blazemap.api.pipeline.DataType;
 import com.eerussianguy.blazemap.api.pipeline.MasterDatum;
@@ -31,13 +28,10 @@ import com.mojang.blaze3d.platform.NativeImage;
  *
  * @author LordFokas
  */
-public abstract class Layer implements RegistryEntry, Consumer {
+public abstract class Layer extends NamedMapComponent<Layer> implements Consumer {
     protected static final int OPAQUE = 0xFF000000;
 
-    private final Key<Layer> id;
     private final Set<Key<DataType<MasterDatum>>> inputs;
-    private final TranslatableComponent name;
-    private final ResourceLocation icon;
     private final boolean opaque;
     public final Type type;
 
@@ -53,16 +47,10 @@ public abstract class Layer implements RegistryEntry, Consumer {
 
     @SafeVarargs
     Layer(Key<Layer> id, Type type, TranslatableComponent name, ResourceLocation icon, Key<DataType<MasterDatum>>... inputs) {
-        this.id = id;
+        super(id, name, icon);
         this.type = type;
-        this.name = name;
-        this.icon = icon;
         this.inputs = Arrays.stream(inputs).collect(Collectors.toUnmodifiableSet());
         this.opaque = icon == null; // FIXME: this is bullshit
-    }
-
-    public Key<Layer> getID() {
-        return id;
     }
 
     @Override
@@ -70,23 +58,11 @@ public abstract class Layer implements RegistryEntry, Consumer {
         return inputs;
     }
 
-    public boolean shouldRenderInDimension(ResourceKey<Level> dimension) {
-        return true;
-    }
-
     public final boolean isOpaque() {
         return opaque;
     }
 
     public abstract boolean renderTile(NativeImage tile, TileResolution resolution, IDataSource data, int xGridOffset, int zGridOffset);
-
-    public TranslatableComponent getName() {
-        return name;
-    }
-
-    public ResourceLocation getIcon() {
-        return icon;
-    }
 
     /**
      * Used by the World Map (fullscreen map) to display a legend in the bottom right corner.

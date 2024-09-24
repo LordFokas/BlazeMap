@@ -11,8 +11,8 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 
-import com.eerussianguy.blazemap.api.BlazeMapAPI;
 import com.eerussianguy.blazemap.config.BlazeMapConfig;
+import com.eerussianguy.blazemap.engine.RegistryController;
 import com.eerussianguy.blazemap.engine.client.BlazeMapClientEngine;
 import com.eerussianguy.blazemap.engine.server.BlazeMapServerEngine;
 import com.eerussianguy.blazemap.feature.BlazeMapCommandsClient;
@@ -52,11 +52,9 @@ public class BlazeMap {
             // DebuggingEventHandler.init();
         }
         else {
-            // These are forbidden in the dedicated server.
+            // Client side objects are forbidden in the dedicated server.
             // The others are frozen by the RegistryController when the time comes.
-            BlazeMapAPI.LAYERS.freeze();
-            BlazeMapAPI.MAPTYPES.freeze();
-            BlazeMapAPI.OBJECT_RENDERERS.freeze();
+            RegistryController.freezeClientRegistries();
         }
     }
 
@@ -82,6 +80,7 @@ public class BlazeMap {
         // Initialize client-only features
         if(FMLEnvironment.dist == Dist.CLIENT) {
             BlazeMapFeaturesClient.initMapping();
+            BlazeMapFeaturesClient.initOverlays();
             BlazeMapFeaturesClient.initMaps();
             BlazeMapFeaturesClient.initWaypoints();
             BlazeMapCommandsClient.init();
