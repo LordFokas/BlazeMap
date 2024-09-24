@@ -34,9 +34,17 @@ public class LayerRegionTile {
     private volatile boolean isDirty = false;
     private volatile boolean destroyed = false;
 
+    public static String getImageName(RegionPos region) {
+        return region + ".png";
+    }
+
+    private static String getBufferName(RegionPos region) {
+        return region + ".buffer";
+    }
+
     public LayerRegionTile(StorageAccess.Internal storage, BlazeRegistry.Key<Layer> layer, RegionPos region, TileResolution resolution) {
-        this.file = storage.getMipmap(layer.location, region + ".png", resolution);
-        this.buffer = storage.getMipmap(layer.location, region + ".buffer", resolution);
+        this.file = storage.getMipmap(layer.location, getImageName(region), resolution);
+        this.buffer = storage.getMipmap(layer.location, getBufferName(region), resolution);
         this.resolution = resolution;
     }
 

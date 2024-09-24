@@ -54,6 +54,10 @@ public class BlazeMapClientEngine {
         MinecraftForge.EVENT_BUS.register(BlazeMapClientEngine.class);
     }
 
+    public static StorageAccess.Internal getDimensionStorage(ResourceKey<Level> dimension) {
+        return storage.internal(dimension.location());
+    }
+
     @SubscribeEvent
     public static void onJoinServer(ClientPlayerNetworkEvent.LoggedInEvent event) {
         RegistryController.ensureRegistriesReady();

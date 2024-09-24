@@ -19,6 +19,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 
+import com.eerussianguy.blazemap.api.maps.TileResolution;
 import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.api.BlazeMapAPI;
 import com.eerussianguy.blazemap.api.BlazeRegistry;
@@ -27,6 +28,8 @@ import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.MapType;
 import com.eerussianguy.blazemap.engine.BlazeMapAsync;
 import com.eerussianguy.blazemap.feature.BlazeMapFeaturesClient;
+import com.eerussianguy.blazemap.feature.atlas.AtlasExporter;
+import com.eerussianguy.blazemap.feature.atlas.AtlasTask;
 import com.eerussianguy.blazemap.gui.Image;
 import com.eerussianguy.blazemap.gui.MouseSubpixelSmoother;
 import com.eerussianguy.blazemap.profiling.overlay.ProfilingRenderer;
@@ -249,6 +252,8 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
         }
 
         if(showWidgets) {
+            renderAtlasExportProgress(stack, scale);
+
             int maps = mapTypes.size();
             if(maps > 0) {
                 stack.pushPose();
@@ -278,6 +283,44 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
             renderCoordination(stack, scale);
             stack.popPose();
         }
+    }
+
+    private void renderAtlasExportProgress(PoseStack stack, float scale) {
+        AtlasTask task = AtlasExporter.getTask();
+        if(task == null) return;
+        Font font = Minecraft.getInstance().font;
+        stack.pushPose();
+
+        stack.translate(width - 205, 5, 0); // Go to corner
+        RenderHelper.fillRect(stack.last().pose(), 200, 30, Colors.WIDGET_BACKGROUND); // draw background
+
+        // Process flashing "animation"
+        int textColor = Colors.WHITE;
+        long flashUntil = ((long)task.getFlashUntil()) * 1000L;
+        long now = System.currentTimeMillis();
+        if(task.isErrored() || (flashUntil >= now && now % 333 < 166)) {
+            textColor = 0xFFFF0000;
+        }
+
+        // Render progress text
+        int total = task.getTilesTotal();
+        int current = task.getTilesCurrent();
+        font.draw(stack, String.format("Exporting  1:%d", task.resolution.pixelWidth), 5, 5, textColor);
+        String operation = switch(task.getStage()){
+            case QUEUED -> "queued";
+            case CALCULATING -> "calculating";
+            case STITCHING -> String.format("stitching %d / %d tiles", current, total);
+            case SAVING -> "saving";
+        };
+        font.draw(stack, operation, 195 - font.width(operation), 5, textColor);
+
+        // Render progress bar
+        double progress = ((double)current) / ((double)total);
+        stack.translate(5, 17, 0);
+        RenderHelper.fillRect(stack.last().pose(), 190, 10, Colors.LABEL_COLOR);
+        RenderHelper.fillRect(stack.last().pose(), (int)(190*progress), 10, textColor);
+
+        stack.popPose();
     }
 
     private void renderCoordination(PoseStack stack, float scale){
@@ -351,6 +394,11 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
     public boolean keyPressed(int key, int x, int y) {
         if(key == GLFW.GLFW_KEY_F1) {
             showWidgets = !showWidgets;
+            return true;
+        }
+
+        if(key == GLFW.GLFW_KEY_F12) {
+            AtlasExporter.exportAsync(new AtlasTask(this.dimension, this.getMapType().getID(), this.mapRenderer.getVisibleLayers(), TileResolution.FULL, this.mapRenderer.getCenterRegion()));
             return true;
         }
 
