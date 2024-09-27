@@ -51,6 +51,16 @@ public class LineContainer extends BaseContainer<LineContainer> {
         return this;
     }
 
+    public LineContainer addSpacer() {
+        var spacer = new Spacer(spacing, Colors.DISABLED);
+        switch(axis) {
+            case HORIZONTAL -> spacer.setSize(1 + spacing*2, getHeight() - spacing*2);
+            case VERTICAL -> spacer.setSize(getWidth() - spacing*2, 1 + spacing*2);
+        }
+        add(spacer);
+        return this;
+    }
+
     @Override
     protected void renderBackground(PoseStack stack, boolean hasMouse, int mouseX, int mouseY) {
         if(size() == 0) return;
@@ -99,5 +109,20 @@ public class LineContainer extends BaseContainer<LineContainer> {
             case HORIZONTAL -> spacing;
             case VERTICAL -> size() == 0 ? spacing : getHeight();
         };
+    }
+
+    static class Spacer extends BaseComponent<Spacer> {
+        private final int spacing, color;
+
+        Spacer(int spacing, int color) {
+            this.spacing = spacing;
+            this.color = (color & Colors.ALPHA) == 0 ? Colors.ALPHA | color : color;
+        }
+
+        @Override
+        protected void render(PoseStack stack, boolean hasMouse, int mouseX, int mouseY) {
+            stack.translate(spacing, spacing, 0.1);
+            RenderHelper.fillRect(stack.last().pose(), getWidth() - spacing*2, getHeight() - spacing*2, color);
+        }
     }
 }

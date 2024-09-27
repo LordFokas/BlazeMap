@@ -45,6 +45,9 @@ import com.mojang.blaze3d.vertex.Tesselator;
 
 public class WorldMapGui extends Screen implements IMapHost {
     private static final TextComponent EMPTY = new TextComponent("");
+    private static final ResourceLocation HEADER_MAPS = Helpers.identifier("textures/map_icons/header_maps.png");
+    private static final ResourceLocation HEADER_LAYERS = Helpers.identifier("textures/map_icons/header_layers.png");
+    private static final ResourceLocation HEADER_OVERLAYS = Helpers.identifier("textures/map_icons/header_overlays.png");
     private static final ResourceLocation ICON = Helpers.identifier("textures/mod_icon.png");
     private static final ResourceLocation NAME = Helpers.identifier("textures/mod_name.png");
     private static final ResourceLocation SCALE = Helpers.identifier("textures/scale.png");
@@ -148,6 +151,8 @@ public class WorldMapGui extends Screen implements IMapHost {
         addRenderableOnly(new Image(NAME, 110, 20).setPosition(width / 2 - 55, 5));
 
         LineContainer maps = addRenderableWidget(new LineContainer(ContainerAxis.HORIZONTAL, ContainerDirection.POSITIVE, 2).setPosition(35, 5)).withBackground();
+        maps.add(new Image(HEADER_MAPS, 16, 16).tooltip(new TextComponent("Maps")));
+        maps.addSpacer();
         List<LineContainer> layerSets = new ArrayList<>();
         for(var mapType : mapTypes) {
             LineContainer layerSet = addRenderableWidget(new LineContainer(ContainerAxis.VERTICAL, ContainerDirection.NEGATIVE, 2).setPosition(5, 35)).withBackground();
@@ -159,9 +164,12 @@ public class WorldMapGui extends Screen implements IMapHost {
                 if(layer.value().isOpaque()) continue; // TODO: fix this crap
                 layerSet.add(new LayerButton(layer, this));
             }
+            layerSet.addSpacer().add(new Image(HEADER_LAYERS, 16, 16).tooltip(new TextComponent("Layers")));
         }
 
         LineContainer overlaySet = addRenderableWidget(new LineContainer(ContainerAxis.HORIZONTAL, ContainerDirection.POSITIVE, 2).setPosition(5, height - 25).withBackground());
+        overlaySet.add(new Image(HEADER_OVERLAYS, 16, 16).tooltip(new TextComponent("Overlays")));
+        overlaySet.addSpacer();
         for(var overlay : overlays) {
             overlaySet.add(new OverlayButton(overlay.getID(), this));
         }

@@ -5,14 +5,15 @@ import java.awt.*;
 public class Colors {
     public static final int NO_TINT = -1;
     public static final int WHITE = 0xFFFFFFFF;
+    public static final int ALPHA = 0xFF000000;
     public static final int DISABLED = 0x666666;
     public static final int LABEL_COLOR = 0xFF404040;
     public static final int WIDGET_BACKGROUND = 0xA0000000;
 
     public static int layerBlend(int bottom, int top) {
-        if((top & 0xFF000000) == 0xFF000000) return top; // top is opaque, use top
-        if((top & 0xFF000000) == 0) return bottom; // top is transparent, use bottom
-        if((bottom & 0xFF000000) == 0) return top; // bottom is transparent, use top
+        if((top & ALPHA) == ALPHA) return top; // top is opaque, use top
+        if((top & ALPHA) == 0) return bottom; // top is transparent, use bottom
+        if((bottom & ALPHA) == 0) return top; // bottom is transparent, use top
 
         float point = ((float) (top >> 24)) / 255F;
         return 0xFF000000 | interpolate(bottom, 0, top, 1, point);
