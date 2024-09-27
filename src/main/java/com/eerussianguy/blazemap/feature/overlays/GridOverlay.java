@@ -40,7 +40,7 @@ public class GridOverlay extends Overlay {
         @Override
         public int getPixel(int x, int y) {
             if(isBorder(x, REGION) || isBorder(y, REGION)) return 0x7F0000FF;
-            if(resolution.pixelWidth > 2) return 0;
+            if(resolution.pixelWidth > 1) return 0;
 
             if(isBorder(x, CHUNK) || isBorder(y, CHUNK)) return 0x7FC0C0C0;
             return 0;
