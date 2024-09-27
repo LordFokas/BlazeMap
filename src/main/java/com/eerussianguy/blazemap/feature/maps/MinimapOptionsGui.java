@@ -18,6 +18,8 @@ import com.eerussianguy.blazemap.api.maps.Overlay;
 import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.config.ClientConfig;
 import com.eerussianguy.blazemap.config.MinimapConfigFacade;
+import com.eerussianguy.blazemap.feature.maps._deprecated.LayerButton;
+import com.eerussianguy.blazemap.feature.maps._deprecated.MapTypeButton;
 import com.eerussianguy.blazemap.gui.BlazeGui;
 import com.eerussianguy.blazemap.util.Helpers;
 import com.mojang.blaze3d.vertex.PoseStack;

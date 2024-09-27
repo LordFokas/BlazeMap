@@ -1,4 +1,4 @@
-package com.eerussianguy.blazemap.feature.maps;
+package com.eerussianguy.blazemap.feature.maps._deprecated;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.ImageButton;
@@ -7,6 +7,7 @@ import net.minecraft.network.chat.TextComponent;
 
 import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
 import com.eerussianguy.blazemap.api.maps.Overlay;
+import com.eerussianguy.blazemap.feature.maps.IMapHost;
 import com.eerussianguy.blazemap.integration.KnownMods;
 import com.eerussianguy.blazemap.util.Colors;
 import com.eerussianguy.blazemap.util.RenderHelper;
