@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 
 import org.lwjgl.glfw.GLFW;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -28,6 +27,7 @@ import com.eerussianguy.blazemap.api.BlazeRegistry;
 import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.MapType;
 import com.eerussianguy.blazemap.feature.BlazeMapFeaturesClient;
+import com.eerussianguy.blazemap.feature.atlas.AtlasExportProgress;
 import com.eerussianguy.blazemap.feature.atlas.AtlasExporter;
 import com.eerussianguy.blazemap.feature.atlas.AtlasTask;
 import com.eerussianguy.blazemap.gui.components.Image;
@@ -36,10 +36,8 @@ import com.eerussianguy.blazemap.gui.components.NamedMapComponentButton.*;
 import com.eerussianguy.blazemap.gui.lib.ContainerAxis;
 import com.eerussianguy.blazemap.gui.lib.ContainerDirection;
 import com.eerussianguy.blazemap.gui.components.LineContainer;
-import com.eerussianguy.blazemap.util.Colors;
 import com.eerussianguy.blazemap.util.Helpers;
 import com.eerussianguy.blazemap.profiling.Profiler;
-import com.eerussianguy.blazemap.util.RenderHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 
@@ -186,6 +184,8 @@ public class WorldMapGui extends Screen implements IMapHost {
             ).shiftPositionY()
         );
 
+        addRenderableOnly(new AtlasExportProgress().setPosition(width - 5, 5).shiftPositionX());
+
         search = addRenderableWidget(new EditBox(getMinecraft().font, (width - 120) / 2, height - 15, 120, 12, EMPTY));
         search.setResponder(mapRenderer::setSearch);
         mapRenderer.pingSearchHost();
@@ -290,50 +290,10 @@ public class WorldMapGui extends Screen implements IMapHost {
         }
 
         if(showWidgets) {
-            renderAtlasExportProgress(stack, scale);
-
             stack.pushPose();
             super.render(stack, i0, i1, f0);
             stack.popPose();
         }
-    }
-
-    private void renderAtlasExportProgress(PoseStack stack, float scale) {
-        AtlasTask task = AtlasExporter.getTask();
-        if(task == null) return;
-        Font font = Minecraft.getInstance().font;
-        stack.pushPose();
-
-        stack.translate(width - 205, 5, 0); // Go to corner
-        RenderHelper.fillRect(stack.last().pose(), 200, 30, Colors.WIDGET_BACKGROUND); // draw background
-
-        // Process flashing "animation"
-        int textColor = Colors.WHITE;
-        long flashUntil = ((long)task.getFlashUntil()) * 1000L;
-        long now = System.currentTimeMillis();
-        if(task.isErrored() || (flashUntil >= now && now % 333 < 166)) {
-            textColor = 0xFFFF0000;
-        }
-
-        // Render progress text
-        int total = task.getTilesTotal();
-        int current = task.getTilesCurrent();
-        font.draw(stack, String.format("Exporting  1:%d", task.resolution.pixelWidth), 5, 5, textColor);
-        String operation = switch(task.getStage()){
-            case QUEUED -> "queued";
-            case CALCULATING -> "calculating";
-            case STITCHING -> String.format("stitching %d / %d tiles", current, total);
-            case SAVING -> "saving";
-        };
-        font.draw(stack, operation, 195 - font.width(operation), 5, textColor);
-
-        // Render progress bar
-        double progress = ((double)current) / ((double)total);
-        stack.translate(5, 17, 0);
-        RenderHelper.fillRect(stack.last().pose(), 190, 10, Colors.LABEL_COLOR);
-        RenderHelper.fillRect(stack.last().pose(), (int)(190*progress), 10, textColor);
-
-        stack.popPose();
     }
 
     @Override
