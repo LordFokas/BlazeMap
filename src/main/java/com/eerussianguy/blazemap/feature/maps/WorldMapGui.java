@@ -317,6 +317,7 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
             case CALCULATING -> "calculating";
             case STITCHING -> String.format("stitching %d / %d tiles", current, total);
             case SAVING -> "saving";
+            case COMPLETE -> "complete";
         };
         graphics.drawString(font, operation, 195 - font.width(operation), 5, textColor);
 
