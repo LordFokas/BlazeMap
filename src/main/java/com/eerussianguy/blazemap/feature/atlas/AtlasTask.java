@@ -6,7 +6,7 @@ import java.util.*;
 
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 
@@ -113,8 +113,8 @@ public class AtlasTask {
 
             // Completed Stage: Send the filepath into chat
             setStage(Stage.COMPLETE);
-            String saveMessage = String.format("Atlas save to: %s", file.getPath());
-            Helpers.getPlayer().sendMessage(new TextComponent(saveMessage), Util.NIL_UUID);
+            Component message = Helpers.translate("blazemap.gui.worldmap.atlas_progress.filepath_message", file.getPath());
+            Helpers.getPlayer().sendMessage(message, Util.NIL_UUID);
         }
         catch(Exception e) {
             BlazeMap.LOGGER.error("Error in AtlasExporter", e);
