@@ -33,9 +33,11 @@ import com.eerussianguy.blazemap.feature.atlas.AtlasTask;
 import com.eerussianguy.blazemap.gui.components.Image;
 import com.eerussianguy.blazemap.gui.MouseSubpixelSmoother;
 import com.eerussianguy.blazemap.gui.components.NamedMapComponentButton.*;
+import com.eerussianguy.blazemap.gui.lib.BaseComponent;
 import com.eerussianguy.blazemap.gui.lib.ContainerAxis;
 import com.eerussianguy.blazemap.gui.lib.ContainerDirection;
 import com.eerussianguy.blazemap.gui.components.LineContainer;
+import com.eerussianguy.blazemap.gui.lib.WrappedComponent;
 import com.eerussianguy.blazemap.util.Helpers;
 import com.eerussianguy.blazemap.profiling.Profiler;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -75,7 +77,7 @@ public class WorldMapGui extends Screen implements IMapHost {
     private final List<MapType> mapTypes;
     private final List<Overlay> overlays;
     private final MouseSubpixelSmoother mouse;
-    private Widget legend;
+    private BaseComponent<?> legend;
     private EditBox search;
     private final Coordination coordination = new Coordination();
     private double rawMouseX = -1, rawMouseY = -1;
@@ -196,7 +198,18 @@ public class WorldMapGui extends Screen implements IMapHost {
     }
 
     private void updateLegend() {
-        legend = mapRenderer.getMapType().getLayers().iterator().next().value().getLegendWidget();
+        if(legend != null) {
+            legend.setVisible(false);
+            renderables.remove(legend); // TODO: will not work when we switch to multi layer containers
+        }
+
+        legend = WrappedComponent.ofNullable(mapRenderer.getMapType().getLayers().iterator().next().value().getLegendWidget());
+
+        if(legend != null) {
+            legend.setPosition(width - 5, height - 5);
+            legend.shiftPositionX().shiftPositionY();
+            addRenderableOnly(legend);
+        }
     }
 
     @Override
@@ -281,13 +294,6 @@ public class WorldMapGui extends Screen implements IMapHost {
             contextMenu.render(stack, i0, i1, f0);
         }
         stack.popPose();
-
-        if(legend != null) {
-            stack.pushPose();
-            stack.translate(width - 5, height - 5, 0);
-            legend.render(stack, -1, -1, 0);
-            stack.popPose();
-        }
 
         if(showWidgets) {
             stack.pushPose();

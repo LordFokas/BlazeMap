@@ -30,7 +30,7 @@ public class Image extends BaseComponent<Image> {
     }
 
     @Override
-    protected void render(PoseStack stack, boolean hasMouse, int mouseX, int mouseY) {
+    public void render(PoseStack stack, boolean hasMouse, int mouseX, int mouseY) {
         RenderHelper.drawTexturedQuad(image, color, stack, 0, 0, getWidth(), getHeight());
     }
 

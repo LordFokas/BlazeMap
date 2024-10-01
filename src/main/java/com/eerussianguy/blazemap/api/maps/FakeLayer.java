@@ -1,6 +1,5 @@
 package com.eerussianguy.blazemap.api.maps;
 
-import net.minecraft.client.gui.components.Widget;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 
@@ -31,7 +30,7 @@ public class FakeLayer extends Layer { // FIXME: rename to GhostLayer in next br
     }
 
     @Override // can't have a legend
-    public final Widget getLegendWidget() {
+    public final Renderable getLegendWidget() {
         return null;
     }
 }

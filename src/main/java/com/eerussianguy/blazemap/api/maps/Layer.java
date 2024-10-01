@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import net.minecraft.client.gui.components.Widget;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 
@@ -65,16 +64,13 @@ public abstract class Layer extends NamedMapComponent<Layer> implements Consumer
     public abstract boolean renderTile(NativeImage tile, TileResolution resolution, IDataSource data, int xGridOffset, int zGridOffset);
 
     /**
-     * Used by the World Map (fullscreen map) to display a legend in the bottom right corner.
-     * The widget will be asked to render while translated to the corner of the screen,
-     * so it must render backwards (towards the left and up) in order to stay inside the screen.
+     * Used by the World Map (fullscreen map) to display a legend somewhere in the screen (at the layout's discretion)
+     * The renderable will be asked to render at its own 0,0 and the height and width are expected to be constant.
      *
-     * The translation to the corner may subtract a small margin to make all legends have a consistent margin with the border.
-     *
-     * This only applies to opaque (bottom) layers, which are the first layer of the current map type,
+     * This currently only applies to opaque (bottom) layers, which are the first layer of the current map type,
      * however not all such layers must have one and returning null is the default action.
      */
-    public Widget getLegendWidget() {
+    public Renderable getLegendWidget() {
         return null;
     }
 

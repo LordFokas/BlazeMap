@@ -5,12 +5,14 @@ import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 
+import com.eerussianguy.blazemap.api.maps.Renderable;
 import com.mojang.blaze3d.vertex.PoseStack;
 
-public abstract class BaseComponent<T extends BaseComponent<T>> extends Positionable<T> implements Widget, NarratableEntry {
+public abstract class BaseComponent<T extends BaseComponent<T>> extends Positionable<T> implements Renderable, Widget, NarratableEntry {
     private boolean enabled = true, visible = true;
 
-    protected abstract void render(PoseStack stack, boolean hasMouse, int mouseX, int mouseY);
+    @Override
+    public abstract void render(PoseStack stack, boolean hasMouse, int mouseX, int mouseY);
     protected void renderTooltip(PoseStack stack, int mouseX, int mouseY, TooltipService service){}
 
     protected final void renderInternal(PoseStack stack, boolean hasMouse, int mouseX, int mouseY) {

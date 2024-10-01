@@ -120,7 +120,7 @@ public class LineContainer extends BaseContainer<LineContainer> {
         }
 
         @Override
-        protected void render(PoseStack stack, boolean hasMouse, int mouseX, int mouseY) {
+        public void render(PoseStack stack, boolean hasMouse, int mouseX, int mouseY) {
             stack.translate(spacing, spacing, 0.1);
             RenderHelper.fillRect(stack.last().pose(), getWidth() - spacing*2, getHeight() - spacing*2, color);
         }

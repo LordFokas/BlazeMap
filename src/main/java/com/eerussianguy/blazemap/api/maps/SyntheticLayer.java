@@ -1,6 +1,5 @@
 package com.eerussianguy.blazemap.api.maps;
 
-import net.minecraft.client.gui.components.Widget;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -22,7 +21,7 @@ public abstract class SyntheticLayer extends Layer {
     }
 
     @Override // can't have a legend
-    public final Widget getLegendWidget() {
+    public final Renderable getLegendWidget() {
         return null;
     }
 

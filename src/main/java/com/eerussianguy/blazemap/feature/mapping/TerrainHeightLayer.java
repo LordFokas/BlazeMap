@@ -2,12 +2,11 @@ package com.eerussianguy.blazemap.feature.mapping;
 
 import java.awt.*;
 
-import net.minecraft.client.gui.components.Widget;
-
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
 import com.eerussianguy.blazemap.api.builtin.TerrainHeightMD;
 import com.eerussianguy.blazemap.api.builtin.WaterLevelMD;
 import com.eerussianguy.blazemap.api.maps.Layer;
+import com.eerussianguy.blazemap.api.maps.Renderable;
 import com.eerussianguy.blazemap.api.maps.TileResolution;
 import com.eerussianguy.blazemap.api.util.ArrayAggregator;
 import com.eerussianguy.blazemap.api.util.IDataSource;
@@ -69,8 +68,8 @@ public class TerrainHeightLayer extends Layer {
     }
 
     @Override
-    public Widget getLegendWidget() {
-        return new TerrainHeightLegendWidget();
+    public Renderable getLegendWidget() {
+        return new TerrainHeightLegend();
     }
 
     private static final int DOWNSIZE = 4;

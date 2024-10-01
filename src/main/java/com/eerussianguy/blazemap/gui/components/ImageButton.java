@@ -23,7 +23,7 @@ public class ImageButton extends BaseButton<ImageButton> {
     }
 
     @Override
-    protected void render(PoseStack stack, boolean hasMouse, int mouseX, int mouseY) {
+    public void render(PoseStack stack, boolean hasMouse, int mouseX, int mouseY) {
         RenderHelper.drawTexturedQuad(background, getTint(), stack, 0, 0, getWidth(), getHeight());
     }
 }

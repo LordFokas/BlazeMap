@@ -36,7 +36,7 @@ public class WorldMapDebug extends BaseComponent<WorldMapDebug> {
     }
 
     @Override
-    protected void render(PoseStack stack, boolean hasMouse, int mouseX, int mouseY) {
+    public void render(PoseStack stack, boolean hasMouse, int mouseX, int mouseY) {
         var font = Minecraft.getInstance().font;
         RenderHelper.fillRect(stack.last().pose(), getWidth(), getHeight(), Colors.WIDGET_BACKGROUND);
 

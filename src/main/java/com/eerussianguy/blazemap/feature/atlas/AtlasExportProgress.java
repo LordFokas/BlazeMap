@@ -22,7 +22,7 @@ public class AtlasExportProgress extends BaseComponent<AtlasExportProgress> {
     }
 
     @Override
-    protected void render(PoseStack stack, boolean hasMouse, int mouseX, int mouseY) {
+    public void render(PoseStack stack, boolean hasMouse, int mouseX, int mouseY) {
         AtlasTask task = AtlasExporter.getTask();
         if(task == null) return;
 

@@ -37,7 +37,7 @@ public class WorldMapHotkey extends BaseComponent<WorldMapHotkey> {
     }
 
     @Override
-    protected void render(PoseStack stack, boolean hasMouse, int mouseX, int mouseY) {
+    public void render(PoseStack stack, boolean hasMouse, int mouseX, int mouseY) {
         stack.scale(1F / (float) scale, 1F / (float) scale, 1);
         var buffers = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
         RenderHelper.drawFrame(buffers.getBuffer(RenderType.text(KEY)), stack, KEY_WIDTH, font.lineHeight + PADDING * 2, 4);

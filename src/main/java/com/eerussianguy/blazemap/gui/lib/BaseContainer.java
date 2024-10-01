@@ -40,7 +40,7 @@ public abstract class BaseContainer<T extends BaseContainer<T>> extends BaseComp
     }
 
     @Override
-    protected void render(PoseStack stack, boolean hasMouse, int mouseX, int mouseY) {
+    public void render(PoseStack stack, boolean hasMouse, int mouseX, int mouseY) {
         renderBackground(stack, hasMouse, mouseX, mouseY);
         for(var child : renderables) {
             stack.pushPose();
