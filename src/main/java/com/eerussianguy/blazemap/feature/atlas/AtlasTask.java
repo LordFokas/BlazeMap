@@ -4,9 +4,12 @@ import java.io.File;
 import java.nio.file.Files;
 import java.util.*;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 
@@ -113,7 +116,10 @@ public class AtlasTask {
 
             // Completed Stage: Send the filepath into chat
             setStage(Stage.COMPLETE);
-            Component message = Helpers.translate("blazemap.gui.worldmap.atlas_progress.filepath_message", file.getPath());
+            Component filepath = (new TextComponent(file.getPath())).withStyle(ChatFormatting.UNDERLINE).withStyle((style) -> {
+                return style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file.getAbsolutePath()));
+            });
+            Component message = Helpers.translate("blazemap.gui.worldmap.atlas_progress.filepath_message", filepath);
             Helpers.getPlayer().sendMessage(message, Util.NIL_UUID);
         }
         catch(Exception e) {
