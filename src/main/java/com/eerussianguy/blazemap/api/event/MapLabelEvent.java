@@ -2,23 +2,23 @@ package com.eerussianguy.blazemap.api.event;
 
 import net.minecraftforge.eventbus.api.Event;
 
-import com.eerussianguy.blazemap.api.markers.MapLabel;
+import com.eerussianguy.blazemap.api.markers.MapComponentMarker;
 
 public class MapLabelEvent extends Event {
-    public final MapLabel label;
+    public final MapComponentMarker label;
 
-    protected MapLabelEvent(MapLabel label) {
+    protected MapLabelEvent(MapComponentMarker label) {
         this.label = label;
     }
 
     public static class Created extends MapLabelEvent {
-        public Created(MapLabel label) {
+        public Created(MapComponentMarker label) {
             super(label);
         }
     }
 
     public static class Removed extends MapLabelEvent {
-        public Removed(MapLabel label) {
+        public Removed(MapComponentMarker label) {
             super(label);
         }
     }

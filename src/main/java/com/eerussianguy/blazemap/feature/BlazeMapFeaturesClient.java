@@ -24,12 +24,9 @@ import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.api.BlazeMapAPI;
 import com.eerussianguy.blazemap.api.event.MapMenuSetupEvent;
 import com.eerussianguy.blazemap.feature.mapping.*;
-import com.eerussianguy.blazemap.feature.overlays.GridOverlay;
+import com.eerussianguy.blazemap.feature.overlays.*;
 import com.eerussianguy.blazemap.feature.maps.*;
-import com.eerussianguy.blazemap.feature.waypoints.WaypointEditorGui;
-import com.eerussianguy.blazemap.feature.waypoints.WaypointManagerGui;
-import com.eerussianguy.blazemap.feature.waypoints.WaypointRenderer;
-import com.eerussianguy.blazemap.feature.waypoints.WaypointStore;
+import com.eerussianguy.blazemap.feature.waypoints.*;
 import com.mojang.blaze3d.platform.InputConstants;
 
 public class BlazeMapFeaturesClient {
@@ -59,6 +56,10 @@ public class BlazeMapFeaturesClient {
                 BlazeMapConfig.CLIENT.clientFeatures.renderWaypointsInWorld.get());
     }
 
+    public static boolean hasWaypointsOnMap() {
+        return waypoints && BlazeMapConfig.CLIENT.clientFeatures.displayWaypointsOnMap.get();
+    }
+
     public static boolean hasOverlays() {
         return overlays;
     }
@@ -80,7 +81,11 @@ public class BlazeMapFeaturesClient {
 
     public static void initOverlays() {
         BlazeMapAPI.OVERLAYS.register(new GridOverlay());
-
+        BlazeMapAPI.OVERLAYS.register(new WaypointOverlay());
+        BlazeMapAPI.OVERLAYS.register(new EntityOverlay.Players());
+        BlazeMapAPI.OVERLAYS.register(new EntityOverlay.Villagers());
+        BlazeMapAPI.OVERLAYS.register(new EntityOverlay.Animals());
+        BlazeMapAPI.OVERLAYS.register(new EntityOverlay.Enemies());
         overlays = true;
     }
 
@@ -105,6 +110,15 @@ public class BlazeMapFeaturesClient {
     private static void mapOverlays(BlazeRegistriesFrozenEvent evt) {
         OverlayOrderingEvent event = new OverlayOrderingEvent(MUT_OVERLAYS);
         event.add(BlazeMapReferences.Overlays.GRID);
+        if(hasWaypointsOnMap()) {
+            event.add(BlazeMapReferences.Overlays.WAYPOINTS);
+        }
+        event.add(
+            BlazeMapReferences.Overlays.PLAYERS,
+            BlazeMapReferences.Overlays.VILLAGERS,
+            BlazeMapReferences.Overlays.ANIMALS,
+            BlazeMapReferences.Overlays.ENEMIES
+        );
         MinecraftForge.EVENT_BUS.post(event);
         event.finish();
         overlays = MUT_OVERLAYS.size() > 0;
@@ -151,9 +165,10 @@ public class BlazeMapFeaturesClient {
         bus.addListener(WaypointEditorGui::onDimensionChanged);
         bus.addListener(WaypointManagerGui::onDimensionChanged);
         bus.addListener(EventPriority.HIGHEST, WaypointStore::onServerJoined);
-        bus.addListener(MapRenderer::onWaypointAdded);
-        bus.addListener(MapRenderer::onWaypointRemoved);
+        // bus.addListener(MapRenderer::onWaypointAdded);
+        // bus.addListener(MapRenderer::onWaypointRemoved);
         bus.addListener(WorldMapMenu::trackWaypointStore);
+        bus.addListener(WaypointOverlay::onDimensionChange);
 
         WaypointRenderer.init();
 

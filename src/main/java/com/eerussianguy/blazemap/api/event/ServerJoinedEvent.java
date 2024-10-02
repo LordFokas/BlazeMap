@@ -4,7 +4,7 @@ import java.util.Objects;
 
 import net.minecraftforge.eventbus.api.Event;
 
-import com.eerussianguy.blazemap.api.markers.IMarkerStorage;
+import com.eerussianguy.blazemap.api.markers.MarkerStorage;
 import com.eerussianguy.blazemap.api.markers.IStorageFactory;
 import com.eerussianguy.blazemap.api.markers.Waypoint;
 import com.eerussianguy.blazemap.api.util.IStorageAccess;
@@ -29,7 +29,7 @@ public class ServerJoinedEvent extends Event {
     /**
      * The factory that creates IMarkerStorage instances to permanently store waypoints for this server
      */
-    private IStorageFactory<IMarkerStorage<Waypoint>> waypointStorageFactory;
+    private IStorageFactory<MarkerStorage<Waypoint>> waypointStorageFactory;
 
     /**
      * If the server we connected to has Blaze Map present
@@ -40,14 +40,14 @@ public class ServerJoinedEvent extends Event {
         this.serverID = serverID;
         this.serverStorage = storage;
         this.serverHasBlazeMap = serverHasBlazeMap;
-        this.waypointStorageFactory = (i, o, e) -> new IMarkerStorage.Dummy<>() {};
+        this.waypointStorageFactory = (i, o, e) -> new MarkerStorage.Dummy<>();
     }
 
-    public IStorageFactory<IMarkerStorage<Waypoint>> getWaypointStorageFactory() {
+    public IStorageFactory<MarkerStorage<Waypoint>> getWaypointStorageFactory() {
         return waypointStorageFactory;
     }
 
-    public void setWaypointStorageFactory(IStorageFactory<IMarkerStorage<Waypoint>> waypointStorageFactory) {
+    public void setWaypointStorageFactory(IStorageFactory<MarkerStorage<Waypoint>> waypointStorageFactory) {
         this.waypointStorageFactory = Objects.requireNonNull(waypointStorageFactory);
     }
 }

@@ -67,6 +67,16 @@ public abstract class ComponentOrderingEvent<T extends NamedMapComponent<T>> ext
         list.add(component);
     }
 
+    /** Adds multiple components, in order, to the top of the stack */
+    @SafeVarargs
+    public final void add(BlazeRegistry.Key<T>... components) {
+        if(components == null || components.length == 0) throw new IllegalArgumentException("components must not be null or zero-length");
+
+        for(var component : components) {
+            add(component);
+        }
+    }
+
     /**
      * Adds your component to the next position immediately after ALL the targets.
      * If none of the targets is found, does nothing and returns false.

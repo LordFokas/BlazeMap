@@ -1,19 +1,23 @@
 {
-  "blazemap.key.maps": "Open World Map / [Shift] Edit Minimap",
-  "blazemap.key.waypoints": "Create Waypoint / [Shift] Manage Waypoints",
-  "blazemap.key.zoom": "Zoom In / [Shift] Zoom Out",
+  "blazemap.aerial_view": "Aerial View",
+  "blazemap.topography": "Topography",
+  "blazemap.nether": "Nether",
+
   "blazemap.terrain_isolines": "Terrain Isolines",
   "blazemap.water_depth": "Water Depth",
   "blazemap.block_color": "Block Color",
   "blazemap.nether_terrain": "Nether Terrain",
   "blazemap.terrain_height": "Terrain Height",
   "blazemap.terrain_slope": "Terrain Slope",
-  "blazemap.aerial_view": "Aerial View",
-  "blazemap.nether": "Nether",
+
   "blazemap.grid": "Chunk Grid",
   "blazemap.ftbchunks": "FTB Chunks",
-  "blazemap.topography": "Topography",
-  "blazemap.enabled": " §aENABLED",
+  "blazemap.waypoints": "Waypoints",
+
+  "blazemap.key.maps": "Open World Map / [Shift] Edit Minimap",
+  "blazemap.key.waypoints": "Create Waypoint / [Shift] Manage Waypoints",
+  "blazemap.key.zoom": "Zoom In / [Shift] Zoom Out",
+
   "blazemap.gui.minimap_options.title": "Minimap Options",
   "blazemap.gui.minimap_options.map_types": "Active Map",
   "blazemap.gui.minimap_options.layers": "Optional Layers",

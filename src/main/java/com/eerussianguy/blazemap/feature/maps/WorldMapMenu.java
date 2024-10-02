@@ -12,13 +12,11 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
-import com.eerussianguy.blazemap.api.builtin.BlockColorMD;
 import com.eerussianguy.blazemap.api.event.DimensionChangedEvent;
 import com.eerussianguy.blazemap.api.event.MapMenuSetupEvent;
 import com.eerussianguy.blazemap.api.event.MapMenuSetupEvent.*;
-import com.eerussianguy.blazemap.api.markers.IMarkerStorage;
+import com.eerussianguy.blazemap.api.markers.MarkerStorage;
 import com.eerussianguy.blazemap.api.markers.Waypoint;
-import com.eerussianguy.blazemap.api.pipeline.MasterDatum;
 import com.eerussianguy.blazemap.engine.cache.ChunkMDCache;
 import com.eerussianguy.blazemap.engine.client.BlazeMapClientEngine;
 import com.eerussianguy.blazemap.util.Colors;
@@ -33,7 +31,7 @@ public class WorldMapMenu {
     private static final TranslatableComponent NOOP_TEXT = Helpers.translate("blazemap.gui.worldmap.menu.no_options");
     public static final MapMenuSetupEvent.MenuAction NOOP = new MapMenuSetupEvent.MenuAction(MENU_NOOP, null, NOOP_TEXT, null);
 
-    private static IMarkerStorage<Waypoint> waypointStore;
+    private static MarkerStorage<Waypoint> waypointStore;
     private static ResourceKey<Level> dimension;
 
     public static MenuFolder waypoints(int blockX, int blockZ) {

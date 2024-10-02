@@ -20,9 +20,8 @@ import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.api.event.DimensionChangedEvent;
 import com.eerussianguy.blazemap.api.event.ServerJoinedEvent;
 import com.eerussianguy.blazemap.api.maps.LayerRegion;
-import com.eerussianguy.blazemap.api.markers.IMarkerStorage;
+import com.eerussianguy.blazemap.api.markers.MarkerStorage;
 import com.eerussianguy.blazemap.api.markers.IStorageFactory;
-import com.eerussianguy.blazemap.api.markers.MapLabel;
 import com.eerussianguy.blazemap.api.markers.Waypoint;
 import com.eerussianguy.blazemap.api.pipeline.MasterDatum;
 import com.eerussianguy.blazemap.api.pipeline.PipelineType;
@@ -37,13 +36,13 @@ import com.eerussianguy.blazemap.util.Helpers;
 public class BlazeMapClientEngine {
     private static final Set<Consumer<LayerRegion>> TILE_CHANGE_LISTENERS = new HashSet<>();
     private static final Map<ResourceKey<Level>, ClientPipeline> PIPELINES = new HashMap<>();
-    private static final Map<ResourceKey<Level>, IMarkerStorage<Waypoint>> WAYPOINTS = new HashMap<>();
+    private static final Map<ResourceKey<Level>, MarkerStorage<Waypoint>> WAYPOINTS = new HashMap<>();
     private static final ResourceLocation WAYPOINT_STORAGE = Helpers.identifier("waypoints.bin");
 
     private static ClientPipeline activePipeline;
-    private static IMarkerStorage.Layered<MapLabel> activeLabels;
-    private static IMarkerStorage<Waypoint> activeWaypoints;
-    private static IStorageFactory<IMarkerStorage<Waypoint>> waypointStorageFactory;
+    private static MarkerStorage.MapComponentStorage activeLabels;
+    private static MarkerStorage<Waypoint> activeWaypoints;
+    private static IStorageFactory<MarkerStorage<Waypoint>> waypointStorageFactory;
     private static String serverID;
     private static StorageAccess.Internal storage;
     private static boolean isServerSource;

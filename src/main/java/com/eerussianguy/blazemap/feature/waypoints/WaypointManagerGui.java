@@ -5,7 +5,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.renderer.MultiBufferSource;
 
 import com.eerussianguy.blazemap.api.event.DimensionChangedEvent;
-import com.eerussianguy.blazemap.api.markers.IMarkerStorage;
+import com.eerussianguy.blazemap.api.markers.MarkerStorage;
 import com.eerussianguy.blazemap.api.markers.Waypoint;
 import com.eerussianguy.blazemap.gui.BlazeGui;
 import com.eerussianguy.blazemap.gui.SelectionList;
@@ -14,7 +14,7 @@ import com.eerussianguy.blazemap.util.RenderHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 public class WaypointManagerGui extends BlazeGui {
-    private static IMarkerStorage<Waypoint> waypointStorage;
+    private static MarkerStorage<Waypoint> waypointStorage;
 
     public static void onDimensionChanged(DimensionChangedEvent event) {
         waypointStorage = event.waypoints;

@@ -13,7 +13,7 @@ import net.minecraft.world.phys.Vec3;
 
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
 import com.eerussianguy.blazemap.api.event.DimensionChangedEvent;
-import com.eerussianguy.blazemap.api.markers.IMarkerStorage;
+import com.eerussianguy.blazemap.api.markers.MarkerStorage;
 import com.eerussianguy.blazemap.api.markers.Waypoint;
 import com.eerussianguy.blazemap.gui.*;
 import com.eerussianguy.blazemap.util.Colors;
@@ -22,7 +22,7 @@ import com.eerussianguy.blazemap.util.RenderHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 public class WaypointEditorGui extends BlazeGui {
-    private static IMarkerStorage<Waypoint> waypointStorage;
+    private static MarkerStorage<Waypoint> waypointStorage;
 
     public static void onDimensionChanged(DimensionChangedEvent event) {
         waypointStorage = event.waypoints;

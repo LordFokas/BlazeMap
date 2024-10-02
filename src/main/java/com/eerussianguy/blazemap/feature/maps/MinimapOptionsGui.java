@@ -33,7 +33,7 @@ public class MinimapOptionsGui extends BlazeGui implements IMapHost {
         Minecraft.getInstance().setScreen(new MinimapOptionsGui());
     }
 
-    private final MapRenderer mapRenderer = new MapRenderer(0, 0, Helpers.identifier("dynamic/map/minimap_preview"), MinimapRenderer.MIN_ZOOM, MinimapRenderer.MAX_ZOOM, false);
+    private final MapRenderer mapRenderer = new MapRenderer(0, 0, Helpers.identifier("dynamic/map/minimap_preview"), MinimapRenderer.MIN_ZOOM, MinimapRenderer.MAX_ZOOM);
     private final MinimapConfigSynchronizer synchronizer = MinimapRenderer.INSTANCE.synchronizer;
     private final WidgetConfigFacade configFacade = new WidgetConfigFacade(BlazeMapConfig.CLIENT.minimap, mapRenderer);
     private final MinimapWidget minimap = new MinimapWidget(mapRenderer, configFacade, true);

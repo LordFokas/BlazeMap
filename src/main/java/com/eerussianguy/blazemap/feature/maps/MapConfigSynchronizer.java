@@ -22,6 +22,7 @@ public class MapConfigSynchronizer {
     public void load() {
         renderer.setMapType(config.activeMap.get().value());
         renderer.setDisabledLayers(config.disabledLayers.get());
+        renderer.setDisabledOverlays(config.disabledOverlays.get());
         renderer.setZoom(config.zoom.get());
     }
 

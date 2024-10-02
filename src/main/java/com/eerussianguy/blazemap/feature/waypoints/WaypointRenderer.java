@@ -16,7 +16,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 
 import com.eerussianguy.blazemap.api.event.DimensionChangedEvent;
-import com.eerussianguy.blazemap.api.markers.IMarkerStorage;
+import com.eerussianguy.blazemap.api.markers.MarkerStorage;
 import com.eerussianguy.blazemap.api.markers.Waypoint;
 import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.util.Colors;
@@ -30,7 +30,7 @@ import com.mojang.math.Vector3f;
 
 public class WaypointRenderer {
 
-    private static IMarkerStorage<Waypoint> waypointStorage;
+    private static MarkerStorage<Waypoint> waypointStorage;
 
     public static void init() {
         IEventBus bus = MinecraftForge.EVENT_BUS;

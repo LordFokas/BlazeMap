@@ -13,12 +13,12 @@ import net.minecraftforge.common.MinecraftForge;
 import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.event.ServerJoinedEvent;
 import com.eerussianguy.blazemap.api.event.WaypointEvent;
-import com.eerussianguy.blazemap.api.markers.IMarkerStorage;
+import com.eerussianguy.blazemap.api.markers.MarkerStorage;
 import com.eerussianguy.blazemap.api.markers.Waypoint;
 import com.eerussianguy.blazemap.api.util.IOSupplier;
 import com.eerussianguy.blazemap.api.util.MinecraftStreams;
 
-public class WaypointStore implements IMarkerStorage<Waypoint> {
+public class WaypointStore implements MarkerStorage<Waypoint> {
     private final Map<ResourceLocation, Waypoint> store = new HashMap<>();
     private final Collection<Waypoint> view = Collections.unmodifiableCollection(store.values());
 
@@ -103,9 +103,8 @@ public class WaypointStore implements IMarkerStorage<Waypoint> {
                     input.readBlockPos(),
                     input.readUTF(),
                     input.readResourceLocation(),
-                    input.readInt(),
-                    input.readFloat()
-                );
+                    input.readInt()
+                ).setRotation(input.readFloat());
                 store.put(waypoint.getID(), waypoint);
             }
         }

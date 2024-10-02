@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -12,6 +11,7 @@ import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -20,13 +20,6 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.animal.AbstractGolem;
-import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.WaterAnimal;
-import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.npc.AbstractVillager;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
@@ -35,11 +28,9 @@ import com.eerussianguy.blazemap.api.BlazeMapAPI;
 import com.eerussianguy.blazemap.api.BlazeRegistry;
 import com.eerussianguy.blazemap.api.event.DimensionChangedEvent;
 import com.eerussianguy.blazemap.api.event.MapLabelEvent;
-import com.eerussianguy.blazemap.api.event.WaypointEvent;
 import com.eerussianguy.blazemap.api.maps.*;
 import com.eerussianguy.blazemap.api.markers.*;
 import com.eerussianguy.blazemap.api.util.RegionPos;
-import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.engine.BlazeMapAsync;
 import com.eerussianguy.blazemap.engine.async.AsyncAwaiter;
 import com.eerussianguy.blazemap.feature.BlazeMapFeaturesClient;
@@ -58,23 +49,13 @@ public class MapRenderer implements AutoCloseable {
     private static final List<MapRenderer> RENDERERS = new ArrayList<>(4);
     private static DimensionTileStorage tileStorage;
     private static ResourceKey<Level> dimension;
-    private static IMarkerStorage<Waypoint> waypointStorage;
-    private static IMarkerStorage.Layered<MapLabel> labelStorage;
+    private static MarkerStorage.MapComponentStorage labelStorage;
 
     public static void onDimensionChange(DimensionChangedEvent evt) {
         evt.tileNotifications.addUpdateListener(MapRenderer::onTileChanged);
         tileStorage = evt.tileStorage;
         dimension = evt.dimension;
-        waypointStorage = evt.waypoints;
         labelStorage = evt.labels;
-    }
-
-    public static void onWaypointAdded(WaypointEvent.Created event) {
-        RENDERERS.forEach(r -> r.add(event.waypoint));
-    }
-
-    public static void onWaypointRemoved(WaypointEvent.Removed event) {
-        RENDERERS.forEach(r -> r.remove(event.waypoint));
     }
 
     public static void onMapLabelAdded(MapLabelEvent.Created event) {
@@ -101,12 +82,9 @@ public class MapRenderer implements AutoCloseable {
     private List<BlazeRegistry.Key<Layer>> layers_on, layers_off;
     private List<BlazeRegistry.Key<Overlay>> overlays_on, overlays_off = new LinkedList<>();
     private final HashMap<BlazeRegistry.Key<MapType>, List<BlazeRegistry.Key<Layer>>> disabledLayers = new HashMap<>();
-    private final List<Waypoint> waypoints = new ArrayList<>(16);
-    private final List<Waypoint> waypoints_on = new ArrayList<>(16);
-    private final List<Waypoint> waypoints_off = new ArrayList<>(16);
-    private final List<MapLabel> labels = new ArrayList<>(16);
-    private final List<MapLabel> labels_on = new ArrayList<>(16);
-    private final List<MapLabel> labels_off = new ArrayList<>(16);
+    private final List<MapComponentMarker> labels = new ArrayList<>(16);
+    private final List<MapComponentMarker> labels_on = new ArrayList<>(16);
+    private final List<MapComponentMarker> labels_off = new ArrayList<>(16);
     private boolean hasActiveSearch = false;
     private Predicate<String> matcher;
     private Consumer<Boolean> searchHost;
@@ -115,6 +93,7 @@ public class MapRenderer implements AutoCloseable {
     private DynamicTexture mapTexture;
     private RenderType renderType;
     private boolean needsUpdate = true;
+    private final Marker<?> playerMarker;
 
     private int width, height;
     private int mapWidth, mapHeight;
@@ -123,10 +102,8 @@ public class MapRenderer implements AutoCloseable {
     private final double minZoom, maxZoom;
     private double zoom = 1;
     private TileResolution resolution;
-    private final boolean renderNames;
-    private final double playerMarkerZHeight = 1;
 
-    public MapRenderer(int width, int height, ResourceLocation textureResource, double minZoom, double maxZoom, boolean renderNames) {
+    public MapRenderer(int width, int height, ResourceLocation textureResource, double minZoom, double maxZoom) {
         this.center = new BlockPos.MutableBlockPos();
         this.begin = new BlockPos.MutableBlockPos();
         this.end = new BlockPos.MutableBlockPos();
@@ -143,7 +120,8 @@ public class MapRenderer implements AutoCloseable {
             this.resize(width, height);
         }
 
-        this.renderNames = renderNames;
+        LocalPlayer player = Helpers.getPlayer();
+        playerMarker = new Marker<>(Helpers.identifier("local_player"), player.level.dimension(), player.blockPosition(), PLAYER).setSize(32).setRotation(player.getRotationVector().y);
 
         RENDERERS.add(this);
         debug.zoom = zoom;
@@ -205,7 +183,6 @@ public class MapRenderer implements AutoCloseable {
             }
         }
 
-        updateWaypoints();
         updateLabels();
 
         // debug info
@@ -215,42 +192,16 @@ public class MapRenderer implements AutoCloseable {
         debug.ez = end.getZ();
     }
 
-    public void updateWaypoints() {
-        waypoints.clear();
-        waypoints.addAll(waypointStorage.getAll().stream().filter(w -> inRange(w.getPosition())).collect(Collectors.toList()));
-        debug.waypoints = waypoints.size();
-        waypoints.forEach(this::matchWaypoint);
-        pingSearchHost();
-    }
-
-    private void add(Waypoint waypoint) {
-        if(inRange(waypoint.getPosition())) {
-            waypoints.add(waypoint);
-            debug.waypoints++;
-            matchWaypoint(waypoint);
-            pingSearchHost();
-        }
-    }
-
-    private void remove(Waypoint waypoint) {
-        if(waypoints.remove(waypoint)) {
-            debug.waypoints--;
-            waypoints_on.remove(waypoint);
-            waypoints_off.remove(waypoint);
-            pingSearchHost();
-        }
-    }
-
     public void updateLabels() {
         labels.clear();
-        layers_on.forEach(layer -> labels.addAll(labelStorage.getInLayer(layer).stream().filter(l -> inRange(l.getPosition())).collect(Collectors.toList())));
+        layers_on.forEach(layer -> labels.addAll(labelStorage.getStorage(layer).getAll().stream().filter(l -> inRange(l.getPosition())).collect(Collectors.toList())));
         debug.labels = labels.size();
         labels.forEach(this::matchLabel);
         pingSearchHost();
     }
 
-    private void add(MapLabel label) {
-        if(inRange(label.getPosition()) && layers_on.contains(label.getLayerID())) {
+    private void add(MapComponentMarker label) {
+        if(inRange(label.getPosition()) && layers_on.contains(label.getComponentId())) {
             labels.add(label);
             debug.labels++;
             matchLabel(label);
@@ -258,7 +209,7 @@ public class MapRenderer implements AutoCloseable {
         }
     }
 
-    private void remove(MapLabel label) {
+    private void remove(MapComponentMarker label) {
         if(labels.remove(label)) {
             debug.labels--;
             labels_off.remove(label);
@@ -308,87 +259,40 @@ public class MapRenderer implements AutoCloseable {
         RenderHelper.drawQuad(buffers.getBuffer(renderType), matrix, width, height);
 
         stack.pushPose();
-        renderEntities(stack, buffers);
+        ClientLevel level = Minecraft.getInstance().level;
+        for(var key : overlays_on) {
+            stack.translate(0, 0, 0.1f);
+            stack.pushPose();
+            key.value().getMarkers(level, resolution).forEach(marker -> {
+                stack.translate(0, 0, 0.0001f);
+                renderObject(buffers, stack, marker, SearchTargeting.NONE);
+            });
+            stack.popPose();
+        }
         stack.popPose();
 
         stack.pushPose();
         if(hasActiveSearch) {
-            for(MapLabel l : labels_off) {
+            for(MapComponentMarker l : labels_off) {
                 renderObject(buffers, stack, l, SearchTargeting.MISS);
             }
-            for(MapLabel l : labels_on) {
+            for(MapComponentMarker l : labels_on) {
                 renderObject(buffers, stack, l, SearchTargeting.HIT);
-            }
-            if (BlazeMapConfig.CLIENT.clientFeatures.displayWaypointsOnMap.get()) {
-                for(Waypoint w : waypoints_off) {
-                    renderMarker(buffers, stack, w.getPosition(), w.getIcon(), w.getColor(), 32, 32, w.getRotation(), false, renderNames ? w.getName() : null, SearchTargeting.MISS);
-                }
-                for(Waypoint w : waypoints_on) {
-                    renderMarker(buffers, stack, w.getPosition(), w.getIcon(), w.getColor(), 32, 32, w.getRotation(), false, renderNames ? w.getName() : null, SearchTargeting.HIT);
-                }
             }
         }
         else {
-            for(MapLabel l : labels) {
+            for(MapComponentMarker l : labels) {
                 renderObject(buffers, stack, l, SearchTargeting.NONE);
-            }
-            if (BlazeMapConfig.CLIENT.clientFeatures.displayWaypointsOnMap.get()) {
-                for(Waypoint w : waypoints) {
-                    renderMarker(buffers, stack, w.getPosition(), w.getIcon(), w.getColor(), 32, 32, w.getRotation(), false, renderNames ? w.getName() : null, SearchTargeting.NONE);
-                }
             }
         }
 
         LocalPlayer player = Helpers.getPlayer();
-        renderMarker(buffers, stack, player.blockPosition(), PLAYER, Colors.NO_TINT, 32, 32, playerMarkerZHeight, player.getRotationVector().y, false, null, SearchTargeting.NONE);
+        stack.translate(0, 0, 1);
+        playerMarker.setPosition(player.blockPosition()).setRotation(player.getRotationVector().y);
+        renderObject(buffers, stack, playerMarker, SearchTargeting.NONE);
         stack.popPose();
 
         stack.popPose();
-    }
-
-    private void renderEntities(PoseStack stack, MultiBufferSource buffers) {
-        Minecraft mc = Minecraft.getInstance();
-        LocalPlayer player = mc.player;
-        Random zHeightGenerator = new Random();
-        mc.level.entitiesForRendering().forEach(entity -> {
-            if(!(entity instanceof LivingEntity)) return;
-            BlockPos pos = entity.blockPosition();
-
-            // Get a *consistent* random value for each entity to avoid appearance of z-fighting
-            zHeightGenerator.setSeed(entity.getUUID().getMostSignificantBits());
-            double zHeight = zHeightGenerator.nextDouble();
-
-            if(inRange(pos)) {
-                int color;
-                boolean isPlayer = false;
-                if(entity instanceof Player && BlazeMapConfig.CLIENT.clientFeatures.displayOtherPlayers.get()) {
-                    if(entity == player) return;
-                    color = 0xFF88FF66;
-                    isPlayer = true;
-                }
-                else if((entity instanceof AbstractVillager || entity instanceof AbstractGolem) && BlazeMapConfig.CLIENT.clientFeatures.displayFriendlyMobs.get()) {
-                    color = 0xFFFFFF3F;
-                }
-                else if(entity instanceof Animal && BlazeMapConfig.CLIENT.clientFeatures.displayFriendlyMobs.get()) {
-                    color = 0xFFA0A0A0;
-                }
-                else if(entity instanceof WaterAnimal && BlazeMapConfig.CLIENT.clientFeatures.displayFriendlyMobs.get()) {
-                    color = 0xFF4488FF;
-                }
-                else if(entity instanceof Monster && BlazeMapConfig.CLIENT.clientFeatures.displayHostileMobs.get()) {
-                    color = 0xFFFF2222;
-                }
-                else {
-                    return;
-                }
-
-                if(!isPlayer && Math.abs(player.position().y - entity.position().y) > 10) {
-                    return;
-                }
-
-                renderMarker(buffers, stack, pos, PLAYER, color, 32, 32, zHeight, entity.getRotationVector().y, false, isPlayer ? entity.getName().getString() : null, SearchTargeting.NONE);
-            }
-        });
     }
 
     private void updateTexture() {
@@ -475,8 +379,11 @@ public class MapRenderer implements AutoCloseable {
         }
 
         // Paint global overlays on top of the layers
-        for(BlazeRegistry.Key<Overlay> overlay : overlays_on) {
-            PixelSource source = overlay.value().getPixelSource(dimension, region, resolution);
+        for(BlazeRegistry.Key<Overlay> overlayKey : overlays_on) {
+            Overlay overlay = overlayKey.value();
+            if(!overlay.type.isVisible) continue;
+
+            PixelSource source = overlay.getPixelSource(dimension, region, resolution);
             transferPixels(texture, source, _startX, _startY, textureFirstPixelX, textureFirstPixelY, textureW, textureH);
         }
     }
@@ -501,49 +408,17 @@ public class MapRenderer implements AutoCloseable {
         }
     }
 
-    private void renderMarker(MultiBufferSource buffers, PoseStack stack, BlockPos position, ResourceLocation marker, int color, double width, double height, float rotation, boolean zoom, String name, SearchTargeting search) {
-        renderMarker(buffers, stack, position, marker, color, width, height, 0, rotation, zoom, name, search);
-    }
+    private void renderObject(MultiBufferSource buffers, PoseStack stack, Marker<?> marker, SearchTargeting search) {
+        if(!inRange(marker.getPosition())) return;
 
-    private void renderMarker(MultiBufferSource buffers, PoseStack stack, BlockPos position, ResourceLocation marker, int color, double width, double height, double zHeight, float rotation, boolean zoom, String name, SearchTargeting search) {
         stack.pushPose();
-
         stack.scale((float) this.zoom, (float) this.zoom, 1);
+        BlockPos position = marker.getPosition();
         int dx = position.getX() - begin.getX();
         int dy = position.getZ() - begin.getZ();
         stack.translate(dx, dy, 0);
 
-        if(!zoom) {
-            stack.scale(1F / (float) this.zoom, 1F / (float) this.zoom, 1);
-        }
-
-        if(name != null) {
-            float scale = 2;
-            Minecraft mc = Minecraft.getInstance();
-
-            stack.pushPose();
-            stack.translate(-mc.font.width(name), (10 + (height / scale)), zHeight);
-            stack.scale(scale, scale, 0);
-            mc.font.drawInBatch(name, 0, 0, search.color(color), true, stack.last().pose(), buffers, false, 0, LightTexture.FULL_BRIGHT);
-            stack.popPose();
-        }
-        stack.mulPose(Vector3f.ZP.rotationDegrees(rotation));
-        stack.translate(-width / 2, -height / 2, zHeight);
-        VertexConsumer vertices = buffers.getBuffer(RenderType.text(marker));
-        RenderHelper.drawQuad(vertices, stack.last().pose(), (float) width, (float) height, search.color(color));
-
-        stack.popPose();
-    }
-
-    private void renderObject(MultiBufferSource buffers, PoseStack stack, MapLabel label, SearchTargeting search) {
-        stack.pushPose();
-        stack.scale((float) this.zoom, (float) this.zoom, 1);
-        BlockPos position = label.getPosition();
-        int dx = position.getX() - begin.getX();
-        int dy = position.getZ() - begin.getZ();
-        stack.translate(dx, dy, 0);
-
-        ((ObjectRenderer<MapLabel>) label.getRenderer().value()).render(label, stack, buffers, this.zoom, search);
+        ((ObjectRenderer<Marker<?>>) marker.getRenderer().value()).render(marker, stack, buffers, this.zoom, search);
 
         stack.popPose();
     }
@@ -555,8 +430,6 @@ public class MapRenderer implements AutoCloseable {
     public void setSearch(String search) {
         labels_off.clear();
         labels_on.clear();
-        waypoints_off.clear();
-        waypoints_on.clear();
         if(search == null || search.equals("")) {
             hasActiveSearch = false;
             matcher = null;
@@ -571,10 +444,9 @@ public class MapRenderer implements AutoCloseable {
         }
         hasActiveSearch = true;
         labels.forEach(this::matchLabel);
-        waypoints.forEach(this::matchWaypoint);
     }
 
-    private void matchLabel(MapLabel label) {
+    private void matchLabel(MapComponentMarker label) {
         if(!hasActiveSearch) return;
         for(String tag : label.getTags()) {
             if(matcher.test(tag)) {
@@ -585,22 +457,13 @@ public class MapRenderer implements AutoCloseable {
         labels_off.add(label);
     }
 
-    private void matchWaypoint(Waypoint waypoint) {
-        if(!hasActiveSearch) return;
-        if(matcher.test(waypoint.getName())) {
-            waypoints_on.add(waypoint);
-        } else {
-            waypoints_off.add(waypoint);
-        }
-    }
-
     public void setSearchHost(Consumer<Boolean> searchHost) {
         this.searchHost = searchHost;
     }
 
     public void pingSearchHost() {
         if(searchHost == null) return;
-        searchHost.accept(waypoints.size() + labels.size() > 0);
+        searchHost.accept(labels.size() > 0);
     }
 
 
