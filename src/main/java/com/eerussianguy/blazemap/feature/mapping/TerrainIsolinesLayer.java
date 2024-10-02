@@ -33,6 +33,7 @@ public class TerrainIsolinesLayer extends Layer {
             BlazeMapReferences.Layers.TERRAIN_ISOLINES,
             Helpers.translate("blazemap.terrain_isolines"),
             Helpers.identifier("textures/map_icons/layer_terrain_isolines.png"),
+            false,
 
             BlazeMapReferences.MasterData.TERRAIN_HEIGHT,
             BlazeMapReferences.MasterData.WATER_LEVEL

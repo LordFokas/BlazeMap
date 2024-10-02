@@ -20,6 +20,8 @@ public class TerrainHeightLayer extends Layer {
         super(
             BlazeMapReferences.Layers.TERRAIN_HEIGHT,
             Helpers.translate("blazemap.terrain_height"),
+            Helpers.identifier("textures/map_icons/layer_terrain_height.png"),
+            true,
 
             BlazeMapReferences.MasterData.TERRAIN_HEIGHT,
             BlazeMapReferences.MasterData.WATER_LEVEL

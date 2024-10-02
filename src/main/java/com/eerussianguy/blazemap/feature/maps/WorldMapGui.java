@@ -160,7 +160,6 @@ public class WorldMapGui extends Screen implements IMapHost {
 
             layerSet.setVisible(getMapType().getID().equals(mapType.getID()));
             for(var layer : mapType.getLayers()) {
-                if(layer.value().isOpaque()) continue; // TODO: fix this crap
                 layerSet.add(new LayerButton(layer, this));
             }
             layerSet.addSpacer().add(new Image(HEADER_LAYERS, 16, 16).tooltip(new TextComponent("Layers")));

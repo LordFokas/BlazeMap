@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.DynamicTexture;
@@ -40,9 +39,7 @@ import com.eerussianguy.blazemap.profiling.Profiler;
 import com.eerussianguy.blazemap.util.RenderHelper;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
 
 public class MapRenderer implements AutoCloseable {
     private static final ResourceLocation PLAYER = Helpers.identifier("textures/player.png");
@@ -82,9 +79,9 @@ public class MapRenderer implements AutoCloseable {
     private List<BlazeRegistry.Key<Layer>> layers_on, layers_off;
     private List<BlazeRegistry.Key<Overlay>> overlays_on, overlays_off = new LinkedList<>();
     private final HashMap<BlazeRegistry.Key<MapType>, List<BlazeRegistry.Key<Layer>>> disabledLayers = new HashMap<>();
-    private final List<MapComponentMarker> labels = new ArrayList<>(16);
-    private final List<MapComponentMarker> labels_on = new ArrayList<>(16);
-    private final List<MapComponentMarker> labels_off = new ArrayList<>(16);
+    private final List<MapLabel> labels = new ArrayList<>(16);
+    private final List<MapLabel> labels_on = new ArrayList<>(16);
+    private final List<MapLabel> labels_off = new ArrayList<>(16);
     private boolean hasActiveSearch = false;
     private Predicate<String> matcher;
     private Consumer<Boolean> searchHost;
@@ -200,7 +197,7 @@ public class MapRenderer implements AutoCloseable {
         pingSearchHost();
     }
 
-    private void add(MapComponentMarker label) {
+    private void add(MapLabel label) {
         if(inRange(label.getPosition()) && layers_on.contains(label.getComponentId())) {
             labels.add(label);
             debug.labels++;
@@ -209,7 +206,7 @@ public class MapRenderer implements AutoCloseable {
         }
     }
 
-    private void remove(MapComponentMarker label) {
+    private void remove(MapLabel label) {
         if(labels.remove(label)) {
             debug.labels--;
             labels_off.remove(label);
@@ -273,15 +270,15 @@ public class MapRenderer implements AutoCloseable {
 
         stack.pushPose();
         if(hasActiveSearch) {
-            for(MapComponentMarker l : labels_off) {
+            for(MapLabel l : labels_off) {
                 renderObject(buffers, stack, l, SearchTargeting.MISS);
             }
-            for(MapComponentMarker l : labels_on) {
+            for(MapLabel l : labels_on) {
                 renderObject(buffers, stack, l, SearchTargeting.HIT);
             }
         }
         else {
-            for(MapComponentMarker l : labels) {
+            for(MapLabel l : labels) {
                 renderObject(buffers, stack, l, SearchTargeting.NONE);
             }
         }
@@ -446,7 +443,7 @@ public class MapRenderer implements AutoCloseable {
         labels.forEach(this::matchLabel);
     }
 
-    private void matchLabel(MapComponentMarker label) {
+    private void matchLabel(MapLabel label) {
         if(!hasActiveSearch) return;
         for(String tag : label.getTags()) {
             if(matcher.test(tag)) {

@@ -20,6 +20,7 @@ public class TerrainSlopeLayer extends Layer {
             Helpers.translate("blazemap.terrain_slope"),
             // This should be changed at some point to its own dedicated image
             Helpers.identifier("textures/map_icons/layer_terrain_isolines.png"),
+            false,
 
             BlazeMapReferences.MasterData.TERRAIN_SLOPE
         );

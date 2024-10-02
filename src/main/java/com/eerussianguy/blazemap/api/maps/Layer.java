@@ -35,21 +35,21 @@ public abstract class Layer extends NamedMapComponent<Layer> implements Consumer
     public final Type type;
 
     @SafeVarargs
-    public Layer(Key<Layer> id, TranslatableComponent name, Key<DataType<MasterDatum>>... inputs) {
-        this(id, Type.PHYSICAL, name, null, inputs);
+    public Layer(Key<Layer> id, TranslatableComponent name, ResourceLocation icon, boolean opaque, Key<DataType<MasterDatum>>... inputs) {
+        this(id, Type.PHYSICAL, name, icon, opaque, inputs);
     }
 
     @SafeVarargs
-    public Layer(Key<Layer> id, TranslatableComponent name, ResourceLocation icon, Key<DataType<MasterDatum>>... inputs) {
-        this(id, Type.PHYSICAL, name, icon, inputs);
-    }
-
-    @SafeVarargs
-    Layer(Key<Layer> id, Type type, TranslatableComponent name, ResourceLocation icon, Key<DataType<MasterDatum>>... inputs) {
+    Layer(Key<Layer> id, Type type, TranslatableComponent name, ResourceLocation icon, boolean opaque, Key<DataType<MasterDatum>>... inputs) {
         super(id, name, icon);
         this.type = type;
+        if(type.isPipelined) {
+            if(inputs == null || inputs.length == 0) throw new IllegalArgumentException("Pipelined Layers must have non-zero input MD list");
+        } else {
+            if(inputs != null && inputs.length > 0) throw new IllegalArgumentException("Non-Pipelined Layers must not have input MDs");
+        }
         this.inputs = Arrays.stream(inputs).collect(Collectors.toUnmodifiableSet());
-        this.opaque = icon == null; // FIXME: this is bullshit
+        this.opaque = opaque;
     }
 
     @Override
@@ -57,7 +57,19 @@ public abstract class Layer extends NamedMapComponent<Layer> implements Consumer
         return inputs;
     }
 
+    /**
+     * isOpaque (alias for isBottomLayer) refers to the fact that bottom layers are opaque, and face different restrictions.
+     * 1 - opaque layers can only be the 1st layer in the map
+     * 1.1 - map therefore can only have 1 opaque layer
+     * 2 - layers in index >= 1 cannot be opaque
+     * 3 - opaque layers cannot be disabled (they are the map background)
+     */
     public final boolean isOpaque() {
+        return opaque;
+    }
+
+    /** Alias for isOpaque */
+    public final boolean isBottomLayer() {
         return opaque;
     }
 

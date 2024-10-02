@@ -21,7 +21,7 @@ import com.mojang.blaze3d.platform.NativeImage;
  */
 public class GhostLayer extends Layer {
     public GhostLayer(BlazeRegistry.Key<Layer> id, TranslatableComponent name, ResourceLocation icon) {
-        super(id, Type.INVISIBLE, name, icon);
+        super(id, Type.INVISIBLE, name, icon, false);
     }
 
     @Override // can't render

@@ -12,7 +12,7 @@ import com.mojang.blaze3d.platform.NativeImage;
 
 public abstract class SyntheticLayer extends Layer {
     public SyntheticLayer(BlazeRegistry.Key<Layer> id, TranslatableComponent name, ResourceLocation icon) {
-        super(id, Type.SYNTHETIC, name, icon);
+        super(id, Type.SYNTHETIC, name, icon, false);
     }
 
     @Override // can't render

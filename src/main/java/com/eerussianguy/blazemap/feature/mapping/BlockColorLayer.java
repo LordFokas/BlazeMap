@@ -17,6 +17,8 @@ public class BlockColorLayer extends Layer {
         super(
             BlazeMapReferences.Layers.BLOCK_COLOR,
             Helpers.translate("blazemap.block_color"),
+            Helpers.identifier("textures/map_icons/layer_block_color.png"),
+            true,
 
             BlazeMapReferences.MasterData.BLOCK_COLOR,
             BlazeMapReferences.MasterData.WATER_LEVEL

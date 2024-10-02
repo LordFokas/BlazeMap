@@ -27,6 +27,7 @@
   "blazemap.gui.waypoint_manager.title": "Your Waypoints",
   "blazemap.gui.waypoint_manager.delete": "Delete",
   "blazemap.gui.waypoint_manager.edit": "Edit",
+  "blazemap.gui.worldmap.layer.bottom": "Bottom layer is always on",
   "blazemap.gui.worldmap.menu.no_options": "No Options",
   "blazemap.gui.worldmap.menu.waypoint": "Waypoints",
   "blazemap.gui.worldmap.menu.waypoint.new": "Create New Waypoint",

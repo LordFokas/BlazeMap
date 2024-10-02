@@ -36,7 +36,7 @@ public interface MarkerStorage<T extends Marker<T>> {
     }
 
     interface MapComponentStorage {
-        MarkerStorage<MapComponentMarker> getGlobal();
-        MarkerStorage<MapComponentMarker> getStorage(BlazeRegistry.Key<? extends NamedMapComponent<?>> componentID);
+        MarkerStorage<MapLabel> getGlobal();
+        MarkerStorage<MapLabel> getStorage(BlazeRegistry.Key<? extends NamedMapComponent<?>> componentID);
     }
 }

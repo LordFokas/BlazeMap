@@ -31,6 +31,7 @@ public class MapType extends NamedMapComponent<MapType> {
         super(id, name, icon);
         this.layers = new LinkedHashSet<>(Arrays.asList(layers));
         this.layerView = Collections.unmodifiableSet(this.layers);
+        checkValid();
     }
 
     public Set<BlazeRegistry.Key<Layer>> getLayers() {
@@ -45,5 +46,22 @@ public class MapType extends NamedMapComponent<MapType> {
         var event = new LayerOrderingEvent(id, layers);
         MinecraftForge.EVENT_BUS.post(event);
         event.finish();
+
+        checkValid();
+    }
+
+    private void checkValid() {
+        if(layers.size() == 0) throw new IllegalStateException("MapType "+id+" must have at least 1 layer");
+
+        int index = 0;
+        for(var key : layers) {
+            var layer = key.value();
+            if(index == 0) {
+                if(!layer.isBottomLayer()) throw new IllegalStateException("MapType "+id+" has non-opaque layer "+layer.getID()+" at the bottom (index 0)");
+            } else {
+                if(layer.isBottomLayer()) throw new IllegalStateException("MapType "+id+" has opaque layer "+layer.getID()+" above the bottom (index "+index+")");
+            }
+            index++;
+        }
     }
 }

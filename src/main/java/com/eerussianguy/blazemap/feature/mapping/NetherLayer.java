@@ -20,6 +20,8 @@ public class NetherLayer extends Layer {
         super(
             BlazeMapReferences.Layers.NETHER,
             Helpers.translate("blazemap.nether_terrain"),
+            Helpers.identifier("textures/map_icons/layer_nether.png"),
+            true,
 
             BlazeMapReferences.MasterData.NETHER
         );

@@ -21,6 +21,7 @@ import com.eerussianguy.blazemap.gui.lib.BaseComponent;
 import com.eerussianguy.blazemap.gui.lib.TooltipService;
 import com.eerussianguy.blazemap.integration.KnownMods;
 import com.eerussianguy.blazemap.util.Colors;
+import com.eerussianguy.blazemap.util.Helpers;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
@@ -73,8 +74,36 @@ public abstract class NamedMapComponentButton<T extends NamedMapComponent<T>> ex
     }
 
     public static class LayerButton extends NamedMapComponentButton<Layer> {
+        private final Component bottom = Helpers.translate("blazemap.gui.worldmap.layer.bottom").withStyle(ChatFormatting.GRAY);
+        private final boolean isBottom;
+
         public LayerButton(BlazeRegistry.Key<Layer> key, IMapHost host) {
             super(key, host, button -> host.toggleLayer(key), () -> host.isLayerVisible(key));
+            isBottom = key.value().isBottomLayer();
+        }
+
+        @Override
+        protected int getTint() {
+            return isBottom ? Colors.DISABLED : super.getTint();
+        }
+
+        @Override
+        protected boolean onClick(int button) {
+            if(isBottom) {
+                Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 0.8F));
+                return true;
+            }
+            return super.onClick(button);
+        }
+
+        @Override
+        protected void renderTooltip(PoseStack stack, int mouseX, int mouseY, TooltipService service) {
+            RenderSystem.setShaderColor(1, 1, 1, 1);
+            if(isBottom) {
+                host.drawTooltip(stack, mouseX, mouseY, name, bottom, owner);
+            } else {
+                host.drawTooltip(stack, mouseX, mouseY, name, owner);
+            }
         }
     }
 

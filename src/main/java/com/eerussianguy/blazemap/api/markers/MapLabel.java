@@ -10,15 +10,15 @@ import net.minecraft.world.level.Level;
 import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
 import com.eerussianguy.blazemap.api.maps.NamedMapComponent;
 
-public abstract class MapComponentMarker extends Marker<MapComponentMarker> {
+public class MapLabel extends Marker<MapLabel> {
     private final Key<NamedMapComponent<?>> componentId;
 
-    public MapComponentMarker(ResourceLocation id, ResourceKey<Level> dimension, BlockPos position, ResourceLocation icon, Key<NamedMapComponent<?>> componentId) {
+    public MapLabel(ResourceLocation id, ResourceKey<Level> dimension, BlockPos position, ResourceLocation icon, Key<NamedMapComponent<?>> componentId) {
         super(id, dimension, position, icon);
         this.componentId = componentId;
     }
 
-    public MapComponentMarker(ResourceLocation id, ResourceKey<Level> dimension, BlockPos position, ResourceLocation icon, Key<NamedMapComponent<?>> componentId, Set<String> tags) {
+    public MapLabel(ResourceLocation id, ResourceKey<Level> dimension, BlockPos position, ResourceLocation icon, Key<NamedMapComponent<?>> componentId, Set<String> tags) {
         super(id, dimension, position, icon, tags);
         this.componentId = componentId;
     }

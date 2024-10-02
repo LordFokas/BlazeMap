@@ -13,9 +13,9 @@ import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
 import com.eerussianguy.blazemap.api.event.MapLabelEvent;
 import com.eerussianguy.blazemap.api.maps.NamedMapComponent;
 import com.eerussianguy.blazemap.api.markers.MarkerStorage;
-import com.eerussianguy.blazemap.api.markers.MapComponentMarker;
+import com.eerussianguy.blazemap.api.markers.MapLabel;
 
-class LabelStorage implements MarkerStorage.MapComponentStorage, MarkerStorage<MapComponentMarker> {
+class LabelStorage implements MarkerStorage.MapComponentStorage, MarkerStorage<MapLabel> {
     private final HashMap<Key<? extends NamedMapComponent<?>>, MarkerStorageImpl> layers = new HashMap<>();
     private final HashSet<ResourceLocation> labelIDs = new HashSet<>();
     private final ResourceKey<Level> dimension;
@@ -25,22 +25,22 @@ class LabelStorage implements MarkerStorage.MapComponentStorage, MarkerStorage<M
     }
 
     @Override
-    public MarkerStorage<MapComponentMarker> getGlobal() {
+    public MarkerStorage<MapLabel> getGlobal() {
         return this;
     }
 
     @Override
-    public MarkerStorage<MapComponentMarker> getStorage(Key<? extends NamedMapComponent<?>> componentID) {
+    public MarkerStorage<MapLabel> getStorage(Key<? extends NamedMapComponent<?>> componentID) {
         return layers.computeIfAbsent(componentID, key -> new MarkerStorageImpl(key, dimension, labelIDs));
     }
 
     @Override
-    public Collection<MapComponentMarker> getAll() {
+    public Collection<MapLabel> getAll() {
         throw new UnsupportedOperationException("Cannot get all markers from global storage");
     }
 
     @Override
-    public void add(MapComponentMarker marker) {
+    public void add(MapLabel marker) {
         getStorage(marker.getComponentId()).add(marker);
     }
 
@@ -50,7 +50,7 @@ class LabelStorage implements MarkerStorage.MapComponentStorage, MarkerStorage<M
     }
 
     @Override
-    public void remove(MapComponentMarker marker) {
+    public void remove(MapLabel marker) {
         getStorage(marker.getComponentId()).remove(marker.getID());
     }
 
@@ -60,8 +60,8 @@ class LabelStorage implements MarkerStorage.MapComponentStorage, MarkerStorage<M
     }
 
 
-    private static class MarkerStorageImpl implements MarkerStorage<MapComponentMarker> {
-        private final HashMap<ResourceLocation, MapComponentMarker> markers = new HashMap<>();
+    private static class MarkerStorageImpl implements MarkerStorage<MapLabel> {
+        private final HashMap<ResourceLocation, MapLabel> markers = new HashMap<>();
         private final HashSet<ResourceLocation> labelIDs;
         private final ResourceKey<Level> dimension;
         private final Key<? extends NamedMapComponent<?>> componentID;
@@ -73,12 +73,12 @@ class LabelStorage implements MarkerStorage.MapComponentStorage, MarkerStorage<M
         }
 
         @Override
-        public Collection<MapComponentMarker> getAll() {
+        public Collection<MapLabel> getAll() {
             return markers.values();
         }
 
         @Override
-        public void add(MapComponentMarker marker) {
+        public void add(MapLabel marker) {
             if(!dimension.equals(marker.getDimension())) return;
             if(!marker.getComponentId().equals(componentID)) throw new IllegalArgumentException("ComponentID mismatch");
             ResourceLocation id = marker.getID();
@@ -89,7 +89,7 @@ class LabelStorage implements MarkerStorage.MapComponentStorage, MarkerStorage<M
         }
 
         @Override
-        public void remove(MapComponentMarker label) {
+        public void remove(MapLabel label) {
             ResourceLocation id = label.getID();
             if(labelIDs.contains(id)) {
                 markers.remove(id);
@@ -102,7 +102,7 @@ class LabelStorage implements MarkerStorage.MapComponentStorage, MarkerStorage<M
         public void remove(ResourceLocation id) {
             if(labelIDs.contains(id)) {
                 if(!markers.containsKey(id)) throw new IllegalArgumentException("Marker is not in specified component");
-                MapComponentMarker label = markers.remove(id);
+                MapLabel label = markers.remove(id);
                 labelIDs.remove(id);
                 MinecraftForge.EVENT_BUS.post(new MapLabelEvent.Removed(label));
             }
