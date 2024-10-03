@@ -132,8 +132,8 @@ public class WorldMapGui extends Screen implements IMapHost {
     }
 
     @Override
-    public void drawTooltip(PoseStack stack, int x, int y, Component... lines) {
-        renderTooltip(stack, Arrays.stream(lines).map(Component::getVisualOrderText).toList(), x, y);
+    public void drawTooltip(PoseStack stack, int x, int y, List<? extends Component> lines) {
+        renderTooltip(stack, lines.stream().map(Component::getVisualOrderText).collect(Collectors.toList()), x, y);
     }
 
     @Override

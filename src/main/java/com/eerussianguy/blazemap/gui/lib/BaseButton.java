@@ -15,14 +15,25 @@ public abstract class BaseButton<T extends BaseButton<T>> extends BaseComponent<
     }
 
     protected boolean onClick(int button) {
-        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+        playOkSound();
         function.accept(button);
         return true;
     }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if(!isEnabled()) return false;
+        if(!isEnabled()){
+            playDeniedSound();
+            return true;
+        }
         return onClick(button);
+    }
+
+    public void playOkSound() {
+        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+    }
+
+    public void playDeniedSound() {
+        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 0.8F));
     }
 }

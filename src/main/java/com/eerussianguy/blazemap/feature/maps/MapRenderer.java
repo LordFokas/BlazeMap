@@ -2,7 +2,6 @@ package com.eerussianguy.blazemap.feature.maps;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -30,6 +29,7 @@ import com.eerussianguy.blazemap.api.event.MapLabelEvent;
 import com.eerussianguy.blazemap.api.maps.*;
 import com.eerussianguy.blazemap.api.markers.*;
 import com.eerussianguy.blazemap.api.util.RegionPos;
+import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.engine.BlazeMapAsync;
 import com.eerussianguy.blazemap.engine.async.AsyncAwaiter;
 import com.eerussianguy.blazemap.feature.BlazeMapFeaturesClient;
@@ -76,8 +76,10 @@ public class MapRenderer implements AutoCloseable {
     private Profiler.TimeProfiler uploadTimer = new Profiler.TimeProfiler.Dummy();
 
     private MapType mapType;
-    private List<BlazeRegistry.Key<Layer>> layers_on, layers_off;
-    private List<BlazeRegistry.Key<Overlay>> overlays_on, overlays_off = new LinkedList<>();
+    private List<BlazeRegistry.Key<Layer>> layers_on = new ArrayList<>();
+    private List<BlazeRegistry.Key<Overlay>> overlays_on = new ArrayList<>();
+    private final List<BlazeRegistry.Key<Layer>> layers_off = new ArrayList<>();
+    private final List<BlazeRegistry.Key<Overlay>> overlays_off = new ArrayList<>();
     private final HashMap<BlazeRegistry.Key<MapType>, List<BlazeRegistry.Key<Layer>>> disabledLayers = new HashMap<>();
     private final List<MapLabel> labels = new ArrayList<>(16);
     private final List<MapLabel> labels_on = new ArrayList<>(16);
@@ -125,10 +127,10 @@ public class MapRenderer implements AutoCloseable {
     }
 
     private void selectMapType() {
-        if(dimension != null && (mapType == null || !mapType.shouldRenderInDimension(dimension))) {
+        if(dimension != null && (mapType == null || !mapType.shouldRenderInDimension(dimension) || !BlazeMapConfig.SERVER.mapPermissions.isAllowed(mapType.getID()))) {
             for(BlazeRegistry.Key<MapType> next : BlazeMapAPI.MAPTYPES.keys()) {
                 MapType type = next.value();
-                if(type.shouldRenderInDimension(dimension)) {
+                if(type.shouldRenderInDimension(dimension) && BlazeMapConfig.SERVER.mapPermissions.isAllowed(next)) {
                     setMapType(type);
                     break;
                 }
@@ -192,6 +194,7 @@ public class MapRenderer implements AutoCloseable {
     public void updateLabels() {
         labels.clear();
         layers_on.forEach(layer -> labels.addAll(labelStorage.getStorage(layer).getAll().stream().filter(l -> inRange(l.getPosition())).collect(Collectors.toList())));
+        overlays_on.forEach(overlay -> labels.addAll(labelStorage.getStorage(overlay).getAll().stream().filter(o -> inRange(o.getPosition())).collect(Collectors.toList())));
         debug.labels = labels.size();
         labels.forEach(this::matchLabel);
         pingSearchHost();
@@ -226,14 +229,25 @@ public class MapRenderer implements AutoCloseable {
     }
 
     private void updateVisibleLayers() {
-        layers_on = mapType.getLayers().stream().filter(l -> !layers_off.contains(l) && l.value().shouldRenderInDimension(dimension)).collect(Collectors.toList());
+        layers_on = mapType.getLayers().stream().filter(this::isLayerAllowed).filter(this::isLayerVisible).toList();
         updateLabels();
         debug.layers = layers_on.size();
     }
 
+    private boolean isLayerAllowed(BlazeRegistry.Key<Layer> key) {
+        return key.value().shouldRenderInDimension(dimension)
+            && BlazeMapConfig.SERVER.layerPermissions.isAllowed(key);
+    }
+
     private void updateVisibleOverlays() {
-        overlays_on = BlazeMapFeaturesClient.OVERLAYS.stream().filter(o -> !overlays_off.contains(o) && o.value().shouldRenderInDimension(dimension)).collect(Collectors.toList());
+        overlays_on = BlazeMapFeaturesClient.OVERLAYS.stream().filter(this::isOverlayAllowed).filter(this::isOverlayVisible).toList();
+        updateLabels();
         debug.overlays = overlays_on.size();
+    }
+
+    private boolean isOverlayAllowed(BlazeRegistry.Key<Overlay> key) {
+        return key.value().shouldRenderInDimension(dimension)
+            && BlazeMapConfig.SERVER.overlayPermissions.isAllowed(key);
     }
 
     private boolean inRange(BlockPos pos) {
@@ -475,9 +489,11 @@ public class MapRenderer implements AutoCloseable {
         }
         else {
             if(!mapType.shouldRenderInDimension(dimension)) return false;
+            if(!BlazeMapConfig.SERVER.mapPermissions.isAllowed(mapType.getID())) return false;
             this.mapType = mapType;
         }
-        this.layers_off = disabledLayers.computeIfAbsent(this.mapType.getID(), $ -> new LinkedList<>());
+        this.layers_off.clear();
+        this.layers_off.addAll(disabledLayers.computeIfAbsent(this.mapType.getID(), $ -> new ArrayList<>()));
         updateVisibleLayers();
         this.needsUpdate = true;
         return true;

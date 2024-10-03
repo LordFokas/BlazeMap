@@ -27,7 +27,12 @@
   "blazemap.gui.waypoint_manager.title": "Your Waypoints",
   "blazemap.gui.waypoint_manager.delete": "Delete",
   "blazemap.gui.waypoint_manager.edit": "Edit",
-  "blazemap.gui.worldmap.layer.bottom": "Bottom layer is always on",
+
+  "blazemap.gui.common.map.disabled": "Map disabled by Server",
+  "blazemap.gui.common.layer.bottom": "Bottom layer is always on",
+  "blazemap.gui.common.layer.disabled": "Layer disabled by Server",
+  "blazemap.gui.common.overlay.disabled": "Overlay disabled by Server",
+
   "blazemap.gui.worldmap.menu.no_options": "No Options",
   "blazemap.gui.worldmap.menu.waypoint": "Waypoints",
   "blazemap.gui.worldmap.menu.waypoint.new": "Create New Waypoint",
