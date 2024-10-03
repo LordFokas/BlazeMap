@@ -95,6 +95,10 @@ public class Helpers {
         return new TranslatableComponent(key);
     }
 
+    public static TranslatableComponent translate(String key, Object ... args) {
+        return new TranslatableComponent(key, args);
+    }
+
     public static int clamp(int min, int var, int max) {
         return Math.max(min, Math.min(var, max));
     }

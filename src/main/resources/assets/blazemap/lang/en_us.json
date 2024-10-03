@@ -45,4 +45,5 @@
   "blazemap.gui.worldmap.menu.ftbchunks.claim": "Claim Chunk",
   "blazemap.gui.worldmap.menu.ftbchunks.unclaim": "Unclaim Chunk",
   "blazemap.gui.worldmap.menu.ftbchunks.claimed": "Claimed by others"
+  "blazemap.gui.worldmap.atlas_progress.filepath_message": "Atlas save to %s"
 }
