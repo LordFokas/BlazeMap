@@ -689,6 +689,10 @@ public class MapRenderer implements AutoCloseable {
         setCenter(center.getX() + x, center.getZ() + z);
     }
 
+    public RegionPos getCenterRegion() {
+        return new RegionPos(center);
+    }
+
     public void centerOnPlayer() {
         LocalPlayer player = Helpers.getPlayer();
         if(player == null) {

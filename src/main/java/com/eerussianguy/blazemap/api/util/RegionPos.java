@@ -38,6 +38,12 @@ public class RegionPos {
         return (xp == x || xn == x) && (zp == z || zn == z);
     }
 
+    public int distanceSquared(RegionPos other) {
+        int dx = Math.abs(x - other.x);
+        int dz = Math.abs(z - other.z);
+        return dx*dx + dz*dz;
+    }
+
     @Override
     public boolean equals(Object o) {
         if(this == o) return true;
