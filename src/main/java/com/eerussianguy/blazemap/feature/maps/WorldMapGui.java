@@ -31,7 +31,6 @@ import com.eerussianguy.blazemap.engine.BlazeMapAsync;
 import com.eerussianguy.blazemap.feature.BlazeMapFeaturesClient;
 import com.eerussianguy.blazemap.feature.atlas.AtlasExporter;
 import com.eerussianguy.blazemap.feature.atlas.AtlasTask;
-import com.eerussianguy.blazemap.gui.Image;
 import com.eerussianguy.blazemap.gui.MouseSubpixelSmoother;
 import com.eerussianguy.blazemap.gui.primitives.Image;
 import com.eerussianguy.blazemap.profiling.overlay.ProfilingRenderer;
@@ -291,7 +290,7 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
     }
 
     private void renderAtlasExportProgress(GuiGraphics graphics, float scale) {
-        AtlasExporter.Task task = AtlasExporter.getTask();
+        AtlasTask task = AtlasExporter.getTask();
         if(task == null) return;
         Font font = Minecraft.getInstance().font;
         var stack = graphics.pose();
