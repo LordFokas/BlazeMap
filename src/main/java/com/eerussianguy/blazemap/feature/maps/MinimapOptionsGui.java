@@ -1,8 +1,6 @@
 package com.eerussianguy.blazemap.feature.maps;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -10,7 +8,6 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
 import com.eerussianguy.blazemap.api.BlazeMapAPI;
@@ -77,7 +74,7 @@ public class MinimapOptionsGui extends BlazeGui implements IMapHost {
 
     @Override
     public void drawTooltip(PoseStack stack, int x, int y, List<? extends Component> lines) {
-        renderTooltip(stack, lines.stream().map(Component::getVisualOrderText).collect(Collectors.toList()), x, y);
+        renderTooltip(stack, lines.stream().map(Component::getVisualOrderText).toList(), x, y);
     }
 
     @Override
