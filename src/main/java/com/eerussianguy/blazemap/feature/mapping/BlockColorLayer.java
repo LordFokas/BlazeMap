@@ -1,5 +1,6 @@
 package com.eerussianguy.blazemap.feature.mapping;
 
+import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
 import com.eerussianguy.blazemap.api.builtin.BlockColorMD;
 import com.eerussianguy.blazemap.api.builtin.WaterLevelMD;
@@ -7,8 +8,8 @@ import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.TileResolution;
 import com.eerussianguy.blazemap.api.util.ArrayAggregator;
 import com.eerussianguy.blazemap.api.util.IDataSource;
-import com.eerussianguy.blazemap.util.Colors;
-import com.eerussianguy.blazemap.util.Helpers;
+import com.eerussianguy.blazemap.lib.Colors;
+import com.eerussianguy.blazemap.lib.Helpers;
 import com.mojang.blaze3d.platform.NativeImage;
 
 public class BlockColorLayer extends Layer {
@@ -17,7 +18,7 @@ public class BlockColorLayer extends Layer {
         super(
             BlazeMapReferences.Layers.BLOCK_COLOR,
             Helpers.translate("blazemap.block_color"),
-            Helpers.identifier("textures/map_icons/layer_block_color.png"),
+            BlazeMap.resource("textures/map_icons/layer_block_color.png"),
             true,
 
             BlazeMapReferences.MasterData.BLOCK_COLOR,

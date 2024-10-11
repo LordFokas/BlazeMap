@@ -6,7 +6,7 @@ import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
 import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.MapType;
 import com.eerussianguy.blazemap.api.maps.Overlay;
-import com.eerussianguy.blazemap.gui.lib.TooltipService;
+import com.eerussianguy.blazemap.lib.gui.core.TooltipService;
 
 public interface MapHost extends TooltipService {
     boolean isLayerVisible(Key<Layer> layerID);

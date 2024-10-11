@@ -5,7 +5,7 @@ import net.minecraft.client.renderer.chunk.RenderChunkRegion;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 
-import com.eerussianguy.blazemap.engine.client.BlazeMapClientEngine;
+import com.eerussianguy.blazemap.engine.client.ClientEngine;
 import com.eerussianguy.blazemap.feature.MDSources;
 import com.eerussianguy.blazemap.profiling.Profilers;
 import org.spongepowered.asm.mixin.Mixin;
@@ -24,7 +24,7 @@ public class RenderChunkRegionMixin {
         for(RenderChunk[] rcs : renderChunks) {
             for(RenderChunk rc : rcs) {
                 ChunkPos pos = rc.wrapped.getPos();
-                BlazeMapClientEngine.onChunkChanged(pos, MDSources.Client.VANILLA);
+                ClientEngine.onChunkChanged(pos, MDSources.Client.VANILLA);
             }
         }
 

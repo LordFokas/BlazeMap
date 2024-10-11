@@ -6,13 +6,14 @@ import java.util.HashMap;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 
+import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
 import com.eerussianguy.blazemap.api.maps.Overlay;
 import com.eerussianguy.blazemap.api.maps.PixelSource;
 import com.eerussianguy.blazemap.api.maps.TileResolution;
 import com.eerussianguy.blazemap.api.util.RegionPos;
-import com.eerussianguy.blazemap.util.Colors;
-import com.eerussianguy.blazemap.util.Helpers;
+import com.eerussianguy.blazemap.lib.Colors;
+import com.eerussianguy.blazemap.lib.Helpers;
 import dev.ftb.mods.ftbchunks.data.ClaimedChunkManager;
 import dev.ftb.mods.ftbchunks.data.FTBChunksAPI;
 import dev.ftb.mods.ftblibrary.math.ChunkDimPos;
@@ -25,7 +26,7 @@ public class FTBChunksOverlay extends Overlay {
         super(
             BlazeMapReferences.Overlays.FTBCHUNKS,
             Helpers.translate("blazemap.ftbchunks"),
-            Helpers.identifier("textures/map_icons/overlay_ftbchunks.png")
+            BlazeMap.resource("textures/map_icons/overlay_ftbchunks.png")
         );
     }
 

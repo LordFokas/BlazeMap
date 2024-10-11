@@ -8,7 +8,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalNotification;
-
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 
@@ -17,12 +16,11 @@ import com.eerussianguy.blazemap.api.util.IStorageAccess;
 import com.eerussianguy.blazemap.api.util.MinecraftStreams;
 import com.eerussianguy.blazemap.api.util.RegionPos;
 import com.eerussianguy.blazemap.engine.BlazeMapAsync;
-import com.eerussianguy.blazemap.engine.async.AsyncChainRoot;
-import com.eerussianguy.blazemap.engine.async.DebouncingDomain;
-import com.eerussianguy.blazemap.util.Helpers;
+import com.eerussianguy.blazemap.lib.async.AsyncChainRoot;
+import com.eerussianguy.blazemap.lib.async.DebouncingDomain;
 
 public class LevelMDCache {
-    private static final ResourceLocation NODE = Helpers.identifier("md-cache");
+    private static final ResourceLocation NODE = BlazeMap.resource("md-cache");
     private final LoadingCache<RegionPos, RegionMDCache> regions;
     private final IStorageAccess storage;
     private final DebouncingDomain<RegionMDCache> debouncer;
@@ -31,7 +29,7 @@ public class LevelMDCache {
     public LevelMDCache(final IStorageAccess storage, AsyncChainRoot asyncChain) {
         this.storage = storage;
         this.asyncChain = asyncChain;
-        this.debouncer = new DebouncingDomain<>(BlazeMapAsync.instance().debouncer, this::persist, 5_000, 30_000);
+        this.debouncer = new DebouncingDomain<>(BlazeMapAsync.instance().debouncer, this::persist, 5_000, 30_000, BlazeMap.LOGGER);
 
         this.regions = CacheBuilder.newBuilder()
             .maximumSize(256)

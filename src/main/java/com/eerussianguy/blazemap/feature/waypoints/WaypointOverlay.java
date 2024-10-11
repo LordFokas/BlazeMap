@@ -9,10 +9,10 @@ import com.eerussianguy.blazemap.api.BlazeMapReferences;
 import com.eerussianguy.blazemap.api.event.DimensionChangedEvent;
 import com.eerussianguy.blazemap.api.maps.GhostOverlay;
 import com.eerussianguy.blazemap.api.maps.TileResolution;
-import com.eerussianguy.blazemap.api.markers.MarkerStorage;
 import com.eerussianguy.blazemap.api.markers.Marker;
+import com.eerussianguy.blazemap.api.markers.MarkerStorage;
 import com.eerussianguy.blazemap.api.markers.Waypoint;
-import com.eerussianguy.blazemap.util.Helpers;
+import com.eerussianguy.blazemap.lib.Helpers;
 
 public class WaypointOverlay extends GhostOverlay {
     private static MarkerStorage<Waypoint> waypointStorage;

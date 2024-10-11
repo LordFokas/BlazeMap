@@ -15,16 +15,20 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 
+import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.BlazeMapAPI;
 import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
 import com.eerussianguy.blazemap.api.maps.*;
 import com.eerussianguy.blazemap.api.pipeline.*;
 import com.eerussianguy.blazemap.api.util.RegionPos;
-import com.eerussianguy.blazemap.engine.*;
-import com.eerussianguy.blazemap.engine.async.*;
+import com.eerussianguy.blazemap.engine.Pipeline;
+import com.eerussianguy.blazemap.engine.PipelineProfiler;
+import com.eerussianguy.blazemap.engine.StorageAccess;
+import com.eerussianguy.blazemap.engine.UnsafeGenerics;
 import com.eerussianguy.blazemap.engine.cache.ChunkMDCache;
 import com.eerussianguy.blazemap.engine.cache.ChunkMDCacheView;
-import com.eerussianguy.blazemap.util.Helpers;
+import com.eerussianguy.blazemap.lib.Helpers;
+import com.eerussianguy.blazemap.lib.async.*;
 import com.mojang.blaze3d.platform.NativeImage;
 
 import static com.eerussianguy.blazemap.profiling.Profilers.Client.*;
@@ -77,7 +81,7 @@ class ClientPipeline extends Pipeline {
             TILE_TIME_PROFILER.begin();
             region.save();
             TILE_TIME_PROFILER.end();
-        }), 2500, 30000);
+        }), 2500, 30000, BlazeMap.LOGGER);
 
         this.useMDCache();
     }
@@ -87,7 +91,7 @@ class ClientPipeline extends Pipeline {
             .map(k -> k.value().getInputIDs()).map(ids -> BlazeMapAPI.COLLECTORS.keys().stream().filter(k -> ids.contains(k.value().getOutputID()))
                 .collect(Collectors.toUnmodifiableSet())).flatMap(Set::stream).filter(k -> k.value().shouldExecuteIn(dimension, type));
 
-        if(!BlazeMapClientEngine.isClientSource()) {
+        if(!ClientEngine.isClientSource()) {
             collectors = collectors.filter(k -> k.value() instanceof ClientOnlyCollector);
         }
 
@@ -235,7 +239,7 @@ class ClientPipeline extends Pipeline {
     private void sendMapUpdates(Set<LayerRegion> updates) {
         if(active) {
             for(LayerRegion update : updates) {
-                BlazeMapClientEngine.notifyLayerRegionChange(update);
+                ClientEngine.notifyLayerRegionChange(update);
             }
         }
     }

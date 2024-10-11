@@ -21,10 +21,10 @@ import com.eerussianguy.blazemap.api.maps.TileResolution;
 import com.eerussianguy.blazemap.api.util.RegionPos;
 import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.engine.StorageAccess;
-import com.eerussianguy.blazemap.engine.client.BlazeMapClientEngine;
+import com.eerussianguy.blazemap.engine.client.ClientEngine;
 import com.eerussianguy.blazemap.engine.client.LayerRegionTile;
-import com.eerussianguy.blazemap.util.Colors;
-import com.eerussianguy.blazemap.util.Helpers;
+import com.eerussianguy.blazemap.lib.Colors;
+import com.eerussianguy.blazemap.lib.Helpers;
 import com.mojang.blaze3d.platform.NativeImage;
 
 public class AtlasTask {
@@ -95,7 +95,7 @@ public class AtlasTask {
         try {
             // Calculation stage: figure out image size and corner regions, create canvas of appropriate size
             setStage(Stage.CALCULATING);
-            StorageAccess.Internal storage = BlazeMapClientEngine.getDimensionStorage(dimension);
+            StorageAccess.Internal storage = ClientEngine.getDimensionStorage(dimension);
             final NativeImage atlas = image = constructAtlas(storage, resolution);
 
             // Stitching stage: open tiles and transfer pixels to the correct place in the atlas

@@ -5,12 +5,13 @@ import java.util.EnumMap;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 
+import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
 import com.eerussianguy.blazemap.api.maps.Overlay;
 import com.eerussianguy.blazemap.api.maps.PixelSource;
 import com.eerussianguy.blazemap.api.maps.TileResolution;
 import com.eerussianguy.blazemap.api.util.RegionPos;
-import com.eerussianguy.blazemap.util.Helpers;
+import com.eerussianguy.blazemap.lib.Helpers;
 
 public class GridOverlay extends Overlay {
     private static final EnumMap<TileResolution, GridPixelSource> SOURCES = new EnumMap<>(TileResolution.class);
@@ -21,7 +22,7 @@ public class GridOverlay extends Overlay {
         super(
             BlazeMapReferences.Overlays.GRID,
             Helpers.translate("blazemap.grid"),
-            Helpers.identifier("textures/map_icons/overlay_grid.png")
+            BlazeMap.resource("textures/map_icons/overlay_grid.png")
         );
     }
 

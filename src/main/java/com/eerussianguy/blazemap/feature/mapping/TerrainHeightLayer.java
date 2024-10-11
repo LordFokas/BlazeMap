@@ -2,6 +2,7 @@ package com.eerussianguy.blazemap.feature.mapping;
 
 import java.awt.*;
 
+import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
 import com.eerussianguy.blazemap.api.builtin.TerrainHeightMD;
 import com.eerussianguy.blazemap.api.builtin.WaterLevelMD;
@@ -10,8 +11,8 @@ import com.eerussianguy.blazemap.api.maps.Renderable;
 import com.eerussianguy.blazemap.api.maps.TileResolution;
 import com.eerussianguy.blazemap.api.util.ArrayAggregator;
 import com.eerussianguy.blazemap.api.util.IDataSource;
-import com.eerussianguy.blazemap.util.Colors;
-import com.eerussianguy.blazemap.util.Helpers;
+import com.eerussianguy.blazemap.lib.Colors;
+import com.eerussianguy.blazemap.lib.Helpers;
 import com.mojang.blaze3d.platform.NativeImage;
 
 public class TerrainHeightLayer extends Layer {
@@ -20,7 +21,7 @@ public class TerrainHeightLayer extends Layer {
         super(
             BlazeMapReferences.Layers.TERRAIN_HEIGHT,
             Helpers.translate("blazemap.terrain_height"),
-            Helpers.identifier("textures/map_icons/layer_terrain_height.png"),
+            BlazeMap.resource("textures/map_icons/layer_terrain_height.png"),
             true,
 
             BlazeMapReferences.MasterData.TERRAIN_HEIGHT,

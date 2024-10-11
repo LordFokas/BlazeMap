@@ -10,21 +10,20 @@ import net.minecraft.client.gui.components.Widget;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
-
 import net.minecraftforge.common.MinecraftForge;
 
+import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.BlazeRegistry;
 import com.eerussianguy.blazemap.api.event.MapMenuSetupEvent;
 import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.Overlay;
-import com.eerussianguy.blazemap.util.Colors;
-import com.eerussianguy.blazemap.util.Helpers;
-import com.eerussianguy.blazemap.util.IntHolder;
-import com.eerussianguy.blazemap.util.RenderHelper;
+import com.eerussianguy.blazemap.lib.Colors;
+import com.eerussianguy.blazemap.lib.IntHolder;
+import com.eerussianguy.blazemap.lib.RenderHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 public class WorldMapPopup implements Widget {
-    private static final ResourceLocation MENU_ROOT = Helpers.identifier("map.menu");
+    private static final ResourceLocation MENU_ROOT = BlazeMap.resource("map.menu");
     private static final TextComponent MENU_ROOT_TEXT = new TextComponent("");
     private static final int MIN_WIDTH = 160;
 

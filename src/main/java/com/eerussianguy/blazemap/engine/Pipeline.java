@@ -7,16 +7,17 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 
+import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.BlazeRegistry;
 import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
 import com.eerussianguy.blazemap.api.pipeline.*;
 import com.eerussianguy.blazemap.api.util.RegionPos;
-import com.eerussianguy.blazemap.engine.async.AsyncChainRoot;
-import com.eerussianguy.blazemap.engine.async.DebouncingDomain;
-import com.eerussianguy.blazemap.engine.async.DebouncingThread;
 import com.eerussianguy.blazemap.engine.cache.ChunkMDCache;
 import com.eerussianguy.blazemap.engine.cache.ChunkMDCacheView;
 import com.eerussianguy.blazemap.engine.cache.LevelMDCache;
+import com.eerussianguy.blazemap.lib.async.AsyncChainRoot;
+import com.eerussianguy.blazemap.lib.async.DebouncingDomain;
+import com.eerussianguy.blazemap.lib.async.DebouncingThread;
 
 import static com.eerussianguy.blazemap.engine.UnsafeGenerics.*;
 
@@ -57,7 +58,7 @@ public abstract class Pipeline {
         Set<Key<Processor>> availableProcessors
     ) {
         this.async = async;
-        this.dirtyChunks = new DebouncingDomain<>(debouncer, this::begin, 500, 5000);
+        this.dirtyChunks = new DebouncingDomain<>(debouncer, this::begin, 500, 5000, BlazeMap.LOGGER);
         this.profiler = profiler;
 
         this.dimension = dimension;

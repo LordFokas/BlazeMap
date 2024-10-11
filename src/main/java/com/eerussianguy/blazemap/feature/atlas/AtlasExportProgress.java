@@ -3,9 +3,9 @@ package com.eerussianguy.blazemap.feature.atlas;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 
-import com.eerussianguy.blazemap.gui.lib.BaseComponent;
-import com.eerussianguy.blazemap.util.Colors;
-import com.eerussianguy.blazemap.util.RenderHelper;
+import com.eerussianguy.blazemap.lib.Colors;
+import com.eerussianguy.blazemap.lib.RenderHelper;
+import com.eerussianguy.blazemap.lib.gui.core.BaseComponent;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 public class AtlasExportProgress extends BaseComponent<AtlasExportProgress> {

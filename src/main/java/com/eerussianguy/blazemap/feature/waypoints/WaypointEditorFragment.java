@@ -7,15 +7,16 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 
+import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
 import com.eerussianguy.blazemap.api.markers.Waypoint;
-import com.eerussianguy.blazemap.gui.components.*;
-import com.eerussianguy.blazemap.gui.fragment.BaseFragment;
-import com.eerussianguy.blazemap.gui.fragment.FragmentContainer;
-import com.eerussianguy.blazemap.util.Colors;
-import com.eerussianguy.blazemap.util.Helpers;
-import com.eerussianguy.blazemap.util.IntHolder;
-import com.eerussianguy.blazemap.util.ObjHolder;
+import com.eerussianguy.blazemap.lib.Colors;
+import com.eerussianguy.blazemap.lib.Helpers;
+import com.eerussianguy.blazemap.lib.IntHolder;
+import com.eerussianguy.blazemap.lib.ObjHolder;
+import com.eerussianguy.blazemap.lib.gui.components.*;
+import com.eerussianguy.blazemap.lib.gui.fragment.BaseFragment;
+import com.eerussianguy.blazemap.lib.gui.fragment.FragmentContainer;
 
 public class WaypointEditorFragment extends BaseFragment {
     private final Waypoint waypoint;
@@ -26,7 +27,7 @@ public class WaypointEditorFragment extends BaseFragment {
     }
 
     public WaypointEditorFragment(BlockPos pos) {
-        this(new Waypoint(Helpers.identifier("waypoint/"+System.nanoTime()), Minecraft.getInstance().level.dimension(), pos, "New Waypoint", BlazeMapReferences.Icons.WAYPOINT, Colors.randomBrightColor()), true);
+        this(new Waypoint(BlazeMap.resource("waypoint/"+System.nanoTime()), Minecraft.getInstance().level.dimension(), pos, "New Waypoint", BlazeMapReferences.Icons.WAYPOINT, Colors.randomBrightColor()), true);
     }
 
     public WaypointEditorFragment(Waypoint waypoint) {

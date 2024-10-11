@@ -8,15 +8,15 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 
-import com.eerussianguy.blazemap.gui.lib.BaseComponent;
-import com.eerussianguy.blazemap.util.Colors;
-import com.eerussianguy.blazemap.util.Helpers;
-import com.eerussianguy.blazemap.util.RenderHelper;
+import com.eerussianguy.blazemap.BlazeMap;
+import com.eerussianguy.blazemap.lib.Colors;
+import com.eerussianguy.blazemap.lib.RenderHelper;
+import com.eerussianguy.blazemap.lib.gui.core.BaseComponent;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 
 public class WorldMapHotkey extends BaseComponent<WorldMapHotkey> {
-    public static final ResourceLocation KEY = Helpers.identifier("textures/gui/key.png");
+    public static final ResourceLocation KEY = BlazeMap.resource("textures/gui/key.png");
     private static final int KEY_WIDTH = 40;
     private static final int KEY_SPACE = 8;
     private static final int PADDING = 2;

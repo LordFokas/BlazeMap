@@ -6,11 +6,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 
 import com.eerussianguy.blazemap.engine.BlazeMapAsync;
-import com.eerussianguy.blazemap.gui.lib.BaseComponent;
+import com.eerussianguy.blazemap.engine.render.MapRenderer;
+import com.eerussianguy.blazemap.lib.Colors;
+import com.eerussianguy.blazemap.lib.RenderHelper;
+import com.eerussianguy.blazemap.lib.gui.core.BaseComponent;
 import com.eerussianguy.blazemap.profiling.Profiler;
 import com.eerussianguy.blazemap.profiling.overlay.ProfilingRenderer;
-import com.eerussianguy.blazemap.util.Colors;
-import com.eerussianguy.blazemap.util.RenderHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 

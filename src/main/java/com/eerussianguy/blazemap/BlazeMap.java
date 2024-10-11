@@ -2,6 +2,7 @@ package com.eerussianguy.blazemap;
 
 import java.util.List;
 
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.IExtensionPoint;
@@ -13,8 +14,8 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.engine.RegistryController;
-import com.eerussianguy.blazemap.engine.client.BlazeMapClientEngine;
-import com.eerussianguy.blazemap.engine.server.BlazeMapServerEngine;
+import com.eerussianguy.blazemap.engine.client.ClientEngine;
+import com.eerussianguy.blazemap.engine.server.ServerEngine;
 import com.eerussianguy.blazemap.feature.BlazeMapCommandsClient;
 import com.eerussianguy.blazemap.feature.BlazeMapFeaturesClient;
 import com.eerussianguy.blazemap.feature.BlazeMapFeaturesCommon;
@@ -36,6 +37,10 @@ public class BlazeMap {
     public static final List<ModIntegration> INTEGRATIONS = List.of(
         new FTBChunksPlugin()
     );
+
+    public static ResourceLocation resource(String name) {
+        return new ResourceLocation(MOD_ID, name);
+    }
 
     public BlazeMap() {
         ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> "Nothing", (remote, isServer) -> true));
@@ -63,7 +68,7 @@ public class BlazeMap {
 
         // We are client side, enable client engine. Required on client.
         if(FMLEnvironment.dist == Dist.CLIENT) {
-            BlazeMapClientEngine.init();
+            ClientEngine.init();
         }
 
         // Regardless of side, server engine is optional.
@@ -71,7 +76,7 @@ public class BlazeMap {
         // So removing the mod to disable the server engine will not be an option.
         // For now, though, there are no other server features.
         if(BlazeMapConfig.COMMON.enableServerEngine.get()){
-            BlazeMapServerEngine.init();
+            ServerEngine.init();
         }
 
         // Initialize common sided features

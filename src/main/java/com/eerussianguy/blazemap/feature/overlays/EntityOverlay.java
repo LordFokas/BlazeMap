@@ -15,16 +15,17 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 
+import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
 import com.eerussianguy.blazemap.api.BlazeRegistry;
 import com.eerussianguy.blazemap.api.maps.GhostOverlay;
 import com.eerussianguy.blazemap.api.maps.Overlay;
 import com.eerussianguy.blazemap.api.maps.TileResolution;
 import com.eerussianguy.blazemap.api.markers.Marker;
-import com.eerussianguy.blazemap.util.Helpers;
+import com.eerussianguy.blazemap.lib.Helpers;
 
 public abstract class EntityOverlay extends GhostOverlay {
-    private static final ResourceLocation PLAYER = Helpers.identifier("textures/player.png");
+    private static final ResourceLocation PLAYER = BlazeMap.resource("textures/player.png");
     private static final ArrayList<Entity> ENTITIES = new ArrayList<>();
     private static final int DEFAULT_ENTITY_MAX_VERTICAL_DISTANCE = 10;
     private static final int DEFAULT_PLAYER_MAX_VERTICAL_DISTANCE = -1;
@@ -58,7 +59,7 @@ public abstract class EntityOverlay extends GhostOverlay {
 
     private static class EntityMarker extends Marker<EntityMarker> {
         protected EntityMarker(Entity e, String name, int color) {
-            super(Helpers.identifier("entity."+e.getStringUUID()), e.level.dimension(), e.blockPosition(), PLAYER);
+            super(BlazeMap.resource("entity."+e.getStringUUID()), e.level.dimension(), e.blockPosition(), PLAYER);
             setName(name);
             setColor(color);
             setRotation(e.getRotationVector().y);

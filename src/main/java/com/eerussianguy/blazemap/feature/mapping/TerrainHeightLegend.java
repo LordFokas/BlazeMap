@@ -8,10 +8,10 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.ResourceLocation;
 
-import com.eerussianguy.blazemap.gui.lib.BaseComponent;
-import com.eerussianguy.blazemap.util.Colors;
-import com.eerussianguy.blazemap.util.Helpers;
-import com.eerussianguy.blazemap.util.RenderHelper;
+import com.eerussianguy.blazemap.BlazeMap;
+import com.eerussianguy.blazemap.lib.Colors;
+import com.eerussianguy.blazemap.lib.RenderHelper;
+import com.eerussianguy.blazemap.lib.gui.core.BaseComponent;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -36,7 +36,7 @@ public class TerrainHeightLegend extends BaseComponent<TerrainHeightLegend> {
             max = level.getMaxBuildHeight();
             legend = TerrainHeightLayer.getLegend(min, sea, max);
             DynamicTexture texture = new DynamicTexture(legend);
-            ResourceLocation path = Helpers.identifier("dynamic/legend/terrain_height");
+            ResourceLocation path = BlazeMap.resource("dynamic/legend/terrain_height");
             mc.getTextureManager().register(path, texture);
             type = RenderType.text(path);
         }

@@ -17,37 +17,40 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 
-import com.eerussianguy.blazemap.api.maps.Overlay;
-import com.eerussianguy.blazemap.api.maps.TileResolution;
-import com.eerussianguy.blazemap.config.BlazeMapConfig;
+import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.BlazeMapAPI;
 import com.eerussianguy.blazemap.api.BlazeRegistry;
 import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.MapType;
+import com.eerussianguy.blazemap.api.maps.Overlay;
+import com.eerussianguy.blazemap.api.maps.TileResolution;
+import com.eerussianguy.blazemap.config.BlazeMapConfig;
+import com.eerussianguy.blazemap.engine.render.MapRenderer;
 import com.eerussianguy.blazemap.feature.BlazeMapFeaturesClient;
 import com.eerussianguy.blazemap.feature.atlas.AtlasExportProgress;
 import com.eerussianguy.blazemap.feature.atlas.AtlasExporter;
 import com.eerussianguy.blazemap.feature.atlas.AtlasTask;
-import com.eerussianguy.blazemap.gui.components.Image;
-import com.eerussianguy.blazemap.gui.fragment.BaseFragment;
-import com.eerussianguy.blazemap.gui.fragment.FragmentHost;
-import com.eerussianguy.blazemap.gui.fragment.HostWindowComponent;
-import com.eerussianguy.blazemap.gui.lib.*;
-import com.eerussianguy.blazemap.gui.util.MouseSubpixelSmoother;
-import com.eerussianguy.blazemap.gui.components.NamedMapComponentButton.*;
-import com.eerussianguy.blazemap.gui.components.LineContainer;
-import com.eerussianguy.blazemap.util.Helpers;
+import com.eerussianguy.blazemap.lib.gui.components.Image;
+import com.eerussianguy.blazemap.lib.gui.components.LineContainer;
+import com.eerussianguy.blazemap.lib.gui.components.NamedMapComponentButton.LayerButton;
+import com.eerussianguy.blazemap.lib.gui.components.NamedMapComponentButton.MapTypeButton;
+import com.eerussianguy.blazemap.lib.gui.components.NamedMapComponentButton.OverlayButton;
+import com.eerussianguy.blazemap.lib.gui.core.*;
+import com.eerussianguy.blazemap.lib.gui.fragment.BaseFragment;
+import com.eerussianguy.blazemap.lib.gui.fragment.FragmentHost;
+import com.eerussianguy.blazemap.lib.gui.fragment.HostWindowComponent;
+import com.eerussianguy.blazemap.lib.gui.util.MouseSubpixelSmoother;
 import com.eerussianguy.blazemap.profiling.Profiler;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 
 public class WorldMapGui extends Screen implements MapHost, FragmentHost {
-    private static final ResourceLocation HEADER_MAPS = Helpers.identifier("textures/map_icons/header_maps.png");
-    private static final ResourceLocation HEADER_LAYERS = Helpers.identifier("textures/map_icons/header_layers.png");
-    private static final ResourceLocation HEADER_OVERLAYS = Helpers.identifier("textures/map_icons/header_overlays.png");
-    private static final ResourceLocation ICON = Helpers.identifier("textures/mod_icon.png");
-    private static final ResourceLocation NAME = Helpers.identifier("textures/mod_name.png");
-    private static final ResourceLocation SCALE = Helpers.identifier("textures/scale.png");
+    private static final ResourceLocation HEADER_MAPS = BlazeMap.resource("textures/map_icons/header_maps.png");
+    private static final ResourceLocation HEADER_LAYERS = BlazeMap.resource("textures/map_icons/header_layers.png");
+    private static final ResourceLocation HEADER_OVERLAYS = BlazeMap.resource("textures/map_icons/header_overlays.png");
+    private static final ResourceLocation ICON = BlazeMap.resource("textures/mod_icon.png");
+    private static final ResourceLocation NAME = BlazeMap.resource("textures/mod_name.png");
+    private static final ResourceLocation SCALE = BlazeMap.resource("textures/scale.png");
     public static final double MIN_ZOOM = 0.125, MAX_ZOOM = 8;
     private static final Profiler.TimeProfiler renderTime = new Profiler.TimeProfilerSync("world_map_render", 10);
     private static final Profiler.TimeProfiler uploadTime = new Profiler.TimeProfilerSync("world_map_upload", 10);
@@ -83,7 +86,7 @@ public class WorldMapGui extends Screen implements MapHost, FragmentHost {
 
     public WorldMapGui() {
         super(TextComponent.EMPTY);
-        mapRenderer = new MapRenderer(-1, -1, Helpers.identifier("dynamic/map/worldmap"), MIN_ZOOM, MAX_ZOOM).setProfilers(renderTime, uploadTime);
+        mapRenderer = new MapRenderer(-1, -1, BlazeMap.resource("dynamic/map/worldmap"), MIN_ZOOM, MAX_ZOOM).setProfilers(renderTime, uploadTime);
         synchronizer = new MapConfigSynchronizer(mapRenderer, BlazeMapConfig.CLIENT.worldMap);
         dimension = Minecraft.getInstance().level.dimension();
         mapTypes = BlazeMapAPI.MAPTYPES.keys().stream().map(BlazeRegistry.Key::value).filter(m -> m.shouldRenderInDimension(dimension)).collect(Collectors.toUnmodifiableList());

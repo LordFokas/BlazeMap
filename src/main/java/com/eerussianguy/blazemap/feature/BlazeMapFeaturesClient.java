@@ -15,18 +15,25 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 
 import com.eerussianguy.blazemap.BlazeMap;
+import com.eerussianguy.blazemap.__deprecated.WaypointEditorGui;
+import com.eerussianguy.blazemap.__deprecated.WaypointManagerGui;
+import com.eerussianguy.blazemap.api.BlazeMapAPI;
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
 import com.eerussianguy.blazemap.api.BlazeRegistry;
 import com.eerussianguy.blazemap.api.event.BlazeRegistriesFrozenEvent;
 import com.eerussianguy.blazemap.api.event.ComponentOrderingEvent.OverlayOrderingEvent;
+import com.eerussianguy.blazemap.api.event.MapMenuSetupEvent;
 import com.eerussianguy.blazemap.api.maps.Overlay;
 import com.eerussianguy.blazemap.config.BlazeMapConfig;
-import com.eerussianguy.blazemap.api.BlazeMapAPI;
-import com.eerussianguy.blazemap.api.event.MapMenuSetupEvent;
+import com.eerussianguy.blazemap.engine.render.MapRenderer;
 import com.eerussianguy.blazemap.feature.mapping.*;
-import com.eerussianguy.blazemap.feature.overlays.*;
 import com.eerussianguy.blazemap.feature.maps.*;
-import com.eerussianguy.blazemap.feature.waypoints.*;
+import com.eerussianguy.blazemap.feature.overlays.EntityOverlay;
+import com.eerussianguy.blazemap.feature.overlays.GridOverlay;
+import com.eerussianguy.blazemap.feature.waypoints.WaypointEditorFragment;
+import com.eerussianguy.blazemap.feature.waypoints.WaypointOverlay;
+import com.eerussianguy.blazemap.feature.waypoints.WaypointRenderer;
+import com.eerussianguy.blazemap.feature.waypoints.WaypointStore;
 import com.mojang.blaze3d.platform.InputConstants;
 
 public class BlazeMapFeaturesClient {
