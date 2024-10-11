@@ -631,7 +631,7 @@ public class MapRenderer implements AutoCloseable {
         public int bx, bz, ex, ez;
         public double zoom;
         public int ox, oz;
-        public int layers, overlays, labels, waypoints;
+        public int layers, overlays, labels;
         public String stitching;
     }
 }

@@ -28,7 +28,7 @@ public class WorldMapDebug extends BaseComponent<WorldMapDebug> {
         this.uploadTime = uploadTime;
         this.visibility = visibility;
 
-        this.setSize(135, 135);
+        this.setSize(135, 129);
     }
 
     @Override
@@ -64,7 +64,6 @@ public class WorldMapDebug extends BaseComponent<WorldMapDebug> {
         font.draw(stack, String.format("Parallel Pool: %d", BlazeMapAsync.instance().cruncher.poolSize()), 0, y += 12, 0xFFFFFF00);
 
         font.draw(stack, String.format("Addon Labels: %d", debug.labels), 0, y += 18, -1);
-        font.draw(stack, String.format("Player Waypoints: %d", debug.waypoints), 0, y += 12, -1);
 
         String region = String.format("Rg %d %d  |  px: %d %d", coordination.regionX, coordination.regionZ, coordination.regionPixelX, coordination.regionPixelY);
         font.draw(stack, region, 0, y += 18, 0x6666FF);
