@@ -16,7 +16,7 @@ import com.eerussianguy.blazemap.api.maps.NamedMapComponent;
 import com.eerussianguy.blazemap.api.maps.Overlay;
 import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.config.ServerConfig;
-import com.eerussianguy.blazemap.feature.maps.IMapHost;
+import com.eerussianguy.blazemap.feature.maps.MapHost;
 import com.eerussianguy.blazemap.gui.lib.BaseComponent;
 import com.eerussianguy.blazemap.gui.lib.TooltipService;
 import com.eerussianguy.blazemap.integration.KnownMods;
@@ -27,13 +27,13 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 public abstract class NamedMapComponentButton<T extends NamedMapComponent<T>> extends ImageButton {
     protected final BlazeRegistry.Key<T> key;
-    protected final IMapHost host;
+    protected final MapHost host;
     protected final Component name, disabled, owner;
     protected final BooleanSupplier active;
     protected final ServerConfig.NamedMapComponentPermissions<T> permissions;
     protected final ArrayList<Component> tooltip = new ArrayList<>();
 
-    public NamedMapComponentButton(BlazeRegistry.Key<T> key, String type, IMapHost host, IntConsumer function, BooleanSupplier active, ServerConfig.NamedMapComponentPermissions<T> permissions) {
+    public NamedMapComponentButton(BlazeRegistry.Key<T> key, String type, MapHost host, IntConsumer function, BooleanSupplier active, ServerConfig.NamedMapComponentPermissions<T> permissions) {
         super(key.value().getIcon(), 16, 16, function);
         this.key = key;
         this.host = host;
@@ -72,7 +72,7 @@ public abstract class NamedMapComponentButton<T extends NamedMapComponent<T>> ex
     }
 
     public static class MapTypeButton extends NamedMapComponentButton<MapType> {
-        public MapTypeButton(BlazeRegistry.Key<MapType> key, IMapHost host, List<? extends BaseComponent<?>> others, BaseComponent<?> own) {
+        public MapTypeButton(BlazeRegistry.Key<MapType> key, MapHost host, List<? extends BaseComponent<?>> others, BaseComponent<?> own) {
             super(key, "map", host, button -> {
                 host.setMapType(key.value());
                 for(var other : others) {
@@ -96,7 +96,7 @@ public abstract class NamedMapComponentButton<T extends NamedMapComponent<T>> ex
         private final Component bottom = Helpers.translate("blazemap.gui.common.layer.bottom").withStyle(ChatFormatting.DARK_GRAY);
         private final boolean isBottom;
 
-        public LayerButton(BlazeRegistry.Key<Layer> key, IMapHost host) {
+        public LayerButton(BlazeRegistry.Key<Layer> key, MapHost host) {
             super(key, "layer", host, button -> host.toggleLayer(key), () -> host.isLayerVisible(key), BlazeMapConfig.SERVER.layerPermissions);
             isBottom = key.value().isBottomLayer();
         }
@@ -114,7 +114,7 @@ public abstract class NamedMapComponentButton<T extends NamedMapComponent<T>> ex
     }
 
     public static class OverlayButton extends NamedMapComponentButton<Overlay> {
-        public OverlayButton(BlazeRegistry.Key<Overlay> key, IMapHost host) {
+        public OverlayButton(BlazeRegistry.Key<Overlay> key, MapHost host) {
             super(key, "overlay", host, button -> host.toggleOverlay(key), () -> host.isOverlayVisible(key), BlazeMapConfig.SERVER.overlayPermissions);
         }
     }

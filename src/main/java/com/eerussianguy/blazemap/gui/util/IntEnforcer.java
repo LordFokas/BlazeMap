@@ -1,15 +1,15 @@
-package com.eerussianguy.blazemap.gui;
+package com.eerussianguy.blazemap.gui.util;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import net.minecraft.client.gui.components.EditBox;
 
-public class NumericWrapper {
+public class IntEnforcer {
     private final Supplier<Integer> source;
     private final Consumer<Integer> target;
 
-    public NumericWrapper(Supplier<Integer> source, Consumer<Integer> target) {
+    public IntEnforcer(Supplier<Integer> source, Consumer<Integer> target) {
         this.source = source;
         this.target = target;
     }

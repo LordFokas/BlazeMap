@@ -8,7 +8,7 @@ import com.eerussianguy.blazemap.api.maps.MapType;
 import com.eerussianguy.blazemap.api.maps.Overlay;
 import com.eerussianguy.blazemap.gui.lib.TooltipService;
 
-public interface IMapHost extends TooltipService {
+public interface MapHost extends TooltipService {
     boolean isLayerVisible(Key<Layer> layerID);
     void toggleLayer(Key<Layer> layerID);
 

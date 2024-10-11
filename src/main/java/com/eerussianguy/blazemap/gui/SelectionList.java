@@ -17,6 +17,7 @@ import com.eerussianguy.blazemap.util.RenderHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 
+@Deprecated
 public class SelectionList<T> implements Widget, GuiEventListener, NarratableEntry {
     private final int x, y, w, h, rh, iw, ih, bx, by;
     private final EntryRenderer<T> renderer;

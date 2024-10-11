@@ -1,4 +1,4 @@
-package com.eerussianguy.blazemap.gui;
+package com.eerussianguy.blazemap.gui.util;
 
 public class MouseSubpixelSmoother {
     private double partialX, partialY;

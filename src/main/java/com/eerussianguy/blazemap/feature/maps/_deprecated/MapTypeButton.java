@@ -8,19 +8,20 @@ import net.minecraft.network.chat.TextComponent;
 
 import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
 import com.eerussianguy.blazemap.api.maps.MapType;
-import com.eerussianguy.blazemap.feature.maps.IMapHost;
+import com.eerussianguy.blazemap.feature.maps.MapHost;
 import com.eerussianguy.blazemap.integration.KnownMods;
 import com.eerussianguy.blazemap.util.Colors;
 import com.eerussianguy.blazemap.util.RenderHelper;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
+@Deprecated
 public class MapTypeButton extends ImageButton {
     private final Key<MapType> key;
-    private final IMapHost host;
+    private final MapHost host;
     private final Component owner;
 
-    public MapTypeButton(int px, int py, int w, int h, Key<MapType> key, IMapHost host) {
+    public MapTypeButton(int px, int py, int w, int h, Key<MapType> key, MapHost host) {
         super(px, py, w, h, 0, 0, 0, key.value().getIcon(), w, h, button -> {
             host.setMapType(key.value());
             for(GuiEventListener widget : host.getChildren()) {

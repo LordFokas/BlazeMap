@@ -32,11 +32,11 @@ public class LineContainer extends BaseContainer<LineContainer> {
             switch(axis) {
                 case HORIZONTAL -> {
                     int width = child.getWidth() + spacing;
-                    forEach(c -> c.addPositionX(width));
+                    forEach(c -> c.moveX(width));
                 }
                 case VERTICAL -> {
                     int height = child.getHeight() + spacing;
-                    forEach(c -> c.addPositionY(height));
+                    forEach(c -> c.moveY(height));
                 }
             }
             child.setPosition(spacing, spacing);
@@ -82,8 +82,8 @@ public class LineContainer extends BaseContainer<LineContainer> {
         if(size() == 0) return 0;
 
         return switch(axis) {
-            case HORIZONTAL -> sum(BaseComponent::getWidth) + (size()+1) * spacing;
-            case VERTICAL -> max(BaseComponent::getWidth) + 2 * spacing;
+            case HORIZONTAL -> sum(BaseComponent::getIndependentWidth) + (size()+1) * spacing;
+            case VERTICAL -> max(BaseComponent::getIndependentWidth) + 2 * spacing;
         };
     }
 
@@ -92,8 +92,8 @@ public class LineContainer extends BaseContainer<LineContainer> {
         if(size() == 0) return 0;
 
         return switch(axis) {
-            case HORIZONTAL -> max(BaseComponent::getHeight) + 2 * spacing;
-            case VERTICAL -> sum(BaseComponent::getHeight) + (size()+1) * spacing;
+            case HORIZONTAL -> max(BaseComponent::getIndependentHeight) + 2 * spacing;
+            case VERTICAL -> sum(BaseComponent::getIndependentHeight) + (size()+1) * spacing;
         };
     }
 

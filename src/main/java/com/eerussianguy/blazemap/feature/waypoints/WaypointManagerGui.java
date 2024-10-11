@@ -13,6 +13,7 @@ import com.eerussianguy.blazemap.util.Helpers;
 import com.eerussianguy.blazemap.util.RenderHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
 
+@Deprecated
 public class WaypointManagerGui extends BlazeGui {
     private static MarkerStorage<Waypoint> waypointStorage;
 

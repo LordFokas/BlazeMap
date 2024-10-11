@@ -9,7 +9,12 @@ import com.eerussianguy.blazemap.api.maps.Renderable;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 public abstract class BaseComponent<T extends BaseComponent<T>> extends Positionable<T> implements Renderable, Widget, NarratableEntry {
-    private boolean enabled = true, visible = true;
+    private static float partial = 0F;
+    private boolean enabled = true, visible = true, focused = false;
+
+    public static float getPartialTick() {
+        return partial;
+    }
 
     @Override
     public abstract void render(PoseStack stack, boolean hasMouse, int mouseX, int mouseY);
@@ -23,6 +28,7 @@ public abstract class BaseComponent<T extends BaseComponent<T>> extends Position
     @Override
     public final void render(PoseStack stack, int mouseX, int mouseY, float partial) {
         if(!isVisible()) return;
+        BaseComponent.partial = partial;
         stack.pushPose();
 
         boolean hasMouse = mouseIntercepts(mouseX, mouseY);
@@ -44,16 +50,10 @@ public abstract class BaseComponent<T extends BaseComponent<T>> extends Position
         stack.popPose();
     }
 
+    @Override
     public boolean mouseIntercepts(double mouseX, double mouseY) {
         if(!isVisible()) return false;
-        if(getReferenceFrame() == ReferenceFrame.GLOBAL) {
-            mouseX -= getPositionX();
-            mouseY -= getPositionY();
-        }
-        return mouseX >= 0
-            && mouseX <  getWidth()
-            && mouseY >= 0
-            && mouseY <  getHeight();
+        return super.mouseIntercepts(mouseX, mouseY);
     }
 
     public boolean isEnabled() {
@@ -64,12 +64,20 @@ public abstract class BaseComponent<T extends BaseComponent<T>> extends Position
         return visible;
     }
 
+    public boolean isFocused() {
+        return focused;
+    }
+
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
 
     public void setVisible(boolean visible) {
         this.visible = visible;
+    }
+
+    public void setFocused(boolean focused) {
+        this.focused = focused;
     }
 
     @Override //TODO: maybe, just MAYBE, one day do this

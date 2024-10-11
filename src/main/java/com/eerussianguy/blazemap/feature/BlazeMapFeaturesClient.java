@@ -138,7 +138,8 @@ public class BlazeMapFeaturesClient {
                 WaypointManagerGui.open();
             }
             else {
-                WaypointEditorGui.open();
+                // WaypointEditorGui.open();
+                new WaypointEditorFragment().open();
             }
         }
         if(KEY_ZOOM.isDown()) {
@@ -165,8 +166,6 @@ public class BlazeMapFeaturesClient {
         bus.addListener(WaypointEditorGui::onDimensionChanged);
         bus.addListener(WaypointManagerGui::onDimensionChanged);
         bus.addListener(EventPriority.HIGHEST, WaypointStore::onServerJoined);
-        // bus.addListener(MapRenderer::onWaypointAdded);
-        // bus.addListener(MapRenderer::onWaypointRemoved);
         bus.addListener(WorldMapMenu::trackWaypointStore);
         bus.addListener(WaypointOverlay::onDimensionChange);
 

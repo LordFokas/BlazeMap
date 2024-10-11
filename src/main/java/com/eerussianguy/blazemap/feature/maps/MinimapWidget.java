@@ -9,7 +9,7 @@ import net.minecraft.world.phys.Vec3;
 import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.config.MinimapConfigFacade.IWidgetConfig;
-import com.eerussianguy.blazemap.gui.MouseSubpixelSmoother;
+import com.eerussianguy.blazemap.gui.util.MouseSubpixelSmoother;
 import com.eerussianguy.blazemap.util.Colors;
 import com.eerussianguy.blazemap.util.Helpers;
 import com.eerussianguy.blazemap.util.RenderHelper;

@@ -3,6 +3,7 @@ package com.eerussianguy.blazemap.gui.lib;
 import java.util.Optional;
 
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 
 import com.eerussianguy.blazemap.api.maps.Renderable;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -21,7 +22,7 @@ public abstract class WrappedComponent extends BaseComponent<WrappedComponent> {
 
     public static BaseComponent<?> of(Object content) {
         if(content == null) {
-            throw new IllegalArgumentException("content cannot be null");
+            throw new IllegalArgumentException("Content cannot be null");
         }
 
         // Already a BaseComponent from our ui lib. Just pass through, no need to wrap.
@@ -41,7 +42,7 @@ public abstract class WrappedComponent extends BaseComponent<WrappedComponent> {
             return new WrappedVanilla(widget);
         }
 
-        throw new IllegalArgumentException("Component of class " + content.getClass() + " cannot be wrapped as a component");
+        throw new IllegalArgumentException("Object of class " + content.getClass() + " cannot be wrapped as a component");
     }
 
     @Override
@@ -72,29 +73,84 @@ public abstract class WrappedComponent extends BaseComponent<WrappedComponent> {
         }
     }
 
-    // TODO: implement GuiEventListener and passthrough.
     // FIXME: widgets with tooltips are likely to render all fucked up
-    private static class WrappedVanilla extends WrappedComponent {
+    public static class WrappedVanilla extends WrappedComponent implements GuiEventListener {
         private final AbstractWidget widget;
+        private int padding;
 
         private WrappedVanilla(AbstractWidget widget) {
             this.widget = widget;
-            widget.x = widget.y = 0;
+            this.setPadding(0);
         }
 
         @Override
         public void render(PoseStack stack, boolean hasMouse, int mouseX, int mouseY) {
-            widget.render(stack, mouseX, mouseY, 0F);
+            widget.render(stack, mouseX, mouseY, getPartialTick());
         }
 
         @Override
         public int getWidth() {
-            return widget.getWidth();
+            return widget.getWidth() + padding * 2;
         }
 
         @Override
         public int getHeight() {
-            return widget.getHeight();
+            return widget.getHeight() + padding * 2;
+        }
+
+        public WrappedComponent setPadding(int padding) {
+            this.padding = widget.x = widget.y = padding;
+            return this;
+        }
+
+        @Override
+        public void mouseMoved(double mouseX, double mouseY) {
+            widget.mouseMoved(mouseX, mouseY);
+        }
+
+        @Override
+        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+            return widget.mouseClicked(mouseX, mouseY, button);
+        }
+
+        @Override
+        public boolean mouseReleased(double mouseX, double mouseY, int button) {
+            return widget.mouseReleased(mouseX, mouseY, button);
+        }
+
+        @Override
+        public boolean mouseDragged(double mouseX, double mouseY, int button, double draggedX, double draggedY) {
+            return widget.mouseDragged(mouseX, mouseY, button, draggedX, draggedY);
+        }
+
+        @Override
+        public boolean mouseScrolled(double mouseX, double mouseY, double scroll) {
+            return widget.mouseScrolled(mouseX, mouseY, scroll);
+        }
+
+        @Override
+        public boolean keyPressed(int key, int mouseX, int mouseY) {
+            return widget.keyPressed(key, mouseX, mouseY);
+        }
+
+        @Override
+        public boolean keyReleased(int key, int mouseX, int mouseY) {
+            return widget.keyReleased(key, mouseX, mouseY);
+        }
+
+        @Override
+        public boolean charTyped(char ch, int modifier) {
+            return widget.charTyped(ch, modifier);
+        }
+
+        @Override
+        public boolean changeFocus(boolean focused) {
+            return widget.changeFocus(focused);
+        }
+
+        @Override
+        public boolean isMouseOver(double mouseX, double mouseY) {
+            return isVisible() && widget.isMouseOver(mouseX, mouseY);
         }
     }
 }

@@ -24,7 +24,7 @@ import com.eerussianguy.blazemap.gui.BlazeGui;
 import com.eerussianguy.blazemap.util.Helpers;
 import com.mojang.blaze3d.vertex.PoseStack;
 
-public class MinimapOptionsGui extends BlazeGui implements IMapHost {
+public class MinimapOptionsGui extends BlazeGui implements MapHost {
     private static final TranslatableComponent MAP_TYPES = Helpers.translate("blazemap.gui.minimap_options.map_types");
     private static final TranslatableComponent LAYERS = Helpers.translate("blazemap.gui.minimap_options.layers");
     private static final int WIDTH = 128, HEIGHT = 154;

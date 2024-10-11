@@ -13,11 +13,19 @@ import com.mojang.blaze3d.vertex.PoseStack;
 public abstract class BaseContainer<T extends BaseContainer<T>> extends BaseComponent<T> implements GuiEventListener {
     private final List<BaseComponent<?>> renderables = new ArrayList<>();
     private final List<GuiEventListener> listeners = new ArrayList<>();
+    private GuiEventListener focus;
 
     protected void add(BaseComponent<?> child) {
-        renderables.add(child.withParentReferenceFrame());
+        renderables.add(child.withParent(this));
         if(child instanceof GuiEventListener listener) {
             listeners.add(listener);
+        }
+    }
+
+    public void remove(BaseComponent<?> child) {
+        renderables.remove(child);
+        if(child instanceof GuiEventListener) {
+            listeners.remove(child);
         }
     }
 
@@ -58,6 +66,16 @@ public abstract class BaseContainer<T extends BaseContainer<T>> extends BaseComp
 
     public Optional<GuiEventListener> getListenerAt(double x, double y) {
         return getElementAt(listeners, x, y, getReferenceFrame());
+    }
+
+    public Optional<GuiEventListener> getLeafListenerAt(double x, double y) {
+        var result = getListenerAt(x, y);
+        if(result.isEmpty()) return result;
+        if(result.get() instanceof BaseContainer<?> container) {
+            return container.getLeafListenerAt(x - container.getPositionX(), y - container.getPositionY());
+        } else {
+            return result;
+        }
     }
 
     public Optional<BaseComponent<?>> getComponentAt(double x, double y, ReferenceFrame reference) {
@@ -110,6 +128,20 @@ public abstract class BaseContainer<T extends BaseContainer<T>> extends BaseComp
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if(getReferenceFrame() == ReferenceFrame.GLOBAL) {
+            var clicked = getLeafListenerAt(mouseX, mouseY).orElse(null);
+            if(clicked != focus) {
+                boolean changed = false;
+                if(clicked != null) {
+                    changed = clicked.changeFocus(true);
+                }
+                if(focus != null) {
+                    focus.changeFocus(false);
+                }
+                focus = changed ? clicked : null;
+            }
+        }
+
         return passthrough(mouseX, mouseY, listener -> listener.mouseClicked(offsetX(mouseX, listener), offsetY(mouseY, listener), button), false);
     }
 
@@ -129,21 +161,30 @@ public abstract class BaseContainer<T extends BaseContainer<T>> extends BaseComp
     }
 
     @Override
-    public boolean keyPressed(int key, int mouseX, int mouseY) {
-        return passthrough(mouseX, mouseY, listener -> listener.keyPressed(key, (int) offsetX(mouseX, listener), (int) offsetY(mouseY, listener)), false);
-    }
-
-    @Override
-    public boolean keyReleased(int key, int mouseX, int mouseY) {
-        return passthrough(mouseX, mouseY, listener -> listener.keyReleased(key, (int) offsetX(mouseX, listener), (int) offsetY(mouseY, listener)), false);
-    }
-
-    @Override // FIXME: implement this
-    public boolean charTyped(char ch, int modifier) {
+    public boolean keyPressed(int key, int scancode, int modifiers) {
+        if(getReferenceFrame() == ReferenceFrame.GLOBAL && focus != null) {
+            return focus.keyPressed(key, 0, 0);
+        }
         return false;
     }
 
-    @Override // FIXME: implement this
+    @Override
+    public boolean keyReleased(int key, int scancode, int modifiers) {
+        if(getReferenceFrame() == ReferenceFrame.GLOBAL && focus != null) {
+            return focus.keyReleased(key, 0, 0);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean charTyped(char ch, int modifier) {
+        if(getReferenceFrame() == ReferenceFrame.GLOBAL && focus != null) {
+            return focus.charTyped(ch, modifier);
+        }
+        return false;
+    }
+
+    @Override
     public boolean changeFocus(boolean focused) {
         return false;
     }

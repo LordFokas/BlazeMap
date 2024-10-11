@@ -16,11 +16,14 @@ import com.eerussianguy.blazemap.api.event.DimensionChangedEvent;
 import com.eerussianguy.blazemap.api.markers.MarkerStorage;
 import com.eerussianguy.blazemap.api.markers.Waypoint;
 import com.eerussianguy.blazemap.gui.*;
+import com.eerussianguy.blazemap.gui.HueSlider;
+import com.eerussianguy.blazemap.gui.util.IntEnforcer;
 import com.eerussianguy.blazemap.util.Colors;
 import com.eerussianguy.blazemap.util.Helpers;
 import com.eerussianguy.blazemap.util.RenderHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
 
+@Deprecated
 public class WaypointEditorGui extends BlazeGui {
     private static MarkerStorage<Waypoint> waypointStorage;
 
@@ -39,7 +42,7 @@ public class WaypointEditorGui extends BlazeGui {
     private Button save;
     private HueSlider slider;
     private SaturationBrightnessSelector sbs;
-    private final NumericWrapper nx, ny, nz;
+    private final IntEnforcer nx, ny, nz;
 
     private final Waypoint waypoint;
     private ResourceLocation icon = BlazeMapReferences.Icons.WAYPOINT;
@@ -53,9 +56,9 @@ public class WaypointEditorGui extends BlazeGui {
         super(Helpers.translate("blazemap.gui.waypoint_editor.title"), 212, 202);
         this.waypoint = waypoint;
 
-        nx = new NumericWrapper(() -> x, v -> x = v);
-        ny = new NumericWrapper(() -> y, v -> y = v);
-        nz = new NumericWrapper(() -> z, v -> z = v);
+        nx = new IntEnforcer(() -> x, v -> x = v);
+        ny = new IntEnforcer(() -> y, v -> y = v);
+        nz = new IntEnforcer(() -> z, v -> z = v);
 
         if(waypoint == null) {
             name = "New Waypoint";
@@ -158,10 +161,11 @@ public class WaypointEditorGui extends BlazeGui {
         sbs.setHue360(hue360);
         sbs.setSB(s, b);
 
-        slider = addRenderableWidget(new HueSlider(left + 150, top + 140, 50, 20, null, null, 0, 360, 1, 6, 1, false));
+        slider = addRenderableWidget(new HueSlider(left + 150, top + 140, 50, 20, 0, 360, 1, 6));
         slider.setResponder(hue -> {
-            sbs.setHue360(hue);
-            this.hue360 = hue;
+            float h360 = hue.floatValue();
+            sbs.setHue360(h360);
+            this.hue360 = h360;
             updateColor();
         });
         slider.setValue(hue360);

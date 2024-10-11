@@ -3,10 +3,12 @@ package com.eerussianguy.blazemap.util;
 import java.awt.*;
 
 public class Colors {
+    public static final int ALPHA = 0xFF000000;
     public static final int NO_TINT = -1;
     public static final int WHITE = 0xFFFFFFFF;
-    public static final int ALPHA = 0xFF000000;
-    public static final int DISABLED = 0x666666;
+    public static final int BLACK = ALPHA;
+    public static final int DISABLED = 0xFF666666;
+    public static final int UNFOCUSED = 0xFFA0A0A0;
     public static final int LABEL_COLOR = 0xFF404040;
     public static final int WIDGET_BACKGROUND = 0xA0000000;
 
@@ -47,6 +49,23 @@ public class Colors {
         int b = color & 0x0000FF;
         color &= 0xFF00FF00;
         return color | (b << 16) | (r >> 16);
+    }
+
+    public static int HSB2RGB(float[] hsb) {
+        return Color.HSBtoRGB(hsb[0], hsb[1], hsb[2]);
+    }
+
+    public static int HSB2RGB(float h, float s, float b) {
+        return Color.HSBtoRGB(h, s, b);
+    }
+
+    public static float[] RGB2HSB(int color) {
+        float[] hsb = new float[3];
+        int r = (color & 0xFF0000) >> 16;
+        int g = (color & 0xFF00) >> 8;
+        int b =  color & 0xFF;
+        Color.RGBtoHSB(r, g, b, hsb);
+        return hsb;
     }
 
     public static int randomBrightColor() {

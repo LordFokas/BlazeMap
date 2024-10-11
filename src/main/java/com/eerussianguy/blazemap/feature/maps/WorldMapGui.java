@@ -1,7 +1,6 @@
 package com.eerussianguy.blazemap.feature.maps;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -30,20 +29,19 @@ import com.eerussianguy.blazemap.feature.atlas.AtlasExportProgress;
 import com.eerussianguy.blazemap.feature.atlas.AtlasExporter;
 import com.eerussianguy.blazemap.feature.atlas.AtlasTask;
 import com.eerussianguy.blazemap.gui.components.Image;
-import com.eerussianguy.blazemap.gui.MouseSubpixelSmoother;
+import com.eerussianguy.blazemap.gui.fragment.BaseFragment;
+import com.eerussianguy.blazemap.gui.fragment.FragmentHost;
+import com.eerussianguy.blazemap.gui.fragment.HostWindowComponent;
+import com.eerussianguy.blazemap.gui.lib.*;
+import com.eerussianguy.blazemap.gui.util.MouseSubpixelSmoother;
 import com.eerussianguy.blazemap.gui.components.NamedMapComponentButton.*;
-import com.eerussianguy.blazemap.gui.lib.BaseComponent;
-import com.eerussianguy.blazemap.gui.lib.ContainerAxis;
-import com.eerussianguy.blazemap.gui.lib.ContainerDirection;
 import com.eerussianguy.blazemap.gui.components.LineContainer;
-import com.eerussianguy.blazemap.gui.lib.WrappedComponent;
 import com.eerussianguy.blazemap.util.Helpers;
 import com.eerussianguy.blazemap.profiling.Profiler;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 
-public class WorldMapGui extends Screen implements IMapHost {
-    private static final TextComponent EMPTY = new TextComponent("");
+public class WorldMapGui extends Screen implements MapHost, FragmentHost {
     private static final ResourceLocation HEADER_MAPS = Helpers.identifier("textures/map_icons/header_maps.png");
     private static final ResourceLocation HEADER_LAYERS = Helpers.identifier("textures/map_icons/header_layers.png");
     private static final ResourceLocation HEADER_OVERLAYS = Helpers.identifier("textures/map_icons/header_overlays.png");
@@ -76,6 +74,7 @@ public class WorldMapGui extends Screen implements IMapHost {
     private final List<MapType> mapTypes;
     private final List<Overlay> overlays;
     private final MouseSubpixelSmoother mouse;
+    private final AbsoluteContainer windows = new AbsoluteContainer(0);
     private BaseComponent<?> legend;
     private EditBox search;
     private final Coordination coordination = new Coordination();
@@ -83,7 +82,7 @@ public class WorldMapGui extends Screen implements IMapHost {
     private WorldMapPopup contextMenu;
 
     public WorldMapGui() {
-        super(EMPTY);
+        super(TextComponent.EMPTY);
         mapRenderer = new MapRenderer(-1, -1, Helpers.identifier("dynamic/map/worldmap"), MIN_ZOOM, MAX_ZOOM).setProfilers(renderTime, uploadTime);
         synchronizer = new MapConfigSynchronizer(mapRenderer, BlazeMapConfig.CLIENT.worldMap);
         dimension = Minecraft.getInstance().level.dimension();
@@ -186,13 +185,23 @@ public class WorldMapGui extends Screen implements IMapHost {
 
         addRenderableOnly(new AtlasExportProgress().setPosition(width - 5, 5).shiftPositionX());
 
-        search = addRenderableWidget(new EditBox(getMinecraft().font, (width - 120) / 2, height - 15, 120, 12, EMPTY));
+        search = addRenderableWidget(new EditBox(getMinecraft().font, (width - 120) / 2, height - 15, 120, 12, TextComponent.EMPTY));
         search.setResponder(mapRenderer::setSearch);
         mapRenderer.pingSearchHost();
 
         addRenderableOnly(new WorldMapDebug(mapRenderer.debug, coordination, renderTime, uploadTime, () -> renderDebug).setPosition(35, 35));
 
         updateLegend();
+
+        windows.setSize(width, height);
+        addRenderableWidget(windows);
+    }
+
+    @Override
+    public boolean consumeFragment(BaseFragment fragment) {
+        HostWindowComponent window = new HostWindowComponent(fragment).setCloser(windows::remove);
+        windows.add(window, ContainerAnchor.MIDDLE_CENTER);
+        return true;
     }
 
     private void updateLegend() {

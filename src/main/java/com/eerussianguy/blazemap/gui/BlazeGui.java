@@ -17,6 +17,7 @@ import com.eerussianguy.blazemap.util.RenderHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 
+@Deprecated
 public abstract class BlazeGui extends Screen {
     private static final TextComponent EMPTY = new TextComponent("");
     public static final ResourceLocation SLOT = Helpers.identifier("textures/gui/slot.png");

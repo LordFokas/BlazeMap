@@ -8,20 +8,21 @@ import net.minecraft.network.chat.TextComponent;
 import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
 import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.MapType;
-import com.eerussianguy.blazemap.feature.maps.IMapHost;
+import com.eerussianguy.blazemap.feature.maps.MapHost;
 import com.eerussianguy.blazemap.integration.KnownMods;
 import com.eerussianguy.blazemap.util.Colors;
 import com.eerussianguy.blazemap.util.RenderHelper;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
+@Deprecated
 public class LayerButton extends ImageButton {
     private final Key<Layer> key;
     private final MapType parent;
-    private final IMapHost host;
+    private final MapHost host;
     private final Component owner;
 
-    public LayerButton(int px, int py, int w, int h, Key<Layer> key, MapType parent, IMapHost host) {
+    public LayerButton(int px, int py, int w, int h, Key<Layer> key, MapType parent, MapHost host) {
         super(px, py, w, h, 0, 0, 0, key.value().getIcon(), w, h, button -> {
             host.toggleLayer(key);
         }, key.value().getName());
