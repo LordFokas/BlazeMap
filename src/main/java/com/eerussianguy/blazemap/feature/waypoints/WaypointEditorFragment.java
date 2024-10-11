@@ -1,7 +1,6 @@
 package com.eerussianguy.blazemap.feature.waypoints;
 
 import java.util.function.Function;
-import java.util.function.IntConsumer;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -107,23 +106,16 @@ public class WaypointEditorFragment extends BaseFragment {
 
 
         // SUBMIT ======================================================================================================
-        Runnable populate = () -> {
+        TextButton submit = new TextButton(Helpers.translate("blazemap.gui.waypoint_editor.save"), button -> {
             waypoint.setName(name.get());
             waypoint.setPosition(new BlockPos(posX.get(), posY.get(), posZ.get()));
             waypoint.setIcon(icons.getValue());
             waypoint.setColor(color.get());
-        };
-        IntConsumer create = button -> {
-            populate.run();
-            // TODO: submit the waypoint for creation
+            if(creating) {
+                // TODO: submit the waypoint for creation
+            }
             container.dismiss();
-        };
-        IntConsumer update = button -> {
-            populate.run();
-            container.dismiss();
-        };
-        var save = Helpers.translate("blazemap.gui.waypoint_editor.save");
-        TextButton submit = new TextButton(save, creating ? create : update).setSize(80, 20);
-        container.add(submit, 40, y+20);
+        });
+        container.add(submit.setSize(80, 20), 40, y+20);
     }
 }
