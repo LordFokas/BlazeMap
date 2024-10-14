@@ -105,8 +105,8 @@ public class Slider extends BaseComponent<Slider> implements FocusableComponent,
 
     @Override
     public boolean keyPressed(int key, int scancode, int modifiers) {
-        if(isKeyUp(key)   || isKeyLeft(key))   return step(+1);
-        if(isKeyDown(key) || isKeyRight(key))  return step(-1);
+        if(isKeyUp(key)   || isKeyLeft(key))   return step(-1);
+        if(isKeyDown(key) || isKeyRight(key))  return step(+1);
         return false;
     }
 }
