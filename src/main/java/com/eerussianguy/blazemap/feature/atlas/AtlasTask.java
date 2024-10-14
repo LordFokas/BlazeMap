@@ -4,7 +4,9 @@ import java.io.File;
 import java.nio.file.Files;
 import java.util.*;
 
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 
@@ -76,7 +78,8 @@ public class AtlasTask {
         QUEUED,
         CALCULATING,
         STITCHING,
-        SAVING
+        SAVING,
+        COMPLETE
     }
 
     void flash() {
@@ -107,6 +110,11 @@ public class AtlasTask {
             File file = getExportFile();
             file.getParentFile().mkdirs();
             image.writeToFile(file);
+
+            // Completed Stage: Send the filepath into chat
+            setStage(Stage.COMPLETE);
+            String saveMessage = String.format("Atlas save to: %s", file.getPath());
+            Helpers.getPlayer().sendMessage(new TextComponent(saveMessage), Util.NIL_UUID);
         }
         catch(Exception e) {
             BlazeMap.LOGGER.error("Error in AtlasExporter", e);
