@@ -10,16 +10,14 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
-import com.eerussianguy.blazemap.api.event.DimensionChangedEvent;
 import com.eerussianguy.blazemap.api.event.MapMenuSetupEvent;
 import com.eerussianguy.blazemap.api.event.MapMenuSetupEvent.MenuAction;
 import com.eerussianguy.blazemap.api.event.MapMenuSetupEvent.MenuFolder;
 import com.eerussianguy.blazemap.api.event.MapMenuSetupEvent.MenuItem;
-import com.eerussianguy.blazemap.api.markers.MarkerStorage;
-import com.eerussianguy.blazemap.api.markers.Waypoint;
 import com.eerussianguy.blazemap.engine.cache.ChunkMDCache;
 import com.eerussianguy.blazemap.engine.client.ClientEngine;
 import com.eerussianguy.blazemap.feature.waypoints.WaypointEditorFragment;
+import com.eerussianguy.blazemap.feature.waypoints.WaypointService;
 import com.eerussianguy.blazemap.lib.Colors;
 import com.eerussianguy.blazemap.lib.Helpers;
 
@@ -32,21 +30,21 @@ public class WorldMapMenu {
     private static final TranslatableComponent NOOP_TEXT = Helpers.translate("blazemap.gui.worldmap.menu.no_options");
     public static final MapMenuSetupEvent.MenuAction NOOP = new MapMenuSetupEvent.MenuAction(MENU_NOOP, null, NOOP_TEXT, null);
 
-    private static MarkerStorage<Waypoint> waypointStore;
-
     public static MenuFolder waypoints(int blockX, int blockZ) {
+        WaypointService waypoints = WaypointService.instance();
+
         BlockPos local = new BlockPos(blockX, 0, blockZ);
         MenuFolder folder = makeFolder("waypoint", BlazeMapReferences.Icons.WAYPOINT, Colors.WHITE,
             makeAction("waypoint.new", BlazeMapReferences.Icons.WAYPOINT,
                 () -> new WaypointEditorFragment(local).open()
             )
         );
-        waypointStore.getAll().stream()
+        waypoints.getAll().stream()
             .filter(waypoint -> waypoint.getPosition().atY(0).distSqr(local) < 48)
             .map(waypoint -> makeFolder("waypoint.options", waypoint.getIcon(), waypoint.getColor(), waypoint.getName(),
                     makeAction("waypoint.edit", null, () -> new WaypointEditorFragment(waypoint).open()),
                     makeAction("waypoint.hide", null, null),
-                    makeAction("waypoint.delete", null, () -> waypointStore.remove(waypoint))
+                    makeAction("waypoint.delete", null, () -> waypoints.remove(waypoint))
                 )
             )
             .forEach(folder::add);
@@ -76,10 +74,6 @@ public class WorldMapMenu {
         }
 
         return folder;
-    }
-
-    public static void trackWaypointStore(DimensionChangedEvent evt) {
-        waypointStore = evt.waypoints;
     }
 
     private static MenuAction makeAction(String id, ResourceLocation icon, Runnable function) {

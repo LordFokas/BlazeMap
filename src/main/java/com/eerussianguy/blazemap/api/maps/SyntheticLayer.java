@@ -6,7 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 
 import com.eerussianguy.blazemap.api.BlazeRegistry;
-import com.eerussianguy.blazemap.api.util.IDataSource;
+import com.eerussianguy.blazemap.api.util.DataSource;
 import com.eerussianguy.blazemap.api.util.RegionPos;
 import com.mojang.blaze3d.platform.NativeImage;
 
@@ -16,7 +16,7 @@ public abstract class SyntheticLayer extends Layer {
     }
 
     @Override // can't render
-    public final boolean renderTile(NativeImage tile, TileResolution resolution, IDataSource data, int xGridOffset, int zGridOffset) {
+    public final boolean renderTile(NativeImage tile, TileResolution resolution, DataSource data, int xGridOffset, int zGridOffset) {
         throw new UnsupportedOperationException("SyntheticLayers do not render tiles: " + getID());
     }
 

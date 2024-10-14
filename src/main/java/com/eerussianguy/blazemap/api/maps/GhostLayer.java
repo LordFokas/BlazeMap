@@ -4,7 +4,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 
 import com.eerussianguy.blazemap.api.BlazeRegistry;
-import com.eerussianguy.blazemap.api.util.IDataSource;
+import com.eerussianguy.blazemap.api.util.DataSource;
 import com.mojang.blaze3d.platform.NativeImage;
 
 /**
@@ -25,7 +25,7 @@ public class GhostLayer extends Layer {
     }
 
     @Override // can't render
-    public boolean renderTile(NativeImage tile, TileResolution resolution, IDataSource data, int xGridOffset, int zGridOffset) {
+    public boolean renderTile(NativeImage tile, TileResolution resolution, DataSource data, int xGridOffset, int zGridOffset) {
         throw new UnsupportedOperationException("GhostLayers do not render tiles: " + getID());
     }
 

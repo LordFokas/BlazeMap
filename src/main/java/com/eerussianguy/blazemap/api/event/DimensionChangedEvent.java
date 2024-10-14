@@ -12,8 +12,7 @@ import com.eerussianguy.blazemap.api.maps.DimensionTileStorage;
 import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.MapType;
 import com.eerussianguy.blazemap.api.markers.MarkerStorage;
-import com.eerussianguy.blazemap.api.markers.Waypoint;
-import com.eerussianguy.blazemap.api.util.IStorageAccess;
+import com.eerussianguy.blazemap.api.util.StorageAccess;
 
 /**
  * Fired after the client enters a new dimension. <br>
@@ -61,14 +60,9 @@ public class DimensionChangedEvent extends Event {
     public final MarkerStorage.MapComponentStorage labels;
 
     /**
-     * Permanent storage containing all the player waypoints for this dimension
-     */
-    public final MarkerStorage<Waypoint> waypoints;
-
-    /**
      * Client file storage where all map data for this dimension is stored
      */
-    public final IStorageAccess dimensionStorage;
+    public final StorageAccess dimensionStorage;
 
     public DimensionChangedEvent(
         ResourceKey<Level> dimension,
@@ -77,8 +71,7 @@ public class DimensionChangedEvent extends Event {
         DimensionTileNotifications notifications,
         DimensionTileStorage tiles,
         MarkerStorage.MapComponentStorage labels,
-        MarkerStorage<Waypoint> waypoints,
-        IStorageAccess storageAccess
+        StorageAccess storageAccess
     ) {
         this.dimension = dimension;
         this.availableMapTypes = mapTypes;
@@ -86,7 +79,6 @@ public class DimensionChangedEvent extends Event {
         this.tileNotifications = notifications;
         this.tileStorage = tiles;
         this.labels = labels;
-        this.waypoints = waypoints;
         this.dimensionStorage = storageAccess;
     }
 }

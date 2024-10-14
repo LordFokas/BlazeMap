@@ -12,7 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 
 import com.eerussianguy.blazemap.BlazeMap;
-import com.eerussianguy.blazemap.api.util.IStorageAccess;
+import com.eerussianguy.blazemap.api.util.StorageAccess;
 import com.eerussianguy.blazemap.api.util.MinecraftStreams;
 import com.eerussianguy.blazemap.api.util.RegionPos;
 import com.eerussianguy.blazemap.engine.BlazeMapAsync;
@@ -22,11 +22,11 @@ import com.eerussianguy.blazemap.lib.async.DebouncingDomain;
 public class LevelMDCache {
     private static final ResourceLocation NODE = BlazeMap.resource("md-cache");
     private final LoadingCache<RegionPos, RegionMDCache> regions;
-    private final IStorageAccess storage;
+    private final StorageAccess storage;
     private final DebouncingDomain<RegionMDCache> debouncer;
     private final AsyncChainRoot asyncChain;
 
-    public LevelMDCache(final IStorageAccess storage, AsyncChainRoot asyncChain) {
+    public LevelMDCache(final StorageAccess storage, AsyncChainRoot asyncChain) {
         this.storage = storage;
         this.asyncChain = asyncChain;
         this.debouncer = new DebouncingDomain<>(BlazeMapAsync.instance().debouncer, this::persist, 5_000, 30_000, BlazeMap.LOGGER);

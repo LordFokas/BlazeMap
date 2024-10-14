@@ -8,7 +8,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.Connection;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelResource;
@@ -21,33 +20,28 @@ import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.event.DimensionChangedEvent;
 import com.eerussianguy.blazemap.api.event.ServerJoinedEvent;
 import com.eerussianguy.blazemap.api.maps.LayerRegion;
-import com.eerussianguy.blazemap.api.markers.IStorageFactory;
 import com.eerussianguy.blazemap.api.markers.MarkerStorage;
-import com.eerussianguy.blazemap.api.markers.Waypoint;
 import com.eerussianguy.blazemap.api.pipeline.MasterDatum;
 import com.eerussianguy.blazemap.api.pipeline.PipelineType;
-import com.eerussianguy.blazemap.api.util.IStorageAccess;
+import com.eerussianguy.blazemap.api.util.StorageAccess;
 import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.engine.BlazeMapAsync;
 import com.eerussianguy.blazemap.engine.RegistryController;
-import com.eerussianguy.blazemap.engine.StorageAccess;
+import com.eerussianguy.blazemap.engine.storage.InternalStorage;
 import com.eerussianguy.blazemap.engine.cache.ChunkMDCache;
+import com.eerussianguy.blazemap.engine.storage.StorageType;
 import com.eerussianguy.blazemap.lib.Helpers;
 import com.eerussianguy.blazemap.network.BlazeNetwork;
 
 public class ClientEngine {
     private static final Set<Consumer<LayerRegion>> TILE_CHANGE_LISTENERS = new HashSet<>();
     private static final Map<ResourceKey<Level>, ClientPipeline> PIPELINES = new HashMap<>();
-    private static final Map<ResourceKey<Level>, MarkerStorage<Waypoint>> WAYPOINTS = new HashMap<>();
-    private static final ResourceLocation WAYPOINT_STORAGE = BlazeMap.resource("waypoints.bin");
 
     private static ClientPipeline activePipeline;
     private static MarkerStorage.MapComponentStorage activeLabels;
-    private static MarkerStorage<Waypoint> activeWaypoints;
-    private static IStorageFactory<MarkerStorage<Waypoint>> waypointStorageFactory;
     private static File baseDir;
     private static String serverID;
-    private static StorageAccess.Internal storage;
+    private static InternalStorage storage;
     private static boolean isServerSource;
     private static String mdSource;
 
@@ -56,7 +50,7 @@ public class ClientEngine {
         MinecraftForge.EVENT_BUS.register(ClientEngine.class);
     }
 
-    public static StorageAccess.Internal getDimensionStorage(ResourceKey<Level> dimension) {
+    public static InternalStorage getDimensionStorage(ResourceKey<Level> dimension) {
         return storage.internal(dimension.location());
     }
 
@@ -66,11 +60,10 @@ public class ClientEngine {
         LocalPlayer player = event.getPlayer();
         if(player == null) return;
         serverID = Helpers.getServerID();
-        storage = new StorageAccess.Internal(getStorageDir());
+        storage = new InternalStorage(StorageType.SERVER, getStorageDir());
         isServerSource = detectRemote(event.getConnection());
         ServerJoinedEvent serverJoined = new ServerJoinedEvent(serverID, storage.addon(), isServerSource);
         MinecraftForge.EVENT_BUS.post(serverJoined);
-        waypointStorageFactory = serverJoined.getWaypointStorageFactory();
         switchToPipeline(player.level.dimension());
         mdSource = "unknown";
     }
@@ -97,16 +90,13 @@ public class ClientEngine {
     @SubscribeEvent
     public static void onLeaveServer(ClientPlayerNetworkEvent.LoggedOutEvent event) {
         PIPELINES.clear();
-        WAYPOINTS.clear();
         if(activePipeline != null) {
             activePipeline.shutdown();
             activePipeline = null;
         }
         activeLabels = null;
-        activeWaypoints = null;
         serverID = null;
         storage = null;
-        waypointStorageFactory = null;
     }
 
     @SubscribeEvent
@@ -122,12 +112,7 @@ public class ClientEngine {
         activePipeline = getPipeline(dimension);
         activeLabels = new LabelStorage(dimension);
 
-        IStorageAccess fileStorage = activePipeline.addonStorage;
-        activeWaypoints = WAYPOINTS.computeIfAbsent(dimension, d -> waypointStorageFactory.create(
-            () -> fileStorage.read(WAYPOINT_STORAGE),
-            () -> fileStorage.write(WAYPOINT_STORAGE),
-            () -> fileStorage.exists(WAYPOINT_STORAGE)
-        ));
+        StorageAccess fileStorage = activePipeline.addonStorage;
 
         TILE_CHANGE_LISTENERS.clear();
         DimensionChangedEvent event = new DimensionChangedEvent(
@@ -137,7 +122,6 @@ public class ClientEngine {
             TILE_CHANGE_LISTENERS::add,
             activePipeline::consumeTile,
             activeLabels,
-            activeWaypoints,
             fileStorage
         );
         MinecraftForge.EVENT_BUS.post(event);

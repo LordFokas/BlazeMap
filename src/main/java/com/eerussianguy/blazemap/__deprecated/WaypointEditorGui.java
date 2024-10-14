@@ -13,9 +13,9 @@ import net.minecraft.world.phys.Vec3;
 
 import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
-import com.eerussianguy.blazemap.api.event.DimensionChangedEvent;
 import com.eerussianguy.blazemap.api.markers.MarkerStorage;
 import com.eerussianguy.blazemap.api.markers.Waypoint;
+import com.eerussianguy.blazemap.feature.waypoints.WaypointService;
 import com.eerussianguy.blazemap.lib.Colors;
 import com.eerussianguy.blazemap.lib.Helpers;
 import com.eerussianguy.blazemap.lib.RenderHelper;
@@ -24,11 +24,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 @Deprecated
 public class WaypointEditorGui extends BlazeGui {
-    private static MarkerStorage<Waypoint> waypointStorage;
-
-    public static void onDimensionChanged(DimensionChangedEvent event) {
-        waypointStorage = event.waypoints;
-    }
+    private final MarkerStorage<Waypoint> waypointStorage;
 
     public static void open() {
         open(null);
@@ -54,6 +50,7 @@ public class WaypointEditorGui extends BlazeGui {
     protected WaypointEditorGui(Waypoint waypoint) {
         super(Helpers.translate("blazemap.gui.waypoint_editor.title"), 212, 202);
         this.waypoint = waypoint;
+        this.waypointStorage = WaypointService.instance();
 
         nx = new IntEnforcer(() -> x, v -> x = v);
         ny = new IntEnforcer(() -> y, v -> y = v);

@@ -15,7 +15,6 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 
 import com.eerussianguy.blazemap.BlazeMap;
-import com.eerussianguy.blazemap.__deprecated.WaypointEditorGui;
 import com.eerussianguy.blazemap.__deprecated.WaypointManagerGui;
 import com.eerussianguy.blazemap.api.BlazeMapAPI;
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
@@ -33,7 +32,7 @@ import com.eerussianguy.blazemap.feature.overlays.GridOverlay;
 import com.eerussianguy.blazemap.feature.waypoints.WaypointEditorFragment;
 import com.eerussianguy.blazemap.feature.waypoints.WaypointOverlay;
 import com.eerussianguy.blazemap.feature.waypoints.WaypointRenderer;
-import com.eerussianguy.blazemap.feature.waypoints.WaypointStore;
+import com.eerussianguy.blazemap.feature.waypoints.WaypointService;
 import com.mojang.blaze3d.platform.InputConstants;
 
 public class BlazeMapFeaturesClient {
@@ -170,11 +169,7 @@ public class BlazeMapFeaturesClient {
 
     public static void initWaypoints() {
         IEventBus bus = MinecraftForge.EVENT_BUS;
-        bus.addListener(WaypointEditorGui::onDimensionChanged);
-        bus.addListener(WaypointManagerGui::onDimensionChanged);
-        bus.addListener(EventPriority.HIGHEST, WaypointStore::onServerJoined);
-        bus.addListener(WorldMapMenu::trackWaypointStore);
-        bus.addListener(WaypointOverlay::onDimensionChange);
+        bus.addListener(EventPriority.HIGHEST, WaypointService::onServerJoined);
 
         WaypointRenderer.init();
 

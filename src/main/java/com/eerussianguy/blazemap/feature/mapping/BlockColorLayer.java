@@ -7,7 +7,7 @@ import com.eerussianguy.blazemap.api.builtin.WaterLevelMD;
 import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.TileResolution;
 import com.eerussianguy.blazemap.api.util.ArrayAggregator;
-import com.eerussianguy.blazemap.api.util.IDataSource;
+import com.eerussianguy.blazemap.api.util.DataSource;
 import com.eerussianguy.blazemap.lib.Colors;
 import com.eerussianguy.blazemap.lib.Helpers;
 import com.mojang.blaze3d.platform.NativeImage;
@@ -27,7 +27,7 @@ public class BlockColorLayer extends Layer {
     }
 
     @Override
-    public boolean renderTile(NativeImage tile, TileResolution resolution, IDataSource data, int xGridOffset, int zGridOffset) {
+    public boolean renderTile(NativeImage tile, TileResolution resolution, DataSource data, int xGridOffset, int zGridOffset) {
         BlockColorMD blocks = (BlockColorMD) data.get(BlazeMapReferences.MasterData.BLOCK_COLOR);
         if(blocks == null) return false;
 

@@ -17,7 +17,8 @@ import com.eerussianguy.blazemap.api.BlazeMapAPI;
 import com.eerussianguy.blazemap.engine.BlazeMapAsync;
 import com.eerussianguy.blazemap.engine.Pipeline;
 import com.eerussianguy.blazemap.engine.RegistryController;
-import com.eerussianguy.blazemap.engine.StorageAccess;
+import com.eerussianguy.blazemap.engine.storage.InternalStorage;
+import com.eerussianguy.blazemap.engine.storage.StorageType;
 import com.eerussianguy.blazemap.network.BlazeNetwork;
 import com.eerussianguy.blazemap.profiling.Profiler;
 
@@ -25,7 +26,7 @@ public class ServerEngine {
     private static final Map<ResourceKey<Level>, ServerPipeline> PIPELINES = new HashMap<>();
     private static MinecraftServer server;
     private static boolean isRunning;
-    private static StorageAccess.Internal storage;
+    private static InternalStorage storage;
     private static int numCollectors = 0, numProcessors = 0, numTransformers = 0;
 
     public static void init() {
@@ -43,7 +44,7 @@ public class ServerEngine {
         RegistryController.ensureRegistriesReady();
         isRunning = true;
         server = event.getServer();
-        storage = new StorageAccess.Internal(server.getWorldPath(LevelResource.ROOT).toFile(), "blazemap-server");
+        storage = new InternalStorage(StorageType.SERVER, server.getWorldPath(LevelResource.ROOT).toFile(), "blazemap-server");
         Profiler.setServerInstance(server);
     }
 

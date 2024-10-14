@@ -16,7 +16,7 @@ import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.PixelSource;
 import com.eerussianguy.blazemap.api.maps.TileResolution;
 import com.eerussianguy.blazemap.api.util.RegionPos;
-import com.eerussianguy.blazemap.engine.StorageAccess;
+import com.eerussianguy.blazemap.engine.storage.InternalStorage;
 import com.eerussianguy.blazemap.profiling.Profilers;
 import com.mojang.blaze3d.platform.NativeImage;
 
@@ -44,9 +44,9 @@ public class LayerRegionTile {
         return region + ".buffer";
     }
 
-    public LayerRegionTile(StorageAccess.Internal storage, BlazeRegistry.Key<Layer> layer, RegionPos region, TileResolution resolution) {
-        this.file = storage.getMipmap(layer.location, getImageName(region), resolution);
-        this.buffer = storage.getMipmap(layer.location, getBufferName(region), resolution);
+    public LayerRegionTile(InternalStorage storage, BlazeRegistry.Key<Layer> layer, RegionPos region, TileResolution resolution) {
+        this.file = storage.getMipmapDir(layer.location, getImageName(region), resolution);
+        this.buffer = storage.getMipmapDir(layer.location, getBufferName(region), resolution);
         this.resolution = resolution;
 
         imageWrapper = new PixelSource() {

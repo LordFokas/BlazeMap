@@ -7,7 +7,7 @@ import com.eerussianguy.blazemap.api.builtin.WaterLevelMD;
 import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.TileResolution;
 import com.eerussianguy.blazemap.api.util.ArrayAggregator;
-import com.eerussianguy.blazemap.api.util.IDataSource;
+import com.eerussianguy.blazemap.api.util.DataSource;
 import com.eerussianguy.blazemap.lib.Helpers;
 import com.mojang.blaze3d.platform.NativeImage;
 
@@ -42,7 +42,7 @@ public class TerrainIsolinesLayer extends Layer {
     }
 
     @Override
-    public boolean renderTile(NativeImage tile, TileResolution resolution, IDataSource data, int xGridOffset, int zGridOffset) {
+    public boolean renderTile(NativeImage tile, TileResolution resolution, DataSource data, int xGridOffset, int zGridOffset) {
         TerrainHeightMD terrain = (TerrainHeightMD) data.get(BlazeMapReferences.MasterData.TERRAIN_HEIGHT);
         WaterLevelMD water = (WaterLevelMD) data.get(BlazeMapReferences.MasterData.WATER_LEVEL);
 

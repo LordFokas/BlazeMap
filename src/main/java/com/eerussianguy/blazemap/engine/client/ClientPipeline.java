@@ -23,10 +23,10 @@ import com.eerussianguy.blazemap.api.pipeline.*;
 import com.eerussianguy.blazemap.api.util.RegionPos;
 import com.eerussianguy.blazemap.engine.Pipeline;
 import com.eerussianguy.blazemap.engine.PipelineProfiler;
-import com.eerussianguy.blazemap.engine.StorageAccess;
 import com.eerussianguy.blazemap.engine.UnsafeGenerics;
 import com.eerussianguy.blazemap.engine.cache.ChunkMDCache;
 import com.eerussianguy.blazemap.engine.cache.ChunkMDCacheView;
+import com.eerussianguy.blazemap.engine.storage.InternalStorage;
 import com.eerussianguy.blazemap.lib.Helpers;
 import com.eerussianguy.blazemap.lib.async.*;
 import com.mojang.blaze3d.platform.NativeImage;
@@ -54,7 +54,7 @@ class ClientPipeline extends Pipeline {
     private final PriorityLock lock = new PriorityLock();
     private boolean active, cold;
 
-    public ClientPipeline(AsyncChainRoot async, DebouncingThread debouncer, ResourceKey<Level> dimension, StorageAccess.Internal storage, PipelineType type) {
+    public ClientPipeline(AsyncChainRoot async, DebouncingThread debouncer, ResourceKey<Level> dimension, InternalStorage storage, PipelineType type) {
         super(
             async, debouncer, CLIENT_PIPELINE_PROFILER, dimension, Helpers::levelOrThrow, storage,
             computeCollectorSet(dimension, type),

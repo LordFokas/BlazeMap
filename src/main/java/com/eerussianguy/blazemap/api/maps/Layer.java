@@ -12,7 +12,7 @@ import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
 import com.eerussianguy.blazemap.api.pipeline.Consumer;
 import com.eerussianguy.blazemap.api.pipeline.DataType;
 import com.eerussianguy.blazemap.api.pipeline.MasterDatum;
-import com.eerussianguy.blazemap.api.util.IDataSource;
+import com.eerussianguy.blazemap.api.util.DataSource;
 import com.mojang.blaze3d.platform.NativeImage;
 
 /**
@@ -73,7 +73,7 @@ public abstract class Layer extends NamedMapComponent<Layer> implements Consumer
         return opaque;
     }
 
-    public abstract boolean renderTile(NativeImage tile, TileResolution resolution, IDataSource data, int xGridOffset, int zGridOffset);
+    public abstract boolean renderTile(NativeImage tile, TileResolution resolution, DataSource data, int xGridOffset, int zGridOffset);
 
     /**
      * Used by the World Map (fullscreen map) to display a legend somewhere in the screen (at the layout's discretion)
