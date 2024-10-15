@@ -85,7 +85,14 @@ public abstract class WrappedComponent extends BaseComponent<WrappedComponent> {
 
         @Override
         public void render(PoseStack stack, boolean hasMouse, int mouseX, int mouseY) {
+            int x = getGlobalPositionX();
+            int y = getGlobalPositionY();
+            stack.translate(-x, -y, 0);
+            widget.x += x;
+            widget.y += y;
             widget.render(stack, mouseX, mouseY, getPartialTick());
+            widget.x -= x;
+            widget.y -= y;
         }
 
         @Override
