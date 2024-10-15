@@ -19,6 +19,7 @@ import com.eerussianguy.blazemap.feature.maps.*;
 import com.eerussianguy.blazemap.feature.waypoints.WaypointEditorGui;
 import com.eerussianguy.blazemap.feature.waypoints.WaypointManagerGui;
 import com.eerussianguy.blazemap.feature.waypoints.WaypointRenderer;
+import com.eerussianguy.blazemap.feature.waypoints.WaypointSharing;
 import com.eerussianguy.blazemap.feature.waypoints.WaypointStore;
 import com.mojang.blaze3d.platform.InputConstants;
 
@@ -121,6 +122,7 @@ public class BlazeMapFeaturesClient {
         bus.addListener(MapRenderer::onWaypointAdded);
         bus.addListener(MapRenderer::onWaypointRemoved);
         bus.addListener(WorldMapMenu::trackWaypointStore);
+        bus.addListener(WaypointSharing::onChatReceive);
 
         WaypointRenderer.init();
 
