@@ -6,8 +6,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.EntityLeaveWorldEvent;
 
 import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.event.ServerJoinedEvent;
@@ -18,6 +20,7 @@ import com.eerussianguy.blazemap.api.util.StorageAccess;
 import com.eerussianguy.blazemap.api.util.MinecraftStreams;
 
 public class WaypointService implements MarkerStorage<Waypoint> {
+    private static final ResourceLocation DEATH = BlazeMap.resource("textures/waypoints/special/death.png");
     private static WaypointService instance = null;
 
     public static WaypointService instance() {
@@ -26,6 +29,17 @@ public class WaypointService implements MarkerStorage<Waypoint> {
 
     public static void onServerJoined(ServerJoinedEvent event) {
         instance = new WaypointService(event.serverStorage);
+    }
+
+    public static void onDeath(EntityLeaveWorldEvent event) {
+        var entity = event.getEntity();
+        if(!entity.level.isClientSide) return;
+        if(entity instanceof LocalPlayer player) {
+            if(!player.isDeadOrDying()) return;
+
+            Waypoint waypoint = new Waypoint(BlazeMap.resource("waypoint/death/"+System.nanoTime()), player.level.dimension(), player.blockPosition(), "Death", DEATH);
+            instance().add(waypoint);
+        }
     }
 
 

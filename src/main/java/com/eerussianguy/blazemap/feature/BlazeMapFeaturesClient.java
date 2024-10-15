@@ -33,6 +33,7 @@ import com.eerussianguy.blazemap.feature.waypoints.WaypointEditorFragment;
 import com.eerussianguy.blazemap.feature.waypoints.WaypointOverlay;
 import com.eerussianguy.blazemap.feature.waypoints.WaypointRenderer;
 import com.eerussianguy.blazemap.feature.waypoints.WaypointService;
+import com.eerussianguy.blazemap.lib.Colors;
 import com.mojang.blaze3d.platform.InputConstants;
 
 public class BlazeMapFeaturesClient {
@@ -170,6 +171,7 @@ public class BlazeMapFeaturesClient {
     public static void initWaypoints() {
         IEventBus bus = MinecraftForge.EVENT_BUS;
         bus.addListener(EventPriority.HIGHEST, WaypointService::onServerJoined);
+        bus.addListener(WaypointService::onDeath);
 
         WaypointRenderer.init();
 
