@@ -6,7 +6,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 
 import com.eerussianguy.blazemap.engine.client.ClientEngine;
-import com.eerussianguy.blazemap.feature.MDSources;
+import com.eerussianguy.blazemap.engine.MDSources;
 import com.eerussianguy.blazemap.profiling.Profilers;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

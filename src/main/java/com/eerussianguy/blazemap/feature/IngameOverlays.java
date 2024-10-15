@@ -13,9 +13,9 @@ import com.mojang.blaze3d.vertex.Tesselator;
 
 import static com.eerussianguy.blazemap.BlazeMap.MOD_NAME;
 
-public class Overlays {
-    public static final IIngameOverlay MINIMAP = OverlayRegistry.registerOverlayTop(MOD_NAME + " Minimap", Overlays::renderMinimap);
-    public static final IIngameOverlay PROFILER = OverlayRegistry.registerOverlayTop(MOD_NAME + " Profiler", Overlays::renderProfiler);
+public class IngameOverlays {
+    public static final IIngameOverlay MINIMAP = OverlayRegistry.registerOverlayTop(MOD_NAME + " Minimap", IngameOverlays::renderMinimap);
+    public static final IIngameOverlay PROFILER = OverlayRegistry.registerOverlayTop(MOD_NAME + " Profiler", IngameOverlays::renderProfiler);
 
     public static void reload() {
         OverlayRegistry.enableOverlay(MINIMAP, BlazeMapConfig.CLIENT.minimap.enabled.get());

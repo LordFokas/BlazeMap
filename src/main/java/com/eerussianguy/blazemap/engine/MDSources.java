@@ -1,4 +1,4 @@
-package com.eerussianguy.blazemap.feature;
+package com.eerussianguy.blazemap.engine;
 
 public class MDSources {
     public static class Client {
