@@ -89,7 +89,7 @@ public class BlazeMapFeaturesClient {
         BlazeMapAPI.OVERLAYS.register(new GridOverlay());
         BlazeMapAPI.OVERLAYS.register(new WaypointOverlay());
         BlazeMapAPI.OVERLAYS.register(new EntityOverlay.Players());
-        BlazeMapAPI.OVERLAYS.register(new EntityOverlay.Villagers());
+        BlazeMapAPI.OVERLAYS.register(new EntityOverlay.NPCs());
         BlazeMapAPI.OVERLAYS.register(new EntityOverlay.Animals());
         BlazeMapAPI.OVERLAYS.register(new EntityOverlay.Enemies());
         overlays = true;

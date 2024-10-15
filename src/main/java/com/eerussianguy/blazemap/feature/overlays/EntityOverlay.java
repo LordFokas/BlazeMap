@@ -71,7 +71,7 @@ public abstract class EntityOverlay extends GhostOverlay {
             super(
                 BlazeMapReferences.Overlays.PLAYERS,
                 Helpers.translate("blazemap.players"),
-                BlazeMapReferences.Icons.PICKAXE,
+                BlazeMap.resource("textures/map_icons/overlay_players.png"),
                 DEFAULT_PLAYER_MAX_VERTICAL_DISTANCE
             );
         }
@@ -92,12 +92,12 @@ public abstract class EntityOverlay extends GhostOverlay {
         }
     }
 
-    public static class Villagers extends EntityOverlay {
-        public Villagers() {
+    public static class NPCs extends EntityOverlay {
+        public NPCs() {
             super(
                 BlazeMapReferences.Overlays.VILLAGERS,
-                Helpers.translate("blazemap.villagers"),
-                BlazeMapReferences.Icons.HOE,
+                Helpers.translate("blazemap.npcs"),
+                BlazeMap.resource("textures/map_icons/overlay_npcs.png"),
                 DEFAULT_ENTITY_MAX_VERTICAL_DISTANCE
             );
         }
@@ -118,7 +118,7 @@ public abstract class EntityOverlay extends GhostOverlay {
             super(
                 BlazeMapReferences.Overlays.ANIMALS,
                 Helpers.translate("blazemap.animals"),
-                BlazeMapReferences.Icons.AXE,
+                BlazeMap.resource("textures/map_icons/overlay_animals.png"),
                 DEFAULT_ENTITY_MAX_VERTICAL_DISTANCE
             );
         }
@@ -139,7 +139,7 @@ public abstract class EntityOverlay extends GhostOverlay {
             super(
                 BlazeMapReferences.Overlays.ENEMIES,
                 Helpers.translate("blazemap.enemies"),
-                BlazeMapReferences.Icons.SWORD,
+                BlazeMap.resource("textures/map_icons/overlay_enemies.png"),
                 DEFAULT_ENTITY_MAX_VERTICAL_DISTANCE
             );
         }

@@ -19,7 +19,7 @@ import com.eerussianguy.blazemap.feature.waypoints.WaypointService;
 import com.eerussianguy.blazemap.lib.Colors;
 import com.eerussianguy.blazemap.lib.Helpers;
 import com.eerussianguy.blazemap.lib.RenderHelper;
-import com.eerussianguy.blazemap.lib.gui.util.IntEnforcer;
+import com.eerussianguy.blazemap.lib.gui.components.VanillaComponents;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 @Deprecated
@@ -37,7 +37,7 @@ public class WaypointEditorGui extends BlazeGui {
     private Button save;
     private HueSlider slider;
     private SaturationBrightnessSelector sbs;
-    private final IntEnforcer nx, ny, nz;
+    private final VanillaComponents.IntEnforcer nx, ny, nz;
 
     private final Waypoint waypoint;
     private ResourceLocation icon = BlazeMapReferences.Icons.WAYPOINT;
@@ -52,9 +52,9 @@ public class WaypointEditorGui extends BlazeGui {
         this.waypoint = waypoint;
         this.waypointStorage = WaypointService.instance();
 
-        nx = new IntEnforcer(() -> x, v -> x = v);
-        ny = new IntEnforcer(() -> y, v -> y = v);
-        nz = new IntEnforcer(() -> z, v -> z = v);
+        nx = new VanillaComponents.IntEnforcer(() -> x, v -> x = v);
+        ny = new VanillaComponents.IntEnforcer(() -> y, v -> y = v);
+        nz = new VanillaComponents.IntEnforcer(() -> z, v -> z = v);
 
         if(waypoint == null) {
             name = "New Waypoint";

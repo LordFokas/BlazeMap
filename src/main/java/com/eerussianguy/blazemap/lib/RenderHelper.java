@@ -1,7 +1,5 @@
 package com.eerussianguy.blazemap.lib;
 
-import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -9,9 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 
 import com.eerussianguy.blazemap.BlazeMap;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
 
 public class RenderHelper {
@@ -20,10 +16,25 @@ public class RenderHelper {
     public static final float F0 = 0, F1 = 1;
 
     public static void drawTexturedQuad(ResourceLocation texture, int color, PoseStack stack, int px, int py, int w, int h) {
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        drawTexturedQuad(texture, color, stack, px, px + w, py, py + h, 0, w, h, 0, 0, w, h);
+    }
+
+    private static void drawTexturedQuad(ResourceLocation texture, int color, PoseStack stack, int px0, int px1, int py0, int py1, int pz, int wp, int hp, float tx0, float ty0, int tw, int th) {
+        drawTexturedQuad(texture, color, stack.last().pose(), px0, px1, py0, py1, pz, (tx0 + 0.0F) / (float)tw, (tx0 + (float)wp) / (float)tw, (ty0 + 0.0F) / (float)th, (ty0 + (float)hp) / (float)th);
+    }
+
+    private static void drawTexturedQuad(ResourceLocation texture, int color, Matrix4f matrix, int px0, int px1, int py0, int py1, int pz, float u0, float u1, float v0, float v1) {
         setShaderColor(color);
         RenderSystem.setShaderTexture(0, texture);
-        GuiComponent.blit(stack, px, py, 0, 0, 0, w, h, w, h);
+        RenderSystem.setShader(ShaderHelper::getTextureShader);
+        BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
+        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        bufferbuilder.vertex(matrix, (float)px0, (float)py1, (float)pz).uv(u0, v1).endVertex();
+        bufferbuilder.vertex(matrix, (float)px1, (float)py1, (float)pz).uv(u1, v1).endVertex();
+        bufferbuilder.vertex(matrix, (float)px1, (float)py0, (float)pz).uv(u1, v0).endVertex();
+        bufferbuilder.vertex(matrix, (float)px0, (float)py0, (float)pz).uv(u0, v0).endVertex();
+        bufferbuilder.end();
+        BufferUploader.end(bufferbuilder);
     }
 
     public static void setShaderColor(int color) {

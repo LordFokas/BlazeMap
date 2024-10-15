@@ -5,6 +5,7 @@ import java.util.Collections;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 
+import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
 import com.eerussianguy.blazemap.api.maps.GhostOverlay;
 import com.eerussianguy.blazemap.api.maps.TileResolution;
@@ -16,7 +17,7 @@ public class WaypointOverlay extends GhostOverlay {
         super(
             BlazeMapReferences.Overlays.WAYPOINTS,
             Helpers.translate("blazemap.waypoints"),
-            BlazeMapReferences.Icons.WAYPOINT
+            BlazeMap.resource("textures/map_icons/overlay_waypoints.png")
         );
     }
 
