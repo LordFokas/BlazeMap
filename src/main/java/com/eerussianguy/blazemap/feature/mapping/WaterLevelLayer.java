@@ -1,12 +1,13 @@
 package com.eerussianguy.blazemap.feature.mapping;
 
+import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
 import com.eerussianguy.blazemap.api.builtin.WaterLevelMD;
 import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.TileResolution;
 import com.eerussianguy.blazemap.api.util.ArrayAggregator;
-import com.eerussianguy.blazemap.api.util.IDataSource;
-import com.eerussianguy.blazemap.util.Helpers;
+import com.eerussianguy.blazemap.api.util.DataSource;
+import com.eerussianguy.blazemap.lib.Helpers;
 import com.mojang.blaze3d.platform.NativeImage;
 
 public class WaterLevelLayer extends Layer {
@@ -15,14 +16,15 @@ public class WaterLevelLayer extends Layer {
         super(
             BlazeMapReferences.Layers.WATER_LEVEL,
             Helpers.translate("blazemap.water_depth"),
-            Helpers.identifier("textures/map_icons/layer_water.png"),
+            BlazeMap.resource("textures/map_icons/layer_water.png"),
+            false,
 
             BlazeMapReferences.MasterData.WATER_LEVEL
         );
     }
 
     @Override
-    public boolean renderTile(NativeImage tile, TileResolution resolution, IDataSource data, int xGridOffset, int zGridOffset) {
+    public boolean renderTile(NativeImage tile, TileResolution resolution, DataSource data, int xGridOffset, int zGridOffset) {
         WaterLevelMD water = (WaterLevelMD) data.get(BlazeMapReferences.MasterData.WATER_LEVEL);
 
         foreachPixel(resolution, (x, z) -> {

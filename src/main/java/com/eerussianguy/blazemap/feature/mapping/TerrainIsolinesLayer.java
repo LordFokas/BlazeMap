@@ -1,13 +1,14 @@
 package com.eerussianguy.blazemap.feature.mapping;
 
+import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
 import com.eerussianguy.blazemap.api.builtin.TerrainHeightMD;
 import com.eerussianguy.blazemap.api.builtin.WaterLevelMD;
 import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.TileResolution;
 import com.eerussianguy.blazemap.api.util.ArrayAggregator;
-import com.eerussianguy.blazemap.api.util.IDataSource;
-import com.eerussianguy.blazemap.util.Helpers;
+import com.eerussianguy.blazemap.api.util.DataSource;
+import com.eerussianguy.blazemap.lib.Helpers;
 import com.mojang.blaze3d.platform.NativeImage;
 
 public class TerrainIsolinesLayer extends Layer {
@@ -32,7 +33,8 @@ public class TerrainIsolinesLayer extends Layer {
         super(
             BlazeMapReferences.Layers.TERRAIN_ISOLINES,
             Helpers.translate("blazemap.terrain_isolines"),
-            Helpers.identifier("textures/map_icons/layer_terrain_isolines.png"),
+            BlazeMap.resource("textures/map_icons/layer_terrain_isolines.png"),
+            false,
 
             BlazeMapReferences.MasterData.TERRAIN_HEIGHT,
             BlazeMapReferences.MasterData.WATER_LEVEL
@@ -40,7 +42,7 @@ public class TerrainIsolinesLayer extends Layer {
     }
 
     @Override
-    public boolean renderTile(NativeImage tile, TileResolution resolution, IDataSource data, int xGridOffset, int zGridOffset) {
+    public boolean renderTile(NativeImage tile, TileResolution resolution, DataSource data, int xGridOffset, int zGridOffset) {
         TerrainHeightMD terrain = (TerrainHeightMD) data.get(BlazeMapReferences.MasterData.TERRAIN_HEIGHT);
         WaterLevelMD water = (WaterLevelMD) data.get(BlazeMapReferences.MasterData.WATER_LEVEL);
 

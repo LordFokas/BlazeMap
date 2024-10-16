@@ -1,7 +1,7 @@
 package com.eerussianguy.blazemap.feature.waypoints;
 
 import com.eerussianguy.blazemap.api.markers.Waypoint;
-import com.eerussianguy.blazemap.util.Helpers;
+import com.eerussianguy.blazemap.lib.Helpers;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;

@@ -8,33 +8,20 @@ import net.minecraft.world.level.Level;
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
 
 public class Waypoint extends Marker<Waypoint> {
-    private String name;
-
     public Waypoint(ResourceLocation id, ResourceKey<Level> dimension, BlockPos position, String name) {
-        this(id, dimension, position, name, BlazeMapReferences.Icons.WAYPOINT, -1, 0);
+        this(id, dimension, position, name, BlazeMapReferences.Icons.WAYPOINT, -1);
         this.randomizeColor();
     }
 
     public Waypoint(ResourceLocation id, ResourceKey<Level> dimension, BlockPos position, String name, ResourceLocation icon) {
-        this(id, dimension, position, name, icon, -1, 0);
+        this(id, dimension, position, name, icon, -1);
         this.randomizeColor();
     }
 
     public Waypoint(ResourceLocation id, ResourceKey<Level> dimension, BlockPos position, String name, ResourceLocation icon, int color) {
-        this(id, dimension, position, name, icon, color, 0);
-    }
-
-    public Waypoint(ResourceLocation id, ResourceKey<Level> dimension, BlockPos position, String name, ResourceLocation icon, int color, float rotation) {
-        super(id, dimension, position, icon, color, rotation);
-        this.name = name;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Waypoint setName(String name) {
-        this.name = name;
-        return this;
+        super(id, dimension, position, icon);
+        setName(name);
+        setColor(color);
+        setNameVisible(true);
     }
 }

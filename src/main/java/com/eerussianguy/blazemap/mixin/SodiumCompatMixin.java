@@ -1,7 +1,7 @@
 package com.eerussianguy.blazemap.mixin;
 
-import com.eerussianguy.blazemap.engine.client.BlazeMapClientEngine;
-import com.eerussianguy.blazemap.feature.MDSources;
+import com.eerussianguy.blazemap.engine.client.ClientEngine;
+import com.eerussianguy.blazemap.engine.MDSources;
 import com.eerussianguy.blazemap.profiling.Profilers;
 import me.jellysquid.mods.sodium.client.render.chunk.ChunkRenderList;
 import me.jellysquid.mods.sodium.client.render.chunk.RenderSection;
@@ -18,7 +18,7 @@ public class SodiumCompatMixin {
         Profilers.Client.Mixin.SODIUM_LOAD_PROFILER.hit();
         Profilers.Client.Mixin.SODIUM_TIME_PROFILER.begin();
 
-        BlazeMapClientEngine.onChunkChanged(render.getChunkPos().chunk(), MDSources.Client.SODIUM);
+        ClientEngine.onChunkChanged(render.getChunkPos().chunk(), MDSources.Client.SODIUM);
 
         Profilers.Client.Mixin.SODIUM_TIME_PROFILER.end();
     }
