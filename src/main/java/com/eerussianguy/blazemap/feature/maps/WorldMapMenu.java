@@ -18,6 +18,7 @@ import com.eerussianguy.blazemap.engine.cache.ChunkMDCache;
 import com.eerussianguy.blazemap.engine.client.ClientEngine;
 import com.eerussianguy.blazemap.feature.waypoints.WaypointEditorFragment;
 import com.eerussianguy.blazemap.feature.waypoints.WaypointService;
+import com.eerussianguy.blazemap.feature.waypoints.WaypointSharing;
 import com.eerussianguy.blazemap.lib.Colors;
 import com.eerussianguy.blazemap.lib.Helpers;
 
@@ -44,6 +45,7 @@ public class WorldMapMenu {
             .map(waypoint -> makeFolder("waypoint.options", waypoint.getIcon(), waypoint.getColor(), waypoint.getName(),
                     makeAction("waypoint.edit", null, () -> new WaypointEditorFragment(waypoint).open()),
                     makeAction("waypoint.hide", null, null),
+                    makeAction("waypoint.share", null, () -> WaypointSharing.shareWaypoint(waypoint)),
                     makeAction("waypoint.delete", null, () -> waypoints.remove(waypoint))
                 )
             )

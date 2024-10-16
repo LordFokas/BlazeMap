@@ -38,6 +38,7 @@
   "blazemap.gui.worldmap.menu.waypoint.new": "Create New Waypoint",
   "blazemap.gui.worldmap.menu.waypoint.edit": "Edit",
   "blazemap.gui.worldmap.menu.waypoint.hide": "Hide",
+  "blazemap.gui.worldmap.menu.waypoint.share": "Share",
   "blazemap.gui.worldmap.menu.waypoint.delete": "Delete",
   "blazemap.gui.worldmap.menu.debug": "Debug",
   "blazemap.gui.worldmap.menu.debug.redraw_chunk_md": "Redraw Chunk from MD Cache",
