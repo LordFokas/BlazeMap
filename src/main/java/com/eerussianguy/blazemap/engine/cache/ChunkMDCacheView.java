@@ -5,11 +5,11 @@ import java.util.Set;
 import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
 import com.eerussianguy.blazemap.api.pipeline.DataType;
 import com.eerussianguy.blazemap.api.pipeline.MasterDatum;
-import com.eerussianguy.blazemap.api.util.IDataSource;
+import com.eerussianguy.blazemap.api.util.DataSource;
 import com.eerussianguy.blazemap.engine.UnsafeGenerics;
 
 @SuppressWarnings("rawtypes")
-public class ChunkMDCacheView implements IDataSource {
+public class ChunkMDCacheView implements DataSource {
     private ChunkMDCache source;
     private Set<Key<DataType>> filter;
 

@@ -5,18 +5,14 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import net.minecraft.client.gui.components.Widget;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.Level;
 
 import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
-import com.eerussianguy.blazemap.api.BlazeRegistry.RegistryEntry;
 import com.eerussianguy.blazemap.api.pipeline.Consumer;
 import com.eerussianguy.blazemap.api.pipeline.DataType;
 import com.eerussianguy.blazemap.api.pipeline.MasterDatum;
-import com.eerussianguy.blazemap.api.util.IDataSource;
+import com.eerussianguy.blazemap.api.util.DataSource;
 import com.mojang.blaze3d.platform.NativeImage;
 
 /**
@@ -31,35 +27,29 @@ import com.mojang.blaze3d.platform.NativeImage;
  *
  * @author LordFokas
  */
-public abstract class Layer implements RegistryEntry, Consumer {
+public abstract class Layer extends NamedMapComponent<Layer> implements Consumer {
     protected static final int OPAQUE = 0xFF000000;
 
-    private final Key<Layer> id;
     private final Set<Key<DataType<MasterDatum>>> inputs;
-    private final TranslatableComponent name;
-    private final ResourceLocation icon;
     private final boolean opaque;
+    public final Type type;
 
     @SafeVarargs
-    public Layer(Key<Layer> id, TranslatableComponent name, Key<DataType<MasterDatum>>... inputs) {
-        this.id = id;
-        this.name = name;
-        this.icon = null;
-        this.inputs = Arrays.stream(inputs).collect(Collectors.toUnmodifiableSet());
-        this.opaque = true;
+    public Layer(Key<Layer> id, TranslatableComponent name, ResourceLocation icon, boolean opaque, Key<DataType<MasterDatum>>... inputs) {
+        this(id, Type.PHYSICAL, name, icon, opaque, inputs);
     }
 
     @SafeVarargs
-    public Layer(Key<Layer> id, TranslatableComponent name, ResourceLocation icon, Key<DataType<MasterDatum>>... inputs) {
-        this.id = id;
-        this.name = name;
-        this.icon = icon;
+    Layer(Key<Layer> id, Type type, TranslatableComponent name, ResourceLocation icon, boolean opaque, Key<DataType<MasterDatum>>... inputs) {
+        super(id, name, icon);
+        this.type = type;
+        if(type.isPipelined) {
+            if(inputs == null || inputs.length == 0) throw new IllegalArgumentException("Pipelined Layers must have non-zero input MD list");
+        } else {
+            if(inputs != null && inputs.length > 0) throw new IllegalArgumentException("Non-Pipelined Layers must not have input MDs");
+        }
         this.inputs = Arrays.stream(inputs).collect(Collectors.toUnmodifiableSet());
-        this.opaque = false;
-    }
-
-    public Key<Layer> getID() {
-        return id;
+        this.opaque = opaque;
     }
 
     @Override
@@ -67,36 +57,53 @@ public abstract class Layer implements RegistryEntry, Consumer {
         return inputs;
     }
 
-    public boolean shouldRenderInDimension(ResourceKey<Level> dimension) {
-        return true;
-    }
-
+    /**
+     * isOpaque (alias for isBottomLayer) refers to the fact that bottom layers are opaque, and face different restrictions.
+     * 1 - opaque layers can only be the 1st layer in the map
+     * 1.1 - map therefore can only have 1 opaque layer
+     * 2 - layers in index >= 1 cannot be opaque
+     * 3 - opaque layers cannot be disabled (they are the map background)
+     */
     public final boolean isOpaque() {
         return opaque;
     }
 
-    public abstract boolean renderTile(NativeImage tile, TileResolution resolution, IDataSource data, int xGridOffset, int zGridOffset);
-
-    public TranslatableComponent getName() {
-        return name;
+    /** Alias for isOpaque */
+    public final boolean isBottomLayer() {
+        return opaque;
     }
 
-    public ResourceLocation getIcon() {
-        return icon;
+    public abstract boolean renderTile(NativeImage tile, TileResolution resolution, DataSource data, int xGridOffset, int zGridOffset);
+
+    /**
+     * Used by the World Map (fullscreen map) to display a legend somewhere in the screen (at the layout's discretion)
+     * The renderable will be asked to render at its own 0,0 and the height and width are expected to be constant.
+     *
+     * This currently only applies to opaque (bottom) layers, which are the first layer of the current map type,
+     * however not all such layers must have one and returning null is the default action.
+     */
+    public Renderable getLegendWidget() {
+        return null;
     }
 
     /**
-     * Used by the World Map (fullscreen map) to display a legend in the bottom right corner.
-     * The widget will be asked to render while translated to the corner of the screen,
-     * so it must render backwards (towards the left and up) in order to stay inside the screen.
-     *
-     * The translation to the corner may subtract a small margin to make all legends have a consistent margin with the border.
-     *
-     * This only applies to opaque (bottom) layers, which are the first layer of the current map type,
-     * however not all such layers must have one and returning null is the default action.
+     * Determines the capabilities and limitations of layers.
      */
-    public Widget getLegendWidget() {
-        return null;
+    public enum Type {
+        PHYSICAL(true, true),
+        SYNTHETIC(false, true),
+        INVISIBLE(false, false);
+
+        /** Whether this layer runs through the pipeline and saves to disk */
+        public final boolean isPipelined;
+
+        /** Whether this layer has pixels to display */
+        public final boolean isVisible;
+
+        Type(boolean isPipelined, boolean isVisible) {
+            this.isPipelined = isPipelined;
+            this.isVisible = isVisible;
+        }
     }
 
 

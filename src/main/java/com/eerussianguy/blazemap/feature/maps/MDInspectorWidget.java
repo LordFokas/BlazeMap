@@ -11,8 +11,8 @@ import net.minecraft.world.level.ChunkPos;
 
 import com.eerussianguy.blazemap.api.debug.MDInspectionController;
 import com.eerussianguy.blazemap.api.pipeline.MasterDatum;
-import com.eerussianguy.blazemap.util.Colors;
-import com.eerussianguy.blazemap.util.RenderHelper;
+import com.eerussianguy.blazemap.lib.Colors;
+import com.eerussianguy.blazemap.lib.RenderHelper;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
 

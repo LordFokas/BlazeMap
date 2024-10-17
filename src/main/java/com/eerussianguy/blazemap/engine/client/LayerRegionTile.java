@@ -13,9 +13,10 @@ import net.minecraft.world.level.ChunkPos;
 import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.BlazeRegistry;
 import com.eerussianguy.blazemap.api.maps.Layer;
+import com.eerussianguy.blazemap.api.maps.PixelSource;
 import com.eerussianguy.blazemap.api.maps.TileResolution;
 import com.eerussianguy.blazemap.api.util.RegionPos;
-import com.eerussianguy.blazemap.engine.StorageAccess;
+import com.eerussianguy.blazemap.engine.storage.InternalStorage;
 import com.eerussianguy.blazemap.profiling.Profilers;
 import com.mojang.blaze3d.platform.NativeImage;
 
@@ -29,6 +30,7 @@ public class LayerRegionTile {
 
     private final File file, buffer;
     private NativeImage image;
+    private final PixelSource imageWrapper;
     private final TileResolution resolution;
     private volatile boolean isEmpty = true;
     private volatile boolean isDirty = false;
@@ -42,10 +44,27 @@ public class LayerRegionTile {
         return region + ".buffer";
     }
 
-    public LayerRegionTile(StorageAccess.Internal storage, BlazeRegistry.Key<Layer> layer, RegionPos region, TileResolution resolution) {
-        this.file = storage.getMipmap(layer.location, getImageName(region), resolution);
-        this.buffer = storage.getMipmap(layer.location, getBufferName(region), resolution);
+    public LayerRegionTile(InternalStorage storage, BlazeRegistry.Key<Layer> layer, RegionPos region, TileResolution resolution) {
+        this.file = storage.getMipmapDir(layer.location, getImageName(region), resolution);
+        this.buffer = storage.getMipmapDir(layer.location, getBufferName(region), resolution);
         this.resolution = resolution;
+
+        imageWrapper = new PixelSource() {
+            @Override
+            public int getPixel(int x, int y) {
+                return image.getPixelRGBA(x, y);
+            }
+
+            @Override
+            public int getWidth() {
+                return image.getWidth();
+            }
+
+            @Override
+            public int getHeight() {
+                return image.getHeight();
+            }
+        };
     }
 
     public void tryLoad() {
@@ -161,12 +180,12 @@ public class LayerRegionTile {
         return isDirty;
     }
 
-    public void consume(Consumer<NativeImage> consumer) {
+    public void consume(Consumer<PixelSource> consumer) {
         if(isEmpty) return;
 
         imageLock.readLock().lock();
         try {
-            consumer.accept(image);
+            consumer.accept(imageWrapper);
         }
         finally {
             imageLock.readLock().unlock();

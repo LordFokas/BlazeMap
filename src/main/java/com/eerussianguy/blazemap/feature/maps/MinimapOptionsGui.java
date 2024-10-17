@@ -1,5 +1,7 @@
 package com.eerussianguy.blazemap.feature.maps;
 
+import java.util.List;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -8,19 +10,23 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 
+import com.eerussianguy.blazemap.BlazeMap;
+import com.eerussianguy.blazemap.__deprecated.BlazeGui;
+import com.eerussianguy.blazemap.__deprecated.LayerButton;
+import com.eerussianguy.blazemap.__deprecated.MapTypeButton;
 import com.eerussianguy.blazemap.api.BlazeMapAPI;
 import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
-import com.eerussianguy.blazemap.api.maps.IScreenSkipsMinimap;
 import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.MapType;
+import com.eerussianguy.blazemap.api.maps.Overlay;
 import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.config.ClientConfig;
 import com.eerussianguy.blazemap.config.MinimapConfigFacade;
-import com.eerussianguy.blazemap.gui.BlazeGui;
-import com.eerussianguy.blazemap.util.Helpers;
+import com.eerussianguy.blazemap.engine.render.MapRenderer;
+import com.eerussianguy.blazemap.lib.Helpers;
 import com.mojang.blaze3d.vertex.PoseStack;
 
-public class MinimapOptionsGui extends BlazeGui implements IScreenSkipsMinimap, IMapHost {
+public class MinimapOptionsGui extends BlazeGui implements MapHost {
     private static final TranslatableComponent MAP_TYPES = Helpers.translate("blazemap.gui.minimap_options.map_types");
     private static final TranslatableComponent LAYERS = Helpers.translate("blazemap.gui.minimap_options.layers");
     private static final int WIDTH = 128, HEIGHT = 154;
@@ -29,7 +35,7 @@ public class MinimapOptionsGui extends BlazeGui implements IScreenSkipsMinimap, 
         Minecraft.getInstance().setScreen(new MinimapOptionsGui());
     }
 
-    private final MapRenderer mapRenderer = new MapRenderer(0, 0, Helpers.identifier("dynamic/map/minimap_preview"), MinimapRenderer.MIN_ZOOM, MinimapRenderer.MAX_ZOOM, false);
+    private final MapRenderer mapRenderer = new MapRenderer(0, 0, BlazeMap.resource("dynamic/map/minimap_preview"), MinimapRenderer.MIN_ZOOM, MinimapRenderer.MAX_ZOOM);
     private final MinimapConfigSynchronizer synchronizer = MinimapRenderer.INSTANCE.synchronizer;
     private final WidgetConfigFacade configFacade = new WidgetConfigFacade(BlazeMapConfig.CLIENT.minimap, mapRenderer);
     private final MinimapWidget minimap = new MinimapWidget(mapRenderer, configFacade, true);
@@ -49,6 +55,16 @@ public class MinimapOptionsGui extends BlazeGui implements IScreenSkipsMinimap, 
     }
 
     @Override
+    public boolean isOverlayVisible(Key<Overlay> overlayID) {
+        return mapRenderer.isOverlayVisible(overlayID);
+    }
+
+    @Override
+    public void toggleOverlay(Key<Overlay> overlayID) {
+        synchronizer.toggleOverlay(overlayID);
+    }
+
+    @Override
     public MapType getMapType() {
         return mapRenderer.getMapType();
     }
@@ -59,8 +75,8 @@ public class MinimapOptionsGui extends BlazeGui implements IScreenSkipsMinimap, 
     }
 
     @Override
-    public void drawTooltip(PoseStack stack, Component component, int x, int y) {
-        renderTooltip(stack, component, x, y);
+    public void drawTooltip(PoseStack stack, int x, int y, List<? extends Component> lines) {
+        renderTooltip(stack, lines.stream().map(Component::getVisualOrderText).toList(), x, y);
     }
 
     @Override

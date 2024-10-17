@@ -6,7 +6,7 @@ import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 
-import com.eerussianguy.blazemap.engine.server.BlazeMapServerEngine;
+import com.eerussianguy.blazemap.engine.server.ServerEngine;
 import com.eerussianguy.blazemap.profiling.Profilers;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -21,7 +21,7 @@ public class ClientboundChunkLightPacketMixin {
         Profilers.Server.Mixin.CHUNKPACKET_LOAD_PROFILER.hit();
         Profilers.Server.Mixin.CHUNKPACKET_TIME_PROFILER.begin();
 
-        BlazeMapServerEngine.onChunkChanged(chunk.getLevel().dimension(), chunk.getPos());
+        ServerEngine.onChunkChanged(chunk.getLevel().dimension(), chunk.getPos());
 
         Profilers.Server.Mixin.CHUNKPACKET_TIME_PROFILER.end();
     }

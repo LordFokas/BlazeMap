@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
 import com.eerussianguy.blazemap.api.BlazeRegistry.RegistryEntry;
-import com.eerussianguy.blazemap.api.util.IDataSource;
+import com.eerussianguy.blazemap.api.util.DataSource;
 
 /**
  * Transformers can produce one MasterDatum by reading other MasterData, without needing access to the world.
@@ -48,5 +48,5 @@ public abstract class Transformer<T extends MasterDatum> implements RegistryEntr
         return inputs;
     }
 
-    public abstract T transform(IDataSource data);
+    public abstract T transform(DataSource data);
 }

@@ -1,8 +1,9 @@
 package com.eerussianguy.blazemap.feature.mapping;
 
+import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
 import com.eerussianguy.blazemap.api.maps.MapType;
-import com.eerussianguy.blazemap.util.Helpers;
+import com.eerussianguy.blazemap.lib.Helpers;
 
 public class AerialViewMapType extends MapType {
 
@@ -10,7 +11,7 @@ public class AerialViewMapType extends MapType {
         super(
             BlazeMapReferences.MapTypes.AERIAL_VIEW,
             Helpers.translate("blazemap.aerial_view"),
-            Helpers.identifier("textures/map_icons/map_aerial.png"),
+            BlazeMap.resource("textures/map_icons/map_aerial.png"),
 
             BlazeMapReferences.Layers.BLOCK_COLOR,
             BlazeMapReferences.Layers.TERRAIN_SLOPE
