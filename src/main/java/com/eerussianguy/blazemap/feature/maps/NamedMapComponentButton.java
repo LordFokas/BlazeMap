@@ -50,7 +50,7 @@ public abstract class NamedMapComponentButton<T extends NamedMapComponent<T>> ex
 
     @Override
     public void render(PoseStack stack, boolean hasMouse, int mouseX, int mouseY) {
-        if(active.getAsBoolean()) {
+        if(active.getAsBoolean() && isAllowed()) {
             super.render(stack, hasMouse, mouseX, mouseY);
         } else {
             ShaderHelper.withTextureShader(GRAYSCALE, () -> {
@@ -61,6 +61,10 @@ public abstract class NamedMapComponentButton<T extends NamedMapComponent<T>> ex
 
     @Override
     public boolean isEnabled() {
+        return isAllowed();
+    }
+
+    public boolean isAllowed() {
         return permissions.isAllowed(key);
     }
 
@@ -74,14 +78,14 @@ public abstract class NamedMapComponentButton<T extends NamedMapComponent<T>> ex
     }
 
     protected void populateTooltip() {
-        if(!permissions.isAllowed(key)) {
+        if(!isAllowed()) {
             tooltip.add(disabled);
         }
     }
 
     @Override
     protected int getTint() {
-        return isEnabled() ? Colors.NO_TINT : Colors.DISABLED;
+        return isAllowed() ? (isEnabled() ? Colors.NO_TINT : Colors.DISABLED) : 0xFF333333;
     }
 
     public static class MapTypeButton extends NamedMapComponentButton<MapType> {
