@@ -60,6 +60,7 @@ public class ClientConfig {
         public final BooleanValue displayOtherPlayers;
         public final BooleanValue displayWaypointsOnMap;
         public final BooleanValue renderWaypointsInWorld;
+        public final BooleanValue deathWaypoints;
 
         FeaturesConfig(Function<String, Builder> builder) {
             this.displayCoords = builder.apply("displayCoords")
@@ -82,6 +83,9 @@ public class ClientConfig {
             this.renderWaypointsInWorld = builder.apply("renderWaypointsInWorld")
                 .comment("Enables waypoints to be rendered in the world")
                 .define("renderWaypointsInWorld", false);
+            this.deathWaypoints = builder.apply("deathWaypoints")
+                .comment("Automatically create special waypoints at the place of your death")
+                .define("deathWaypoints", true);
         }
     }
 

@@ -30,7 +30,10 @@ public class Slider extends BaseComponent<Slider> implements FocusableComponent,
             if(playDenied) playDeniedSound();
             return;
         }
-        playPitchedClick(value > this.value ? 1.05F : 0.95F);
+
+        if(value > this.value) playUpSound();
+        else playDownSound();
+
         setValue(value);
     }
 

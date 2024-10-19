@@ -32,6 +32,10 @@ public class Label extends BaseComponent<Label> {
         return textWidth;
     }
 
+    public int getTextHeight() {
+        return 10;
+    }
+
     @Override
     public void render(PoseStack stack, boolean hasMouse, int mouseX, int mouseY) {
         text.map(
@@ -62,6 +66,6 @@ public class Label extends BaseComponent<Label> {
     }
 
     protected Label setLabelWidth() {
-        return setSize(textWidth, 10);
+        return setSize(getTextWidth(), getTextHeight());
     }
 }

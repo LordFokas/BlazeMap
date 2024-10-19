@@ -14,6 +14,7 @@ import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import com.eerussianguy.blazemap.api.BlazeMapAPI;
+import com.eerussianguy.blazemap.api.event.ServerEngineEvent;
 import com.eerussianguy.blazemap.engine.BlazeMapAsync;
 import com.eerussianguy.blazemap.engine.Pipeline;
 import com.eerussianguy.blazemap.engine.RegistryController;
@@ -46,10 +47,14 @@ public class ServerEngine {
         server = event.getServer();
         storage = new InternalStorage(StorageType.SERVER, server.getWorldPath(LevelResource.ROOT).toFile(), "blazemap-server");
         Profiler.setServerInstance(server);
+
+        MinecraftForge.EVENT_BUS.post(new ServerEngineEvent.EngineStartingEvent(storage));
     }
 
     @SubscribeEvent
     public static void onServerStop(ServerStoppedEvent event) {
+        MinecraftForge.EVENT_BUS.post(new ServerEngineEvent.EngineStoppingEvent(storage));
+
         isRunning = false;
         server = null;
         storage = null;

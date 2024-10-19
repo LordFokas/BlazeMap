@@ -1,5 +1,6 @@
 package com.eerussianguy.blazemap.lib;
 
+import java.util.Calendar;
 import java.util.Objects;
 
 import net.minecraft.client.Minecraft;
@@ -79,5 +80,16 @@ public class Helpers {
             try {closeable.close();}
             catch(Exception ignored) {}
         }
+    }
+
+    public static String getISO8601(char d, char t, char h) {
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH) + 1; // fuck you too Java
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        int minute = calendar.get(Calendar.MINUTE);
+        int second = calendar.get(Calendar.SECOND);
+        return String.format("%04d%s%02d%s%02d%s%02d%s%02d%s%02d", year, d, month, d, day, t, hour, h, minute, h, second);
     }
 }

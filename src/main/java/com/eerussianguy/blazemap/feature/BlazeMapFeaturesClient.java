@@ -11,11 +11,9 @@ import net.minecraftforge.client.ClientRegistry;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 
 import com.eerussianguy.blazemap.BlazeMap;
-import com.eerussianguy.blazemap.__deprecated.WaypointManagerGui;
 import com.eerussianguy.blazemap.api.BlazeMapAPI;
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
 import com.eerussianguy.blazemap.api.BlazeRegistry;
@@ -29,11 +27,10 @@ import com.eerussianguy.blazemap.feature.mapping.*;
 import com.eerussianguy.blazemap.feature.maps.*;
 import com.eerussianguy.blazemap.feature.overlays.EntityOverlay;
 import com.eerussianguy.blazemap.feature.overlays.GridOverlay;
-import com.eerussianguy.blazemap.feature.waypoints.WaypointEditorFragment;
-import com.eerussianguy.blazemap.feature.waypoints.WaypointOverlay;
-import com.eerussianguy.blazemap.feature.waypoints.WaypointRenderer;
-import com.eerussianguy.blazemap.feature.waypoints.WaypointService;
-import com.eerussianguy.blazemap.lib.Colors;
+import com.eerussianguy.blazemap.feature.waypoints.*;
+import com.eerussianguy.blazemap.feature.waypoints.service.WaypointService;
+import com.eerussianguy.blazemap.feature.waypoints.service.WaypointServiceClient;
+import com.eerussianguy.blazemap.feature.waypoints.service.WaypointServiceServer;
 import com.mojang.blaze3d.platform.InputConstants;
 
 public class BlazeMapFeaturesClient {
@@ -122,7 +119,7 @@ public class BlazeMapFeaturesClient {
         }
         event.add(
             BlazeMapReferences.Overlays.PLAYERS,
-            BlazeMapReferences.Overlays.VILLAGERS,
+            BlazeMapReferences.Overlays.NPCS,
             BlazeMapReferences.Overlays.ANIMALS,
             BlazeMapReferences.Overlays.ENEMIES
         );
@@ -142,10 +139,9 @@ public class BlazeMapFeaturesClient {
         }
         if(KEY_WAYPOINTS.isDown() && hasWaypoints()) {
             if(Screen.hasShiftDown()) {
-                WaypointManagerGui.open();
+                new WaypointManagerFragment().open();
             }
             else {
-                // WaypointEditorGui.open();
                 new WaypointEditorFragment().open();
             }
         }
@@ -170,10 +166,11 @@ public class BlazeMapFeaturesClient {
 
     public static void initWaypoints() {
         IEventBus bus = MinecraftForge.EVENT_BUS;
-        bus.addListener(EventPriority.HIGHEST, WaypointService::onServerJoined);
-        bus.addListener(WaypointService::onDeath);
+        bus.register(WaypointServiceClient.class);
+        bus.register(WaypointServiceServer.class);
 
         WaypointRenderer.init();
+        WaypointService.init();
 
         waypoints = true;
     }

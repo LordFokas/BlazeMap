@@ -305,13 +305,6 @@ public class AtlasTask {
     }
 
     private static File getExportFile() {
-        Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH) + 1; // fuck you too Java
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
-        int hour = calendar.get(Calendar.HOUR_OF_DAY);
-        int minute = calendar.get(Calendar.MINUTE);
-        int second = calendar.get(Calendar.SECOND);
-        return new File(Minecraft.getInstance().gameDirectory, String.format("screenshots/%04d-%02d-%02d_%02d.%02d.%02d-blazemap-export.png", year, month, day, hour, minute, second));
+        return new File(Minecraft.getInstance().gameDirectory, String.format("screenshots/%s-blazemap-export.png", Helpers.getISO8601('-', '.', '.')));
     }
 }

@@ -29,6 +29,24 @@ public abstract class BaseContainer<T extends BaseContainer<T>> extends BaseComp
         }
     }
 
+    protected void clear() {
+        // Clear focus if it is our direct child
+        // FIXME: when focus is deeper child
+        BaseComponent<?> parent = this;
+        while(parent != null) {
+            if(parent instanceof BaseContainer<?> container) {
+                if(listeners.contains(container.focus)) {
+                    container.focus = null;
+                    break; // only root container can have focus
+                }
+            }
+            parent = parent.getParent();
+        }
+
+        renderables.clear();
+        listeners.clear();
+    }
+
     public int size() {
         return renderables.size();
     }

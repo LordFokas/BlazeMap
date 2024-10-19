@@ -10,6 +10,8 @@ import net.minecraft.resources.ResourceLocation;
 import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
 import com.eerussianguy.blazemap.api.markers.Waypoint;
+import com.eerussianguy.blazemap.feature.waypoints.service.WaypointChannelLocal;
+import com.eerussianguy.blazemap.feature.waypoints.service.WaypointServiceClient;
 import com.eerussianguy.blazemap.lib.Colors;
 import com.eerussianguy.blazemap.lib.Helpers;
 import com.eerussianguy.blazemap.lib.IntHolder;
@@ -113,7 +115,9 @@ public class WaypointEditorFragment extends BaseFragment {
             waypoint.setIcon(icons.getValue());
             waypoint.setColor(color.get());
             if(creating) {
-                // TODO: submit the waypoint for creation
+                WaypointServiceClient.instance().getPool(WaypointChannelLocal.PRIVATE_POOL).getGroups(waypoint.getDimension())
+                    .stream().filter(g -> g.type == WaypointChannelLocal.GROUP_DEFAULT).findFirst()
+                    .ifPresent(g -> g.add(waypoint));
             }
             container.dismiss();
         });

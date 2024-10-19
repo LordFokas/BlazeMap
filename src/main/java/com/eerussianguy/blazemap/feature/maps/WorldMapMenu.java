@@ -17,7 +17,7 @@ import com.eerussianguy.blazemap.api.event.MapMenuSetupEvent.MenuItem;
 import com.eerussianguy.blazemap.engine.cache.ChunkMDCache;
 import com.eerussianguy.blazemap.engine.client.ClientEngine;
 import com.eerussianguy.blazemap.feature.waypoints.WaypointEditorFragment;
-import com.eerussianguy.blazemap.feature.waypoints.WaypointService;
+import com.eerussianguy.blazemap.feature.waypoints.service.WaypointServiceClient;
 import com.eerussianguy.blazemap.lib.Colors;
 import com.eerussianguy.blazemap.lib.Helpers;
 
@@ -31,7 +31,7 @@ public class WorldMapMenu {
     public static final MapMenuSetupEvent.MenuAction NOOP = new MapMenuSetupEvent.MenuAction(MENU_NOOP, null, NOOP_TEXT, null);
 
     public static MenuFolder waypoints(int blockX, int blockZ) {
-        WaypointService waypoints = WaypointService.instance();
+        WaypointServiceClient waypoints = WaypointServiceClient.instance();
 
         BlockPos local = new BlockPos(blockX, 0, blockZ);
         MenuFolder folder = makeFolder("waypoint", BlazeMapReferences.Icons.WAYPOINT, Colors.WHITE,
@@ -39,15 +39,15 @@ public class WorldMapMenu {
                 () -> new WaypointEditorFragment(local).open()
             )
         );
-        waypoints.getAll().stream()
-            .filter(waypoint -> waypoint.getPosition().atY(0).distSqr(local) < 48)
-            .map(waypoint -> makeFolder("waypoint.options", waypoint.getIcon(), waypoint.getColor(), waypoint.getName(),
+        waypoints.iterate(waypoint -> {
+            if(waypoint.getPosition().atY(0).distSqr(local) < 40) return;
+            folder.add(makeFolder("waypoint.options", waypoint.getIcon(), waypoint.getColor(), waypoint.getName(),
                     makeAction("waypoint.edit", null, () -> new WaypointEditorFragment(waypoint).open()),
                     makeAction("waypoint.hide", null, null),
-                    makeAction("waypoint.delete", null, () -> waypoints.remove(waypoint))
+                    makeAction("waypoint.delete", null, null)
                 )
-            )
-            .forEach(folder::add);
+            );
+        });
         return folder;
     }
 
