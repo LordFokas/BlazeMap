@@ -71,7 +71,7 @@ public class WaypointManagerFragment extends BaseFragment {
 
         private void construct() {
             clear();
-            var list = new TreeContainer(13).setSize(160, 160);
+            var list = new TreeContainer().setSize(160, 160);
             add(list, 0, 0);
             var groups = pool.getGroups(Helpers.levelOrThrow().dimension());
             for(var group : groups) {

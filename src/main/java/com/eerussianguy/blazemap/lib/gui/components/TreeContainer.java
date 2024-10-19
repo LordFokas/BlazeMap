@@ -19,6 +19,10 @@ public class TreeContainer extends BaseContainer<TreeContainer> implements Focus
     private final ScrollBar scroll;
     private final TreeList tree;
 
+    public TreeContainer() {
+        this(10);
+    }
+
     public TreeContainer(int step) {
         this.tree = new TreeList(1, step, SCROLLBAR_WIDTH);
         super.add(tree);
@@ -40,7 +44,9 @@ public class TreeContainer extends BaseContainer<TreeContainer> implements Focus
     @Override
     public void render(PoseStack stack, boolean hasMouse, int mouseX, int mouseY) {
         renderFocusableBackground(stack);
-        super.render(stack, hasMouse, mouseX, mouseY);
+        renderWithScissor(1, 1, getWidth() - 2, getHeight() - 2,
+            () -> super.render(stack, hasMouse, mouseX, mouseY)
+        );
     }
 
     @Override
@@ -90,7 +96,7 @@ public class TreeContainer extends BaseContainer<TreeContainer> implements Focus
         private void recalculate() {
             this.clear();
             if(items.size() == 0) return;
-            int y = deepAdd(items, 0);
+            int y = deepAdd(items, 0) - padding;
             this.setSize(TreeContainer.this.getWidth() - offset*2, y);
 
             int parent = (TreeContainer.this.getHeight() - offset * 2);
@@ -130,14 +136,6 @@ public class TreeContainer extends BaseContainer<TreeContainer> implements Focus
                     playDeniedSound();
                 }
             }
-
-            // hide children outside of window
-            int trackEnd = trackPos + getHeight() - trackSize;
-            forEach(child -> {
-                int childPos = child.getPositionY();
-                int childEnd = childPos + child.getHeight();
-                child.setVisible(childPos >= trackPos && childEnd <= trackEnd);
-            });
         }
 
         private void step(int dir) {
