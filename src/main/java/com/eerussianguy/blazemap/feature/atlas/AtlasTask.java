@@ -20,11 +20,11 @@ import com.eerussianguy.blazemap.api.maps.MapType;
 import com.eerussianguy.blazemap.api.maps.TileResolution;
 import com.eerussianguy.blazemap.api.util.RegionPos;
 import com.eerussianguy.blazemap.config.BlazeMapConfig;
-import com.eerussianguy.blazemap.engine.StorageAccess;
-import com.eerussianguy.blazemap.engine.client.BlazeMapClientEngine;
+import com.eerussianguy.blazemap.engine.storage.InternalStorage;
+import com.eerussianguy.blazemap.engine.client.ClientEngine;
 import com.eerussianguy.blazemap.engine.client.LayerRegionTile;
-import com.eerussianguy.blazemap.util.Colors;
-import com.eerussianguy.blazemap.util.Helpers;
+import com.eerussianguy.blazemap.lib.Colors;
+import com.eerussianguy.blazemap.lib.Helpers;
 import com.mojang.blaze3d.platform.NativeImage;
 
 public class AtlasTask {
@@ -95,7 +95,7 @@ public class AtlasTask {
         try {
             // Calculation stage: figure out image size and corner regions, create canvas of appropriate size
             setStage(Stage.CALCULATING);
-            StorageAccess.Internal storage = BlazeMapClientEngine.getDimensionStorage(dimension);
+            InternalStorage storage = ClientEngine.getDimensionStorage(dimension);
             final NativeImage atlas = image = constructAtlas(storage, resolution);
 
             // Stitching stage: open tiles and transfer pixels to the correct place in the atlas
@@ -104,7 +104,7 @@ public class AtlasTask {
             for(var layerKey : map.value().getLayers()) { // Loop layers
                 if(!layers.contains(layerKey)) continue;
 
-                File folder = storage.getMipmap(layerKey.location, ".", resolution);
+                File folder = storage.getMipmapDir(layerKey.location, ".", resolution);
                 pages.forEach(page -> renderAtlasPage(page, folder, atlas, origin));
             }
 
@@ -193,14 +193,14 @@ public class AtlasTask {
         }
     }
 
-    private NativeImage constructAtlas(StorageAccess.Internal storage, TileResolution resolution) {
+    private NativeImage constructAtlas(InternalStorage storage, TileResolution resolution) {
         Set<RegionPos> regions = new HashSet<>();
         var layers = map.value().getLayers();
 
         // Determine which regions of the map will need to be rendered
         for(var layer : layers) {
             if(!layers.contains(layer)) continue;
-            File folder = storage.getMipmap(layer.location, ".", resolution);
+            File folder = storage.getMipmapDir(layer.location, ".", resolution);
             File[] images = folder.listFiles();
             if(images == null) continue;
 
@@ -305,13 +305,6 @@ public class AtlasTask {
     }
 
     private static File getExportFile() {
-        Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH) + 1; // fuck you too Java
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
-        int hour = calendar.get(Calendar.HOUR_OF_DAY);
-        int minute = calendar.get(Calendar.MINUTE);
-        int second = calendar.get(Calendar.SECOND);
-        return new File(Minecraft.getInstance().gameDirectory, String.format("screenshots/%04d-%02d-%02d_%02d.%02d.%02d-blazemap-export.png", year, month, day, hour, minute, second));
+        return new File(Minecraft.getInstance().gameDirectory, String.format("screenshots/%s-blazemap-export.png", Helpers.getISO8601('-', '.', '.')));
     }
 }

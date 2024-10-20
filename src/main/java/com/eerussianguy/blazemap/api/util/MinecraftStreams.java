@@ -1,6 +1,7 @@
 package com.eerussianguy.blazemap.api.util;
 
 import java.io.*;
+import java.util.Collection;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
@@ -14,6 +15,13 @@ public class MinecraftStreams {
     public static class Output extends DataOutputStream {
         public Output(OutputStream out) {
             super(out);
+        }
+
+        public <T> void writeCollection(Collection<T> collection, IOConsumer<T> consumer) throws IOException {
+            writeInt(collection.size());
+            for(T element : collection) {
+                consumer.accept(element);
+            }
         }
 
         public void writeResourceLocation(ResourceLocation resourceLocation) throws IOException {
@@ -48,6 +56,13 @@ public class MinecraftStreams {
             super(in);
         }
 
+        public void readCollection(IORunnable function) throws IOException {
+            int count = readInt();
+            for(int i = 0; i < count; i++) {
+                function.run();
+            }
+        }
+
         public ResourceLocation readResourceLocation() throws IOException {
             return new ResourceLocation(readUTF());
         }
@@ -76,5 +91,15 @@ public class MinecraftStreams {
             int z = readInt();
             return new RegionPos(x, z);
         }
+    }
+
+    @FunctionalInterface
+    public interface IORunnable {
+        void run() throws IOException;
+    }
+
+    @FunctionalInterface
+    public interface IOConsumer<T> {
+        void accept(T t) throws IOException;
     }
 }

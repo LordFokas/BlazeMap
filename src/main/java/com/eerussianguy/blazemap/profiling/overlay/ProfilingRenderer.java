@@ -9,17 +9,17 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 
 import com.eerussianguy.blazemap.engine.BlazeMapAsync;
-import com.eerussianguy.blazemap.engine.client.BlazeMapClientEngine;
+import com.eerussianguy.blazemap.engine.client.ClientEngine;
 import com.eerussianguy.blazemap.engine.client.LayerRegionTile;
-import com.eerussianguy.blazemap.engine.server.BlazeMapServerEngine;
-import com.eerussianguy.blazemap.feature.ModIntegration;
-import com.eerussianguy.blazemap.profiling.KnownMods;
+import com.eerussianguy.blazemap.engine.server.ServerEngine;
 import com.eerussianguy.blazemap.feature.maps.WorldMapGui;
+import com.eerussianguy.blazemap.integration.KnownMods;
+import com.eerussianguy.blazemap.integration.ModIDs;
+import com.eerussianguy.blazemap.lib.Colors;
+import com.eerussianguy.blazemap.lib.Helpers;
 import com.eerussianguy.blazemap.profiling.Profiler;
 import com.eerussianguy.blazemap.profiling.Profilers;
 import com.eerussianguy.blazemap.profiling.overlay.Container.Style;
-import com.eerussianguy.blazemap.util.Colors;
-import com.eerussianguy.blazemap.util.Helpers;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 
@@ -38,7 +38,7 @@ public class ProfilingRenderer {
                 )
             ),
             new Container("Client Engine", Style.SECTION,
-                new StringSource(() -> String.format("MD Source: %s / %s", BlazeMapClientEngine.isClientSource() ? "Client" : "Server", BlazeMapClientEngine.getMDSource())),
+                new StringSource(() -> String.format("MD Source: %s / %s", ClientEngine.isClientSource() ? "Client" : "Server", ClientEngine.getMDSource())),
                 new StringSource(() -> String.format("Parallel Pool: %d threads", BlazeMapAsync.instance().cruncher.poolSize())),
                 new StringSource(() -> {
                     double size = ((double) LayerRegionTile.getLoadedKb()) / 1024D;
@@ -47,24 +47,24 @@ public class ProfilingRenderer {
                     return String.format("Layer Region Tiles: %d   [ %.2f %sB ]", tiles, size, scale);
                 }),
                 new SubsystemProfile("Chunk Render Mixin", Profilers.Client.Mixin.RENDERCHUNK_LOAD_PROFILER, Profilers.Client.Mixin.RENDERCHUNK_TIME_PROFILER, "tick load")
-                    .enable(() -> !KnownMods.isAnyLoaded(ModIntegration.SODIUM_FAMILY)),
+                    .enable(() -> !KnownMods.isAnyLoaded(ModIDs.SODIUM_FAMILY)),
                 new SubsystemProfile("Sodium Mixin", Profilers.Client.Mixin.SODIUM_LOAD_PROFILER, Profilers.Client.Mixin.SODIUM_TIME_PROFILER, "tick load")
-                    .enable(() -> KnownMods.isAnyLoaded(ModIntegration.SODIUM_FAMILY))
+                    .enable(() -> KnownMods.isAnyLoaded(ModIDs.SODIUM_FAMILY))
             ),
             new Container("Client Pipeline", Style.SECTION,
                 new SubsystemProfile("MD Collect", Profilers.Client.COLLECTOR_LOAD_PROFILER, Profilers.Client.COLLECTOR_TIME_PROFILER, "tick load",
-                    new StringSource(() -> String.format("Dirty Chunks: %d", BlazeMapClientEngine.dirtyChunks()), Style.BLOCK.header)
-                ).enable(() -> BlazeMapClientEngine.numCollectors() > 0).metric(() -> String.valueOf(BlazeMapClientEngine.numCollectors())),
+                    new StringSource(() -> String.format("Dirty Chunks: %d", ClientEngine.dirtyChunks()), Style.BLOCK.header)
+                ).enable(() -> ClientEngine.numCollectors() > 0).metric(() -> String.valueOf(ClientEngine.numCollectors())),
                 new SubsystemProfile("MD Transform", Profilers.Client.TRANSFORMER_LOAD_PROFILER, Profilers.Client.TRANSFORMER_TIME_PROFILER, "delay")
-                    .enable(() -> BlazeMapClientEngine.numTransformers() > 0).metric(() -> String.valueOf(BlazeMapClientEngine.numTransformers())),
+                    .enable(() -> ClientEngine.numTransformers() > 0).metric(() -> String.valueOf(ClientEngine.numTransformers())),
                 new SubsystemProfile("MD Process", Profilers.Client.PROCESSOR_LOAD_PROFILER, Profilers.Client.PROCESSOR_TIME_PROFILER, "delay")
-                    .enable(() -> BlazeMapClientEngine.numProcessors() > 0).metric(() -> String.valueOf(BlazeMapClientEngine.numProcessors())),
+                    .enable(() -> ClientEngine.numProcessors() > 0).metric(() -> String.valueOf(ClientEngine.numProcessors())),
                 new SubsystemProfile("Layer Render", Profilers.Client.LAYER_LOAD_PROFILER, Profilers.Client.LAYER_TIME_PROFILER, "delay")
-                    .enable(() -> BlazeMapClientEngine.numLayers() > 0).metric(() -> String.valueOf(BlazeMapClientEngine.numLayers())),
+                    .enable(() -> ClientEngine.numLayers() > 0).metric(() -> String.valueOf(ClientEngine.numLayers())),
                 new SubsystemProfile("Dirty Tiles", Profilers.Client.TILE_LOAD_PROFILER, Profilers.Client.TILE_TIME_PROFILER, "delay")
-                    .enable(() -> BlazeMapClientEngine.numLayers() > 0).metric(() -> String.valueOf(BlazeMapClientEngine.dirtyTiles()))
+                    .enable(() -> ClientEngine.numLayers() > 0).metric(() -> String.valueOf(ClientEngine.dirtyTiles()))
             )
-        ).metric(() -> String.format("[ %s fps ]", BlazeMapClientEngine.avgFPS())),
+        ).metric(() -> String.format("[ %s fps ]", ClientEngine.avgFPS())),
 
         new Container("Server Debug Info", Style.PANEL,
             new Container("Server Engine", Style.SECTION,
@@ -73,21 +73,21 @@ public class ProfilingRenderer {
             ),
             new Container("Server Pipelines", Style.SECTION,
                 new SubsystemProfile("MD Collect", Profilers.Server.COLLECTOR_LOAD_PROFILER, Profilers.Server.COLLECTOR_TIME_PROFILER, "tick load",
-                    new StringSource(() -> String.format("Dirty Chunks: %d", BlazeMapServerEngine.dirtyChunks()), Style.BLOCK.header)
-                ).enable(() -> BlazeMapServerEngine.numCollectors() > 0).metric(() -> String.valueOf(BlazeMapServerEngine.numCollectors())),
+                    new StringSource(() -> String.format("Dirty Chunks: %d", ServerEngine.dirtyChunks()), Style.BLOCK.header)
+                ).enable(() -> ServerEngine.numCollectors() > 0).metric(() -> String.valueOf(ServerEngine.numCollectors())),
                 new SubsystemProfile("MD Transform", Profilers.Server.TRANSFORMER_LOAD_PROFILER, Profilers.Server.TRANSFORMER_TIME_PROFILER, "delay")
-                    .enable(() -> BlazeMapServerEngine.numTransformers() > 0).metric(() -> String.valueOf(BlazeMapServerEngine.numTransformers())),
+                    .enable(() -> ServerEngine.numTransformers() > 0).metric(() -> String.valueOf(ServerEngine.numTransformers())),
                 new SubsystemProfile("MD Process", Profilers.Server.PROCESSOR_LOAD_PROFILER, Profilers.Server.PROCESSOR_TIME_PROFILER, "delay")
-                    .enable(() -> BlazeMapServerEngine.numProcessors() > 0).metric(() -> String.valueOf(BlazeMapServerEngine.numProcessors()))
-            ).metric(() -> String.valueOf(BlazeMapServerEngine.numPipelines()))
-        ).metric(() -> String.format("[ %d tps ]", BlazeMapServerEngine.avgTPS())).enable(BlazeMapServerEngine::isRunning),
+                    .enable(() -> ServerEngine.numProcessors() > 0).metric(() -> String.valueOf(ServerEngine.numProcessors()))
+            ).metric(() -> String.valueOf(ServerEngine.numPipelines()))
+        ).metric(() -> String.format("[ %d tps ]", ServerEngine.avgTPS())).enable(ServerEngine::isRunning),
 
         new Container("Mod Interactions", Style.PANEL,
-            new Container("Core", Style.SECTION, KnownMods.getCore(IDrawable.class, mod -> new StringSource(mod.name).note(mod.version, Colors.WHITE), NO_MODS_FOUND)),
-            new Container("Built-in Support", Style.SECTION, KnownMods.getCompat(IDrawable.class, mod -> new StringSource(mod.name).note(mod.version, Colors.WHITE), NO_MODS_FOUND)),
-            new Container("Known Problematic", Style.SECTION, KnownMods.getProblem(IDrawable.class, mod -> new StringSource(mod.name, 0xFFAAAA).note(mod.version, 0xFFAAAA), NO_BAD_MODS_FOUND)),
-            new Container("Registered API Objects", Style.SECTION, KnownMods.getAPICall(IDrawable.class, mod -> new StringSource(mod.name).note(mod.version, Colors.WHITE), NO_MODS_FOUND)),
-            new Container("Announced", Style.SECTION, KnownMods.getAnnounced(IDrawable.class, mod -> new StringSource(mod.name).note(mod.version, Colors.WHITE), NO_MODS_FOUND))
+            new Container("Core", Style.SECTION, KnownMods.getCore(IDrawable.class, mod -> new VersionString(mod.name).note(mod.version, Colors.WHITE), NO_MODS_FOUND)),
+            new Container("Built-in Support", Style.SECTION, KnownMods.getCompat(IDrawable.class, mod -> new VersionString(mod.name).note(mod.version, Colors.WHITE), NO_MODS_FOUND)),
+            new Container("Known Problematic", Style.SECTION, KnownMods.getProblem(IDrawable.class, mod -> new VersionString(mod.name, 0xFFAAAA).note(mod.version, 0xFFAAAA), NO_BAD_MODS_FOUND)),
+            new Container("Registered API Objects", Style.SECTION, KnownMods.getAPICall(IDrawable.class, mod -> new VersionString(mod.name).note(mod.version, Colors.WHITE), NO_MODS_FOUND)),
+            new Container("Announced", Style.SECTION, KnownMods.getAnnounced(IDrawable.class, mod -> new VersionString(mod.name).note(mod.version, Colors.WHITE), NO_MODS_FOUND))
         )
     );
 

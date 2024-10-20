@@ -5,14 +5,15 @@ import java.awt.*;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 
+import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
 import com.eerussianguy.blazemap.api.builtin.TerrainHeightMD;
 import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.TileResolution;
 import com.eerussianguy.blazemap.api.util.ArrayAggregator;
-import com.eerussianguy.blazemap.api.util.IDataSource;
-import com.eerussianguy.blazemap.util.Colors;
-import com.eerussianguy.blazemap.util.Helpers;
+import com.eerussianguy.blazemap.api.util.DataSource;
+import com.eerussianguy.blazemap.lib.Colors;
+import com.eerussianguy.blazemap.lib.Helpers;
 import com.mojang.blaze3d.platform.NativeImage;
 
 public class NetherLayer extends Layer {
@@ -20,6 +21,8 @@ public class NetherLayer extends Layer {
         super(
             BlazeMapReferences.Layers.NETHER,
             Helpers.translate("blazemap.nether_terrain"),
+            BlazeMap.resource("textures/map_icons/layer_nether.png"),
+            true,
 
             BlazeMapReferences.MasterData.NETHER
         );
@@ -51,7 +54,7 @@ public class NetherLayer extends Layer {
     }
 
     @Override
-    public boolean renderTile(NativeImage tile, TileResolution resolution, IDataSource data, int xGridOffset, int zGridOffset) {
+    public boolean renderTile(NativeImage tile, TileResolution resolution, DataSource data, int xGridOffset, int zGridOffset) {
         TerrainHeightMD terrain = (TerrainHeightMD) data.get(BlazeMapReferences.MasterData.NETHER);
         float down = -1.0F / ((float) terrain.sea - terrain.minY);
         float up = 1.0F / ((float) terrain.maxY - terrain.sea);

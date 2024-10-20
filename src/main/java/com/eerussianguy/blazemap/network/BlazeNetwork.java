@@ -4,11 +4,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
 
-import com.eerussianguy.blazemap.util.Helpers;
+import com.eerussianguy.blazemap.BlazeMap;
 
 public class BlazeNetwork {
     private static final String ENGINE_VERSION = "1";
-    private static final ResourceLocation ENGINE_CHANNEL = Helpers.identifier("engine");
+    private static final ResourceLocation ENGINE_CHANNEL = BlazeMap.resource("engine");
     private static SimpleChannel engine;
 
     public static SimpleChannel engine() {

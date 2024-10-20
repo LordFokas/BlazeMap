@@ -1,13 +1,14 @@
 package com.eerussianguy.blazemap.feature.mapping;
 
+import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
 import com.eerussianguy.blazemap.api.builtin.TerrainSlopeMD;
 import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.TileResolution;
 import com.eerussianguy.blazemap.api.util.ArrayAggregator;
-import com.eerussianguy.blazemap.api.util.IDataSource;
-import com.eerussianguy.blazemap.util.Colors;
-import com.eerussianguy.blazemap.util.Helpers;
+import com.eerussianguy.blazemap.api.util.DataSource;
+import com.eerussianguy.blazemap.lib.Colors;
+import com.eerussianguy.blazemap.lib.Helpers;
 import com.mojang.blaze3d.platform.NativeImage;
 
 public class TerrainSlopeLayer extends Layer {
@@ -19,14 +20,15 @@ public class TerrainSlopeLayer extends Layer {
             BlazeMapReferences.Layers.TERRAIN_SLOPE,
             Helpers.translate("blazemap.terrain_slope"),
             // This should be changed at some point to its own dedicated image
-            Helpers.identifier("textures/map_icons/layer_terrain_isolines.png"),
+            BlazeMap.resource("textures/map_icons/layer_terrain_isolines.png"),
+            false,
 
             BlazeMapReferences.MasterData.TERRAIN_SLOPE
         );
     }
 
     @Override
-    public boolean renderTile(NativeImage tile, TileResolution resolution, IDataSource data, int xGridOffset, int zGridOffset) {
+    public boolean renderTile(NativeImage tile, TileResolution resolution, DataSource data, int xGridOffset, int zGridOffset) {
         TerrainSlopeMD terrain = (TerrainSlopeMD) data.get(BlazeMapReferences.MasterData.TERRAIN_SLOPE);
 
         foreachPixel(resolution, (x, z) -> {

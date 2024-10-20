@@ -1,31 +1,42 @@
 package com.eerussianguy.blazemap.api.markers;
 
 import java.awt.Color;
+import java.util.Collections;
+import java.util.Set;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 
-public abstract class Marker<T extends Marker<T>> {
+import com.eerussianguy.blazemap.api.BlazeMapReferences;
+import com.eerussianguy.blazemap.api.BlazeRegistry;
+
+public class Marker<T extends Marker<T>> {
     private final ResourceLocation id;
     private final ResourceKey<Level> dimension;
+    private final Set<String> tags;
     private BlockPos.MutableBlockPos position;
     private ResourceLocation icon;
-    private int color;
-    private float rotation;
+    private int width = 32, height = 32;
+    private String name = null;
+    private boolean nameVisible = false;
+    private int color = -1;
+    private float rotation = 0F;
+    private boolean usesZoom = false;
+    private BlazeRegistry.Key<ObjectRenderer<?>> renderer = BlazeMapReferences.ObjectRenderers.DEFAULT;
 
-    protected Marker(ResourceLocation id, ResourceKey<Level> dimension, BlockPos position, ResourceLocation icon) {
-        this(id, dimension, position, icon, -1, 0);
+    @SuppressWarnings("unchecked")
+    public Marker(ResourceLocation id, ResourceKey<Level> dimension, BlockPos position, ResourceLocation icon) {
+        this(id, dimension, position, icon, (Set<String>) Collections.EMPTY_SET);
     }
 
-    protected Marker(ResourceLocation id, ResourceKey<Level> dimension, BlockPos position, ResourceLocation icon, int color, float rotation) {
+    public Marker(ResourceLocation id, ResourceKey<Level> dimension, BlockPos position, ResourceLocation icon, Set<String> tags) {
         this.id = id;
         this.dimension = dimension;
         this.position = new BlockPos.MutableBlockPos().set(position);
         this.icon = icon;
-        this.color = color;
-        this.rotation = rotation;
+        this.tags = tags;
     }
 
     public final ResourceLocation getID() {
@@ -45,13 +56,34 @@ public abstract class Marker<T extends Marker<T>> {
      * You most likely won't need this.
      * Maybe see setPosition() instead?
      */
+    @SuppressWarnings("unchecked")
     public T setPositionObject(BlockPos.MutableBlockPos position) {
         this.position = position;
         return (T) this;
     }
 
+    public BlazeRegistry.Key<ObjectRenderer<?>> getRenderer() {
+        return renderer;
+    }
+
     public ResourceLocation getIcon() {
         return icon;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean isNameVisible() {
+        return nameVisible;
     }
 
     public int getColor() {
@@ -62,6 +94,14 @@ public abstract class Marker<T extends Marker<T>> {
         return rotation;
     }
 
+    public boolean getUsesZoom() {
+        return usesZoom;
+    }
+
+    public final Set<String> getTags() {
+        return tags;
+    }
+
     @SuppressWarnings("unchecked")
     public T setPosition(BlockPos position) {
         this.position.set(position);
@@ -69,8 +109,37 @@ public abstract class Marker<T extends Marker<T>> {
     }
 
     @SuppressWarnings("unchecked")
+    public T setRenderer(BlazeRegistry.Key<ObjectRenderer<?>> renderer) {
+        this.renderer = renderer;
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
     public T setIcon(ResourceLocation icon) {
         this.icon = icon;
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T setSize(int width, int height) {
+        this.width = width;
+        this.height = height;
+        return (T) this;
+    }
+
+    public T setSize(int size) {
+        return setSize(size, size);
+    }
+
+    @SuppressWarnings("unchecked")
+    public T setName(String name) {
+        this.name = name;
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T setNameVisible(boolean visible) {
+        this.nameVisible = visible;
         return (T) this;
     }
 
@@ -83,6 +152,12 @@ public abstract class Marker<T extends Marker<T>> {
     @SuppressWarnings("unchecked")
     public T setRotation(float rotation) {
         this.rotation = rotation;
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T setUsesZoom(boolean usesZoom) {
+        this.usesZoom = usesZoom;
         return (T) this;
     }
 

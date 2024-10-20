@@ -1,5 +1,9 @@
 package com.eerussianguy.blazemap.feature;
 
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import org.lwjgl.glfw.GLFW;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.screens.Screen;
@@ -7,22 +11,32 @@ import net.minecraftforge.client.ClientRegistry;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 
 import com.eerussianguy.blazemap.BlazeMap;
-import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.api.BlazeMapAPI;
+import com.eerussianguy.blazemap.api.BlazeMapReferences;
+import com.eerussianguy.blazemap.api.BlazeRegistry;
+import com.eerussianguy.blazemap.api.event.BlazeRegistriesFrozenEvent;
+import com.eerussianguy.blazemap.api.event.ComponentOrderingEvent.OverlayOrderingEvent;
 import com.eerussianguy.blazemap.api.event.MapMenuSetupEvent;
+import com.eerussianguy.blazemap.api.maps.Overlay;
+import com.eerussianguy.blazemap.config.BlazeMapConfig;
+import com.eerussianguy.blazemap.engine.render.MapRenderer;
 import com.eerussianguy.blazemap.feature.mapping.*;
 import com.eerussianguy.blazemap.feature.maps.*;
-import com.eerussianguy.blazemap.feature.waypoints.WaypointEditorGui;
-import com.eerussianguy.blazemap.feature.waypoints.WaypointManagerGui;
-import com.eerussianguy.blazemap.feature.waypoints.WaypointRenderer;
-import com.eerussianguy.blazemap.feature.waypoints.WaypointStore;
+import com.eerussianguy.blazemap.feature.overlays.EntityOverlay;
+import com.eerussianguy.blazemap.feature.overlays.GridOverlay;
+import com.eerussianguy.blazemap.feature.waypoints.*;
+import com.eerussianguy.blazemap.feature.waypoints.service.WaypointService;
+import com.eerussianguy.blazemap.feature.waypoints.service.WaypointServiceClient;
+import com.eerussianguy.blazemap.feature.waypoints.service.WaypointServiceServer;
 import com.mojang.blaze3d.platform.InputConstants;
 
 public class BlazeMapFeaturesClient {
+    private static final LinkedHashSet<BlazeRegistry.Key<Overlay>> MUT_OVERLAYS = new LinkedHashSet<>();
+    public static final Set<BlazeRegistry.Key<Overlay>> OVERLAYS = Collections.unmodifiableSet(MUT_OVERLAYS);
+
     public static final KeyMapping KEY_MAPS = new KeyMapping("blazemap.key.maps", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_B, BlazeMap.MOD_NAME);
     public static final KeyMapping KEY_ZOOM = new KeyMapping("blazemap.key.zoom", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_LEFT_BRACKET, BlazeMap.MOD_NAME);
     public static final KeyMapping KEY_WAYPOINTS = new KeyMapping("blazemap.key.waypoints", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_N, BlazeMap.MOD_NAME);
@@ -30,9 +44,28 @@ public class BlazeMapFeaturesClient {
     private static boolean mapping = false;
     private static boolean maps = false;
     private static boolean waypoints = false;
+    private static boolean overlays = false;
 
     public static boolean hasMapping() {
         return mapping;
+    }
+
+    public static boolean hasMaps() {
+        return maps;
+    }
+
+    public static boolean hasWaypoints() {
+        return waypoints &&
+            (BlazeMapConfig.CLIENT.clientFeatures.displayWaypointsOnMap.get() ||
+                BlazeMapConfig.CLIENT.clientFeatures.renderWaypointsInWorld.get());
+    }
+
+    public static boolean hasWaypointsOnMap() {
+        return waypoints && BlazeMapConfig.CLIENT.clientFeatures.displayWaypointsOnMap.get();
+    }
+
+    public static boolean hasOverlays() {
+        return overlays;
     }
 
     public static void initMapping() {
@@ -50,8 +83,14 @@ public class BlazeMapFeaturesClient {
         mapping = true;
     }
 
-    public static boolean hasMaps() {
-        return maps;
+    public static void initOverlays() {
+        BlazeMapAPI.OVERLAYS.register(new GridOverlay());
+        BlazeMapAPI.OVERLAYS.register(new WaypointOverlay());
+        BlazeMapAPI.OVERLAYS.register(new EntityOverlay.Players());
+        BlazeMapAPI.OVERLAYS.register(new EntityOverlay.NPCs());
+        BlazeMapAPI.OVERLAYS.register(new EntityOverlay.Animals());
+        BlazeMapAPI.OVERLAYS.register(new EntityOverlay.Enemies());
+        overlays = true;
     }
 
     public static void initMaps() {
@@ -65,10 +104,28 @@ public class BlazeMapFeaturesClient {
         bus.addListener(MapRenderer::onDimensionChange);
         bus.addListener(MapRenderer::onMapLabelAdded);
         bus.addListener(MapRenderer::onMapLabelRemoved);
+        bus.addListener(BlazeMapFeaturesClient::mapOverlays);
         bus.addListener(BlazeMapFeaturesClient::mapKeybinds);
         bus.addListener(BlazeMapFeaturesClient::mapMenu);
 
         maps = true;
+    }
+
+    private static void mapOverlays(BlazeRegistriesFrozenEvent evt) {
+        OverlayOrderingEvent event = new OverlayOrderingEvent(MUT_OVERLAYS);
+        event.add(BlazeMapReferences.Overlays.GRID);
+        if(hasWaypointsOnMap()) {
+            event.add(BlazeMapReferences.Overlays.WAYPOINTS);
+        }
+        event.add(
+            BlazeMapReferences.Overlays.PLAYERS,
+            BlazeMapReferences.Overlays.NPCS,
+            BlazeMapReferences.Overlays.ANIMALS,
+            BlazeMapReferences.Overlays.ENEMIES
+        );
+        MinecraftForge.EVENT_BUS.post(event);
+        event.finish();
+        overlays = MUT_OVERLAYS.size() > 0;
     }
 
     private static void mapKeybinds(InputEvent.KeyInputEvent evt) {
@@ -82,10 +139,10 @@ public class BlazeMapFeaturesClient {
         }
         if(KEY_WAYPOINTS.isDown() && hasWaypoints()) {
             if(Screen.hasShiftDown()) {
-                WaypointManagerGui.open();
+                new WaypointManagerFragment().open();
             }
             else {
-                WaypointEditorGui.open();
+                new WaypointEditorFragment().open();
             }
         }
         if(KEY_ZOOM.isDown()) {
@@ -107,22 +164,13 @@ public class BlazeMapFeaturesClient {
         }
     }
 
-    public static boolean hasWaypoints() {
-        return waypoints &&
-            (BlazeMapConfig.CLIENT.clientFeatures.displayWaypointsOnMap.get() ||
-             BlazeMapConfig.CLIENT.clientFeatures.renderWaypointsInWorld.get());
-    }
-
     public static void initWaypoints() {
         IEventBus bus = MinecraftForge.EVENT_BUS;
-        bus.addListener(WaypointEditorGui::onDimensionChanged);
-        bus.addListener(WaypointManagerGui::onDimensionChanged);
-        bus.addListener(EventPriority.HIGHEST, WaypointStore::onServerJoined);
-        bus.addListener(MapRenderer::onWaypointAdded);
-        bus.addListener(MapRenderer::onWaypointRemoved);
-        bus.addListener(WorldMapMenu::trackWaypointStore);
+        bus.register(WaypointServiceClient.class);
+        bus.register(WaypointServiceServer.class);
 
         WaypointRenderer.init();
+        WaypointService.init();
 
         waypoints = true;
     }

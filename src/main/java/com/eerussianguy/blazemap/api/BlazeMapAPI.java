@@ -2,6 +2,7 @@ package com.eerussianguy.blazemap.api;
 
 import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.MapType;
+import com.eerussianguy.blazemap.api.maps.Overlay;
 import com.eerussianguy.blazemap.api.markers.ObjectRenderer;
 import com.eerussianguy.blazemap.api.pipeline.*;
 
@@ -28,5 +29,6 @@ public class BlazeMapAPI {
     public static final BlazeRegistry<Layer> LAYERS = new BlazeRegistry<>();
 
     public static final BlazeRegistry<MapType> MAPTYPES = new BlazeRegistry<>();
+    public static final BlazeRegistry<Overlay> OVERLAYS = new BlazeRegistry<>();
     public static final BlazeRegistry<ObjectRenderer<?>> OBJECT_RENDERERS = new BlazeRegistry<>();
 }

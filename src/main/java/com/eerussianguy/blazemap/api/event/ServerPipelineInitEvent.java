@@ -7,7 +7,7 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.eventbus.api.Event;
 
 import com.eerussianguy.blazemap.api.pipeline.MasterDataDispatcher;
-import com.eerussianguy.blazemap.api.util.IStorageAccess;
+import com.eerussianguy.blazemap.api.util.StorageAccess;
 
 /**
  * Fired when the Blaze Map server engine initializes a pipeline to serve a new dimension.
@@ -22,14 +22,14 @@ public class ServerPipelineInitEvent extends Event {
     /**
      * Server file storage where all map data for this dimension is stored
      */
-    public final IStorageAccess dimensionStorage;
+    public final StorageAccess dimensionStorage;
 
     /**
      * The dispatcher that forwards MasterData updates to the clients
      */
     private MasterDataDispatcher dispatcher;
 
-    public ServerPipelineInitEvent(ResourceKey<Level> dimension, IStorageAccess dimensionStorage, MasterDataDispatcher dispatcher) {
+    public ServerPipelineInitEvent(ResourceKey<Level> dimension, StorageAccess dimensionStorage, MasterDataDispatcher dispatcher) {
         this.dimension = dimension;
         this.dimensionStorage = dimensionStorage;
         this.dispatcher = dispatcher;

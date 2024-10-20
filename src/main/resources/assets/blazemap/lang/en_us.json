@@ -1,26 +1,38 @@
 {
-  "blazemap.key.maps": "Open World Map / [Shift] Edit Minimap",
-  "blazemap.key.waypoints": "Create Waypoint / [Shift] Manage Waypoints",
-  "blazemap.key.zoom": "Zoom In / [Shift] Zoom Out",
+  "blazemap.aerial_view": "Aerial View",
+  "blazemap.topography": "Topography",
+  "blazemap.nether": "Nether",
+
   "blazemap.terrain_isolines": "Terrain Isolines",
   "blazemap.water_depth": "Water Depth",
   "blazemap.block_color": "Block Color",
   "blazemap.nether_terrain": "Nether Terrain",
   "blazemap.terrain_height": "Terrain Height",
   "blazemap.terrain_slope": "Terrain Slope",
-  "blazemap.aerial_view": "Aerial View",
-  "blazemap.nether": "Nether",
-  "blazemap.topography": "Topography",
-  "blazemap.enabled": " §aENABLED",
+
+  "blazemap.grid": "Chunk Grid",
+  "blazemap.ftbchunks": "FTB Chunks",
+  "blazemap.waypoints": "Waypoints",
+
+  "blazemap.key.maps": "Open World Map / [Shift] Edit Minimap",
+  "blazemap.key.waypoints": "Create Waypoint / [Shift] Manage Waypoints",
+  "blazemap.key.zoom": "Zoom In / [Shift] Zoom Out",
+
   "blazemap.gui.minimap_options.title": "Minimap Options",
   "blazemap.gui.minimap_options.map_types": "Active Map",
   "blazemap.gui.minimap_options.layers": "Optional Layers",
   "blazemap.gui.waypoint_editor.title": "Waypoint Editor",
   "blazemap.gui.waypoint_editor.random": "Randomize Color",
   "blazemap.gui.waypoint_editor.save": "Save",
-  "blazemap.gui.waypoint_manager.title": "Your Waypoints",
+  "blazemap.gui.waypoint_manager.title": "Waypoint Manager",
   "blazemap.gui.waypoint_manager.delete": "Delete",
   "blazemap.gui.waypoint_manager.edit": "Edit",
+
+  "blazemap.gui.common.map.disabled": "Map disabled by Server",
+  "blazemap.gui.common.layer.bottom": "Bottom layer is always on",
+  "blazemap.gui.common.layer.disabled": "Layer disabled by Server",
+  "blazemap.gui.common.overlay.disabled": "Overlay disabled by Server",
+
   "blazemap.gui.worldmap.menu.no_options": "No Options",
   "blazemap.gui.worldmap.menu.waypoint": "Waypoints",
   "blazemap.gui.worldmap.menu.waypoint.new": "Create New Waypoint",
@@ -30,5 +42,8 @@
   "blazemap.gui.worldmap.menu.debug": "Debug",
   "blazemap.gui.worldmap.menu.debug.redraw_chunk_md": "Redraw Chunk from MD Cache",
   "blazemap.gui.worldmap.menu.debug.inspect_chunk_md": "Inspect Chunk Master Data",
+  "blazemap.gui.worldmap.menu.ftbchunks.claim": "Claim Chunk",
+  "blazemap.gui.worldmap.menu.ftbchunks.unclaim": "Unclaim Chunk",
+  "blazemap.gui.worldmap.menu.ftbchunks.claimed": "Claimed by others",
   "blazemap.gui.worldmap.atlas_progress.filepath_message": "Atlas save to %s"
 }

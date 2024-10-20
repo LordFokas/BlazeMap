@@ -5,7 +5,7 @@ import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
-import com.eerussianguy.blazemap.feature.Overlays;
+import com.eerussianguy.blazemap.feature.IngameOverlays;
 
 
 public class FMLEventHandler {
@@ -18,10 +18,10 @@ public class FMLEventHandler {
     }
 
     private static void clientSetup(final FMLClientSetupEvent event) {
-        Overlays.reload();
+        IngameOverlays.reload();
     }
 
     private static void onConfigReload(ModConfigEvent.Reloading event) {
-        Overlays.reload();
+        IngameOverlays.reload();
     }
 }
