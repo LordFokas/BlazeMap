@@ -19,20 +19,20 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 public class IconTabs extends BaseComponent<IconTabs> implements BorderedComponent, ComponentSounds, GuiEventListener {
     private final ArrayList<Tab> tabs = new ArrayList<>();
-    private final int spacing, offset;
     private int size, grain, track;
     private int begin, end;
     private Tab active = null;
 
-    public IconTabs(int spacing) {
-        this.spacing = spacing;
-        this.offset = spacing + 1;
+    public IconTabs() {
     }
 
     @Override
     public void render(PoseStack stack, boolean hasMouse, int mouseX, int mouseY) {
-        // render background
-        renderBorderedBackground(stack);
+        //render bottom line
+        stack.pushPose();
+        stack.translate(-begin, getHeight() - 1, 0);
+        RenderHelper.fillRect(stack.last().pose(), getWidth() + begin + end, 1, Colors.UNFOCUSED);
+        stack.popPose();
 
         // render tabs
         for(var tab : tabs) {
@@ -40,16 +40,28 @@ public class IconTabs extends BaseComponent<IconTabs> implements BorderedCompone
             stack.translate(tab.getPositionX(), tab.getPositionY(), 0);
             var item = tab.component;
 
-            // render active tab & hover extras
-            if(tab == active) {
+            if(tab == active) { // render active tab
+                renderBorderedBox(stack, -1, -1, tab.getWidth()+2, tab.getHeight()+2, Colors.UNFOCUSED, Colors.BLACK);
+                stack.pushPose();
+                stack.translate(0, tab.getHeight(), 0);
+                RenderHelper.fillRect(stack.last().pose(), tab.getWidth(), 1, 0xFF303030);
+                stack.popPose();
                 Minecraft.getInstance().font.draw(stack, item.getName(), size + 2, size / 2f - 4, Colors.WHITE);
             }
-            else if(hasMouse && tab.mouseIntercepts(mouseX, mouseY)) {
-                RenderHelper.fillRect(stack.last().pose(), tab.getWidth(), tab.getHeight(), 0xFF222222); // render hover
+            else { // render inactive tabs
+                renderBorderedBox(stack, -1, 0, tab.getWidth()+2, tab.getHeight()+1, Colors.UNFOCUSED, Colors.BLACK);
+
+                // hover only for inactive tabs
+                if(hasMouse && tab.mouseIntercepts(mouseX, mouseY)) {
+                    stack.pushPose();
+                    stack.translate(0, 1, 0);
+                    RenderHelper.fillRect(stack.last().pose(), tab.getWidth(), tab.getHeight()-1, 0xFF222222); // render hover
+                    stack.popPose();
+                }
             }
 
             // render icon
-            RenderHelper.drawTexturedQuad(item.getIcon(), item.getIconTint(), stack, 0, 0, size, size);
+            RenderHelper.drawTexturedQuad(item.getIcon(), item.getIconTint(), stack, 1, 1, size-2, size-2);
 
             stack.popPose();
         }
@@ -68,9 +80,9 @@ public class IconTabs extends BaseComponent<IconTabs> implements BorderedCompone
     @Override
     public IconTabs setSize(int w, int h) {
         super.setSize(w, h);
-        size = h - offset * 2;
-        grain = size + spacing;
-        track = w - offset * 2;
+        size = h - 2;
+        grain = h - 1;
+        track = w - 2;
         recalculate();
         return this;
     }
@@ -78,11 +90,11 @@ public class IconTabs extends BaseComponent<IconTabs> implements BorderedCompone
     private void recalculate() {
         if(tabs.size() == 0) return;
         int open = track - (tabs.size() - 1) * grain;
-        int x = offset;
+        int x = 1;
         for(var tab : tabs) {
             tab.setSize(tab == active ? open : size, size);
-            tab.setPosition(x, offset);
-            x += tab.getWidth() + spacing;
+            tab.setPosition(x, 1);
+            x += tab.getWidth()+1;
         }
     }
 

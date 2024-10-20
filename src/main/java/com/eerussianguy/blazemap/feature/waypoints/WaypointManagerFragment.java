@@ -46,7 +46,7 @@ public class WaypointManagerFragment extends BaseFragment {
             y = 15;
         }
 
-        IconTabs tabs = new IconTabs(1).setSize(160, 20).setLine(5, 5);
+        IconTabs tabs = new IconTabs().setSize(160, 20).setLine(5, 5);
         container.add(tabs, 0, y);
 
         for(var pool : client.getPools()) {
