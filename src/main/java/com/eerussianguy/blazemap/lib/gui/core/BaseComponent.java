@@ -6,7 +6,7 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 
 import com.eerussianguy.blazemap.api.maps.Renderable;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.eerussianguy.blazemap.lib.RenderHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 public abstract class BaseComponent<T extends BaseComponent<T>> extends Positionable<T> implements Renderable, Widget, NarratableEntry {
@@ -52,14 +52,9 @@ public abstract class BaseComponent<T extends BaseComponent<T>> extends Position
     }
 
     protected void renderWithScissor(int x, int y, int w, int h, Runnable function) {
-        var window = Minecraft.getInstance().getWindow();
-        double scale = (int) window.getGuiScale();
         x += getGlobalPositionX();
-        y += getGlobalPositionY() + h;
-
-        RenderSystem.enableScissor((int)(x * scale), window.getHeight() - (int)(y * scale), (int)(w * scale), (int)(h * scale));
-        function.run();
-        RenderSystem.disableScissor();
+        y += getGlobalPositionY();
+        RenderHelper.renderWithScissorScaled(x, y, w, h, function);
     }
 
     @Override

@@ -56,7 +56,9 @@ public class MinimapWidget {
         RenderHelper.fillRect(stack.last().pose(), width + BORDER_SIZE*2, height + BORDER_SIZE*2, Colors.WIDGET_BACKGROUND);
         stack.popPose();
 
-        map.render(stack, buffers);
+        RenderHelper.renderWithScissorNative(posX, posY, width, height, () -> {
+            map.render(stack, buffers);
+        });
 
         if(editor){
             stack.pushPose();

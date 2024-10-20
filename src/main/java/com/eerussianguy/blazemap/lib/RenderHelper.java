@@ -1,5 +1,6 @@
 package com.eerussianguy.blazemap.lib;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -136,5 +137,20 @@ public class RenderHelper {
         drawQuad(vertices, stack.last().pose(), border, border, color, 0.75F, 1F, 0.75F, 1F);
 
         stack.popPose();
+    }
+
+    public static void renderWithScissorScaled(int x, int y, int w, int h, Runnable function) {
+        var window = Minecraft.getInstance().getWindow();
+        double scale = (int) window.getGuiScale();
+        RenderSystem.enableScissor((int)(x * scale), window.getHeight() - (int)((y+h) * scale), (int)(w * scale), (int)(h * scale));
+        function.run();
+        RenderSystem.disableScissor();
+    }
+
+    public static void renderWithScissorNative(int x, int y, int w, int h, Runnable function) {
+        var window = Minecraft.getInstance().getWindow();
+        RenderSystem.enableScissor(x, window.getHeight() - (y+h), w, h);
+        function.run();
+        RenderSystem.disableScissor();
     }
 }
