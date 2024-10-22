@@ -7,10 +7,12 @@ import java.util.List;
 import java.util.Map;
 
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 
 import com.eerussianguy.blazemap.api.markers.Waypoint;
 import com.eerussianguy.blazemap.api.util.MinecraftStreams;
+import com.eerussianguy.blazemap.lib.InheritedBoolean;
 import com.eerussianguy.blazemap.lib.io.FormatSpec;
 import com.eerussianguy.blazemap.lib.io.Format;
 import com.eerussianguy.blazemap.lib.io.FormatVersion;
@@ -35,6 +37,7 @@ public class WaypointSerialization {
                     if(group.isUserNamed()) {
                         output.writeUTF(group.getNameString());
                     }
+                    output.writeByte(group.getState().getVisibility().ordinal());
 
                     // Write waypoints in group
                     output.writeCollection(group.getAll(), waypoint -> {
@@ -44,6 +47,7 @@ public class WaypointSerialization {
                         output.writeResourceLocation(waypoint.getIcon());
                         output.writeInt(waypoint.getColor());
                         output.writeFloat(waypoint.getRotation());
+                        output.writeByte(group.getState(waypoint.getID()).getVisibility().ordinal());
                     });
                 });
             });
@@ -65,12 +69,14 @@ public class WaypointSerialization {
                     if(group.isUserNamed()) {
                         group.setUserGivenName(input.readUTF());
                     }
+                    group.getState().setVisibility(InheritedBoolean.values()[input.readByte()]);
                     groups.add(group);
 
                     // Read waypoints in group
                     input.readCollection(() -> {
+                        ResourceLocation waypointID = input.readResourceLocation();
                         group.add(new Waypoint(
-                            input.readResourceLocation(),
+                            waypointID,
                             dimension,
                             input.readBlockPos(),
                             input.readUTF(),
@@ -78,6 +84,7 @@ public class WaypointSerialization {
                             input.readInt())
                             .setRotation(input.readFloat())
                         );
+                        group.getState(waypointID).setVisibility(InheritedBoolean.values()[input.readByte()]);
                     });
                 });
             });

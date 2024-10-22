@@ -92,4 +92,11 @@ public class Helpers {
         int second = calendar.get(Calendar.SECOND);
         return String.format("%04d%s%02d%s%02d%s%02d%s%02d%s%02d", year, d, month, d, day, t, hour, h, minute, h, second);
     }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends Enum<T>> T cycle(T current, int direction) {
+        T[] values = (T[]) current.getClass().getEnumConstants();
+        int index = (current.ordinal() + values.length + direction) % values.length;
+        return values[index];
+    }
 }

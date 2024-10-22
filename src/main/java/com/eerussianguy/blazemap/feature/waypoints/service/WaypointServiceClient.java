@@ -1,6 +1,7 @@
 package com.eerussianguy.blazemap.feature.waypoints.service;
 
 import java.util.Date;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import net.minecraft.client.player.LocalPlayer;
@@ -58,6 +59,10 @@ public class WaypointServiceClient extends WaypointService {
     }
 
     public void iterate(Consumer<Waypoint> consumer) {
+        iterate(Helpers.levelOrThrow().dimension(), consumer);
+    }
+
+    public void iterate(BiConsumer<Waypoint, WaypointGroup> consumer) {
         iterate(Helpers.levelOrThrow().dimension(), consumer);
     }
 }

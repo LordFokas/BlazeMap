@@ -1,6 +1,7 @@
 package com.eerussianguy.blazemap.feature.waypoints.service;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import net.minecraft.resources.ResourceKey;
@@ -40,6 +41,12 @@ public abstract class WaypointService {
     }
 
     public void iterate(ResourceKey<Level> level, Consumer<Waypoint> consumer) {
+        for(WaypointPool pool : view) {
+            pool.iterate(level, consumer);
+        }
+    }
+
+    public void iterate(ResourceKey<Level> level, BiConsumer<Waypoint, WaypointGroup> consumer) {
         for(WaypointPool pool : view) {
             pool.iterate(level, consumer);
         }

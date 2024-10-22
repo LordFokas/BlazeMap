@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
@@ -42,6 +43,16 @@ public abstract class WaypointPool extends ManagedContainer {
 
         for(WaypointGroup group : groups.get(dimension)) {
             group.getAll().forEach(consumer);
+        }
+    }
+
+    public void iterate(ResourceKey<Level> dimension, BiConsumer<Waypoint, WaypointGroup> consumer) {
+        if(!groups.containsKey(dimension)) return;
+
+        for(WaypointGroup group : groups.get(dimension)) {
+            group.getAll().forEach(waypoint -> {
+                consumer.accept(waypoint, group);
+            });
         }
     }
 

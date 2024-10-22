@@ -10,10 +10,9 @@ import com.eerussianguy.blazemap.lib.gui.core.BaseComponent;
 import com.eerussianguy.blazemap.lib.gui.core.BaseContainer;
 import com.eerussianguy.blazemap.lib.gui.trait.ComponentSounds;
 import com.eerussianguy.blazemap.lib.gui.trait.FocusableComponent;
-import com.eerussianguy.blazemap.lib.gui.trait.KeyboardControls;
 import com.mojang.blaze3d.vertex.PoseStack;
 
-public class TreeContainer extends BaseContainer<TreeContainer> implements FocusableComponent, ComponentSounds, KeyboardControls {
+public class TreeContainer extends BaseContainer<TreeContainer> implements FocusableComponent, ComponentSounds {
     private static final int SCROLLBAR_WIDTH = 5;
     private final List<TreeItem> items = new ArrayList<>();
     private final ScrollBar scroll;
@@ -33,7 +32,6 @@ public class TreeContainer extends BaseContainer<TreeContainer> implements Focus
 
     public <T extends BaseComponent<?> & TreeItem> void addItem(T item) {
         items.add(item);
-        item.setUpdater(this::recalculate);
         recalculate();
     }
 
@@ -57,6 +55,7 @@ public class TreeContainer extends BaseContainer<TreeContainer> implements Focus
     }
 
     public void recalculate() {
+        items.removeIf(TreeItem::wasDeleted);
         tree.recalculate();
     }
 
@@ -74,6 +73,10 @@ public class TreeContainer extends BaseContainer<TreeContainer> implements Focus
         }
 
         default void setUpdater(Runnable function){ }
+
+        default boolean wasDeleted() {
+            return false;
+        }
     }
 
     // =================================================================================================================
@@ -112,6 +115,7 @@ public class TreeContainer extends BaseContainer<TreeContainer> implements Focus
 
         private int deepAdd(List<TreeItem> items, int y) {
             for(var item : items) {
+                item.setUpdater(TreeContainer.this::recalculate);
                 var component = (BaseComponent<?>) item;
                 add(component, 0, y);
                 y += component.getHeight() + padding;

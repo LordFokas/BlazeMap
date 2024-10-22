@@ -33,7 +33,11 @@ public class WaypointOverlay extends GhostOverlay {
         }
 
         ArrayList<Waypoint> list = new ArrayList<>();
-        waypoints.iterate(list::add);
+        waypoints.iterate((waypoint, group) -> {
+            if(group.getState(waypoint.getID()).isVisible()) {
+                list.add(waypoint);
+            }
+        });
         return Collections.unmodifiableList(list);
     }
 }

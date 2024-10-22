@@ -36,6 +36,8 @@ public class WaypointGroup extends ManagedContainer implements MarkerStorage<Way
     // =================================================================================================================
     public final ResourceLocation type;
     protected final HashMap<ResourceLocation, Waypoint> waypoints = new HashMap<>();
+    protected final HashMap<ResourceLocation, LocalState> states = new HashMap<>();
+    private final LocalState state = new LocalState();
     private NameType nameType = NameType.USER_GIVEN;
     private Component name;
     private String _name;
@@ -48,6 +50,14 @@ public class WaypointGroup extends ManagedContainer implements MarkerStorage<Way
         super(manage);
         assertDefined(type);
         this.type = type;
+    }
+
+    public LocalState getState() {
+        return state;
+    }
+
+    public LocalState getState(ResourceLocation marker) {
+        return states.get(marker);
     }
 
     public boolean isUserNamed() {
@@ -86,18 +96,25 @@ public class WaypointGroup extends ManagedContainer implements MarkerStorage<Way
         return waypoints.values();
     }
 
-    @Override
-    public void add(Waypoint marker) {
+    public void add(Waypoint marker, LocalState state) {
         var key = marker.getID();
         if(waypoints.containsKey(key)) {
             throw new IllegalArgumentException("Waypoint Group already contains this waypoint");
         }
         waypoints.put(key, marker);
+        state.setParent(this.state);
+        states.put(key, state);
+    }
+
+    @Override
+    public void add(Waypoint marker) {
+        add(marker, new LocalState());
     }
 
     @Override
     public void remove(ResourceLocation id) {
         waypoints.remove(id);
+        states.remove(id);
     }
 
     @Override
