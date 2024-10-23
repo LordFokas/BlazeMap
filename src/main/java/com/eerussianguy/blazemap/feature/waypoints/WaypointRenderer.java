@@ -15,13 +15,12 @@ import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 
-import com.eerussianguy.blazemap.api.event.DimensionChangedEvent;
-import com.eerussianguy.blazemap.api.markers.IMarkerStorage;
 import com.eerussianguy.blazemap.api.markers.Waypoint;
 import com.eerussianguy.blazemap.config.BlazeMapConfig;
-import com.eerussianguy.blazemap.util.Colors;
-import com.eerussianguy.blazemap.util.Helpers;
-import com.eerussianguy.blazemap.util.RenderHelper;
+import com.eerussianguy.blazemap.feature.waypoints.service.WaypointServiceClient;
+import com.eerussianguy.blazemap.lib.Colors;
+import com.eerussianguy.blazemap.lib.Helpers;
+import com.eerussianguy.blazemap.lib.RenderHelper;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -30,13 +29,10 @@ import com.mojang.math.Vector3f;
 
 public class WaypointRenderer {
 
-    private static IMarkerStorage<Waypoint> waypointStorage;
-
     public static void init() {
         IEventBus bus = MinecraftForge.EVENT_BUS;
 
         bus.addListener(WaypointRenderer::onLevelStageRender);
-        bus.addListener(WaypointRenderer::onDimensionChanged);
     }
 
     public static void onLevelStageRender(RenderLevelStageEvent event) {
@@ -53,7 +49,7 @@ public class WaypointRenderer {
             if(playerCamera != null) {
                 Level level = playerCamera.level;
 
-                waypointStorage.getAll().forEach(w -> {
+                WaypointServiceClient.instance().iterate(w -> {
                     final BlockPos pos = w.getPosition();
                     // TODO: Swap to just using a call to pos.getCenter() where needed in 1.19+
                     // (method not available in 1.18.2)
@@ -151,9 +147,5 @@ public class WaypointRenderer {
     private static void translateFromCameraToPos(PoseStack stack, Vec3 pos) {
         Vec3 cam = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
         stack.translate(pos.x() - cam.x(), pos.y() - cam.y(), pos.z() - cam.z());
-    }
-
-    public static void onDimensionChanged(DimensionChangedEvent event) {
-        waypointStorage = event.waypoints;
     }
 }

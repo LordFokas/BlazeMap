@@ -6,6 +6,7 @@ import com.eerussianguy.blazemap.api.BlazeMapAPI;
 import com.eerussianguy.blazemap.api.BlazeRegistry;
 import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.MapType;
+import com.eerussianguy.blazemap.api.maps.Overlay;
 import com.eerussianguy.blazemap.api.markers.ObjectRenderer;
 import com.eerussianguy.blazemap.api.pipeline.*;
 
@@ -61,6 +62,12 @@ public abstract class BlazeRegistryEvent<T> extends Event {
     public static class MapTypeRegistryEvent extends BlazeRegistryEvent<MapType> {
         public MapTypeRegistryEvent() {
             super(BlazeMapAPI.MAPTYPES);
+        }
+    }
+
+    public static class OverlayRegistryEvent extends BlazeRegistryEvent<Overlay> {
+        public OverlayRegistryEvent() {
+            super(BlazeMapAPI.OVERLAYS);
         }
     }
 

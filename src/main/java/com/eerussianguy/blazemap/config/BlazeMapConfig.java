@@ -10,6 +10,7 @@ import net.minecraftforge.fml.config.ModConfig;
 public class BlazeMapConfig {
     public static final ClientConfig CLIENT = register(ClientConfig::new, ModConfig.Type.CLIENT);
     public static final CommonConfig COMMON = register(CommonConfig::new, ModConfig.Type.COMMON);
+    public static final ServerConfig SERVER = register(ServerConfig::new, ModConfig.Type.SERVER);
 
     public static void init() {}
 

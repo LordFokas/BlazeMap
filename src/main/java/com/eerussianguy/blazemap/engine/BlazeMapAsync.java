@@ -1,10 +1,11 @@
 package com.eerussianguy.blazemap.engine;
 
-import com.eerussianguy.blazemap.engine.async.AsyncChainRoot;
-import com.eerussianguy.blazemap.engine.async.AsyncDataCruncher;
-import com.eerussianguy.blazemap.engine.async.DebouncingThread;
-import com.eerussianguy.blazemap.engine.server.BlazeMapServerEngine;
-import com.eerussianguy.blazemap.util.Helpers;
+import com.eerussianguy.blazemap.BlazeMap;
+import com.eerussianguy.blazemap.engine.server.ServerEngine;
+import com.eerussianguy.blazemap.lib.Helpers;
+import com.eerussianguy.blazemap.lib.async.AsyncChainRoot;
+import com.eerussianguy.blazemap.lib.async.AsyncDataCruncher;
+import com.eerussianguy.blazemap.lib.async.DebouncingThread;
 
 public class BlazeMapAsync {
     private static BlazeMapAsync instance;
@@ -21,9 +22,9 @@ public class BlazeMapAsync {
     }
 
     private BlazeMapAsync() {
-        cruncher = new AsyncDataCruncher("Blaze Map");
-        serverChain = new AsyncChainRoot(cruncher, BlazeMapServerEngine::submit);
+        cruncher = new AsyncDataCruncher("Blaze Map", BlazeMap.LOGGER);
+        serverChain = new AsyncChainRoot(cruncher, ServerEngine::submit);
         clientChain = new AsyncChainRoot(cruncher, Helpers::runOnMainThread);
-        debouncer = new DebouncingThread("Blaze Map");
+        debouncer = new DebouncingThread("Blaze Map", BlazeMap.LOGGER);
     }
 }
