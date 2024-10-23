@@ -12,7 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 import com.eerussianguy.blazemap.api.markers.MarkerStorage;
 import com.eerussianguy.blazemap.api.markers.Waypoint;
 
-public class WaypointGroup extends ManagedContainer implements MarkerStorage<Waypoint> {
+public class WaypointGroup implements MarkerStorage<Waypoint> {
     private static final HashMap<ResourceLocation, Supplier<WaypointGroup>> GROUPS = new HashMap<>();
 
     public static WaypointGroup make(ResourceLocation type) {
@@ -35,6 +35,7 @@ public class WaypointGroup extends ManagedContainer implements MarkerStorage<Way
 
     // =================================================================================================================
     public final ResourceLocation type;
+    public final ManagementType management;
     protected final HashMap<ResourceLocation, Waypoint> waypoints = new HashMap<>();
     protected final HashMap<ResourceLocation, LocalState> states = new HashMap<>();
     private final LocalState state = new LocalState();
@@ -47,9 +48,9 @@ public class WaypointGroup extends ManagedContainer implements MarkerStorage<Way
     }
 
     public WaypointGroup(ResourceLocation type, ManagementType manage) {
-        super(manage);
         assertDefined(type);
         this.type = type;
+        this.management = manage;
     }
 
     public LocalState getState() {

@@ -41,7 +41,22 @@ public abstract class BaseFragment {
             return openHosted(host);
         }
         if(standalone && screen == null) {
-            return openStandalone();
+            return openStandalone(() -> {});
+        }
+        return false;
+    }
+
+    public boolean push() {
+        return push(() -> {});
+    }
+
+    public boolean push(Runnable callback) {
+        Screen screen = mc.screen;
+        if(standalone && screen != null) {
+            return openStandalone(() -> {
+                mc.setScreen(screen);
+                callback.run();
+            });
         }
         return false;
     }
@@ -52,8 +67,8 @@ public abstract class BaseFragment {
     }
 
     /** Create an empty Screen to host the fragment */
-    protected boolean openStandalone() {
-        mc.setScreen(new HostScreen(this));
+    protected boolean openStandalone(Runnable callback) {
+        mc.setScreen(new HostScreen(this, callback));
         return true;
     }
 }

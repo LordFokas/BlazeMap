@@ -13,10 +13,16 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 public class HostScreen extends Screen implements TooltipService {
     private final BaseFragment fragment;
+    private final Runnable callback;
 
     public HostScreen(BaseFragment fragment) {
+        this(fragment, () -> {});
+    }
+
+    public HostScreen(BaseFragment fragment, Runnable callback) {
         super(fragment.getTitle());
         this.fragment = fragment;
+        this.callback = callback;
     }
 
     @Override
@@ -42,5 +48,11 @@ public class HostScreen extends Screen implements TooltipService {
     @Override
     public void drawTooltip(PoseStack stack, int x, int y, List<? extends Component> lines) {
         renderTooltip(stack, lines.stream().map(Component::getVisualOrderText).toList(), x, y);
+    }
+
+    @Override
+    public void onClose() {
+        super.onClose();
+        this.callback.run();
     }
 }

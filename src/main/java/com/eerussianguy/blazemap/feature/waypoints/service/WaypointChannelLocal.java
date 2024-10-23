@@ -35,7 +35,7 @@ public class WaypointChannelLocal extends WaypointChannel {
         private static final ResourceLocation PRIVATE = BlazeMap.resource("private.waypoints");
 
         private PrivatePool() {
-            super(PRIVATE_POOL, ManagementType.FULL, BlazeMapReferences.Icons.WAYPOINT, 0xFF0088FF, new TextComponent("Private"));
+            super(PRIVATE_POOL, true, BlazeMapReferences.Icons.WAYPOINT, 0xFF0088FF, new TextComponent("Private"));
         }
 
         @Override

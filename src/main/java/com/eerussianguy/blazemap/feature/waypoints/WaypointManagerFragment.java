@@ -82,11 +82,11 @@ public class WaypointManagerFragment extends BaseFragment {
             for(var group : groups) {
                 list.addItem(new NodeItem(group, () -> groups.remove(group)));
             }
-            var addButton = new TextButton(new TextComponent("Add Group"), button -> {
+            var addButton = new TextButton(new TextComponent("Add Group"), button -> { // TODO: temporary
                 pool.getGroups(Helpers.levelOrThrow().dimension()).add(WaypointGroup.make(WaypointChannelLocal.GROUP_DEFAULT));
                 PoolContainer.this.construct();
             }).setSize(MANAGER_UI_WIDTH / 2 - 1, 14);
-            addButton.setEnabled(pool.management.canCreate);
+            addButton.setEnabled(pool.canUserCreate());
             add(addButton, 0, 162);
         }
 
@@ -113,8 +113,11 @@ public class WaypointManagerFragment extends BaseFragment {
 
     // =================================================================================================================
     private static class NodeItem extends TreeNode {
+        private static final ResourceLocation ADD = BlazeMap.resource("textures/gui/add.png");
+
         private final WaypointGroup group;
         private final ArrayList<? extends TreeContainer.TreeItem> children;
+        private final EdgeReference add = new EdgeReference(this, ContainerAnchor.TOP_RIGHT).setSize(8, 8).setPosition(22, 2);
         private boolean open = true;
 
         private NodeItem(WaypointGroup group, Runnable delete) {
@@ -127,7 +130,7 @@ public class WaypointManagerFragment extends BaseFragment {
             ResourceLocation id = waypoint.getID();
             return new LeafItem(
                 waypoint,
-                group.getState(id),
+                group,
                 () -> {
                     group.remove(id);
                 }
@@ -137,6 +140,9 @@ public class WaypointManagerFragment extends BaseFragment {
         @Override
         public void render(PoseStack stack, boolean hasMouse, int mouseX, int mouseY) {
             renderFlatBackground(stack, 0xFF444444);
+            if(group.management.canCreateChild) {
+                RenderHelper.drawTexturedQuad(ADD, Colors.NO_TINT, stack, add.getPositionX(), add.getPositionY(), add.getWidth(), add.getHeight());
+            }
             stack.pushPose();
             stack.translate(getHeight(), getHeight() / 2F - 4, 0);
             font.draw(stack, open ? "v" : ">", -9, 1, Colors.BLACK);
@@ -168,6 +174,16 @@ public class WaypointManagerFragment extends BaseFragment {
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
             if(super.mouseClicked(mouseX, mouseY, button)) return true;
 
+            if(group.management.canCreateChild && add.mouseIntercepts(mouseX, mouseY)) {
+                boolean opened = new WaypointEditorFragment(Helpers.getPlayer().blockPosition(), group).push(updater);
+                if(opened) {
+                    playOkSound();
+                } else {
+                    playDeniedSound();
+                }
+                return true;
+            }
+
             this.open = !this.open;
             updater.run();
 
@@ -179,18 +195,31 @@ public class WaypointManagerFragment extends BaseFragment {
 
         @Override
         protected boolean isDeletable() {
-            return group.management == ManagementType.FULL;
+            return group.management.canDelete;
+        }
+
+        @Override
+        protected void renderTooltip(PoseStack stack, int mouseX, int mouseY, TooltipService service) {
+            if(group.management.canCreateChild && add.mouseIntercepts(mouseX, mouseY)) {
+                service.drawTooltip(stack, mouseX, mouseY, new TextComponent("Add Waypoint")); // TODO: temporary
+                return;
+            }
+            super.renderTooltip(stack, mouseX, mouseY, service);
         }
     }
 
     // =================================================================================================================
     private static class LeafItem extends TreeNode {
+        private static final ResourceLocation EDIT = BlazeMap.resource("textures/gui/edit.png");
         private static final int ICON_SIZE = 8;
+        private final EdgeReference edit = new EdgeReference(this, ContainerAnchor.TOP_RIGHT).setSize(8, 8).setPosition(22, 2);
         private final Waypoint waypoint;
+        private final WaypointGroup group;
 
-        private LeafItem(Waypoint waypoint, LocalState state, Runnable delete) {
-            super(waypoint.getName(), state, delete);
+        private LeafItem(Waypoint waypoint, WaypointGroup group, Runnable delete) {
+            super(waypoint.getName(), group.getState(waypoint.getID()), delete);
             this.waypoint = waypoint;
+            this.group = group;
         }
 
         @Override
@@ -199,8 +228,36 @@ public class WaypointManagerFragment extends BaseFragment {
             if(hasMouse && mouseIntercepts(mouseX, mouseY)) {
                 renderFlatBackground(stack, 0xFF222222); // render hover
             }
+            if(group.management.canEditChild) {
+                RenderHelper.drawTexturedQuad(EDIT, Colors.NO_TINT, stack, edit.getPositionX(), edit.getPositionY(), edit.getWidth(), edit.getHeight());
+            }
             RenderHelper.drawTexturedQuad(waypoint.getIcon(), waypoint.getColor(), stack, offset, offset, ICON_SIZE, ICON_SIZE);
             super.render(stack, hasMouse, mouseX, mouseY);
+        }
+
+        @Override
+        protected void renderTooltip(PoseStack stack, int mouseX, int mouseY, TooltipService service) {
+            if(group.management.canEditChild && edit.mouseIntercepts(mouseX, mouseY)) {
+                service.drawTooltip(stack, mouseX, mouseY, new TextComponent("Edit Waypoint")); // TODO: temporary
+                return;
+            }
+            super.renderTooltip(stack, mouseX, mouseY, service);
+        }
+
+        @Override
+        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+            if(super.mouseClicked(mouseX, mouseY, button)) return true;
+
+            if(group.management.canEditChild && edit.mouseIntercepts(mouseX, mouseY)) {
+                boolean opened = new WaypointEditorFragment(waypoint).push();
+                if(opened) {
+                    playOkSound();
+                } else {
+                    playDeniedSound();
+                }
+            }
+
+            return true;
         }
 
         @Override
@@ -216,11 +273,10 @@ public class WaypointManagerFragment extends BaseFragment {
 
     // =================================================================================================================
     private static class TreeNode extends Label implements TreeContainer.TreeItem, BorderedComponent, ComponentSounds, GuiEventListener {
-        private static final ResourceLocation ADD = BlazeMap.resource("textures/gui/add.png");
         private static final ResourceLocation REMOVE = BlazeMap.resource("textures/gui/remove.png");
         private static final ResourceLocation ON_OVERRIDE   = BlazeMap.resource("textures/gui/on.png");
-        private static final ResourceLocation OFF_OVERRIDE  = BlazeMap.resource("textures/gui/off.png");
         private static final ResourceLocation ON_INHERITED  = BlazeMap.resource("textures/gui/on_inherited.png");
+        private static final ResourceLocation OFF_OVERRIDE  = BlazeMap.resource("textures/gui/off.png");
         private static final ResourceLocation OFF_INHERITED = BlazeMap.resource("textures/gui/off_inherited.png");
 
         protected final EdgeReference visibility = new EdgeReference(this, ContainerAnchor.TOP_RIGHT).setSize(8, 8).setPosition(2, 2);
@@ -262,7 +318,7 @@ public class WaypointManagerFragment extends BaseFragment {
         protected void renderTooltip(PoseStack stack, int mouseX, int mouseY, TooltipService service) {
             if(visibility.mouseIntercepts(mouseX, mouseY)) {
                 InheritedBoolean visible = state.getVisibility();
-                var tooltip = new TextComponent(switch(visible) {
+                var tooltip = new TextComponent(switch(visible) { // TODO: temporary
                     case TRUE -> "Visibility: Show";
                     case FALSE -> "Visibility: Hide";
                     case INHERITED -> "Visibility: Inherit";
@@ -272,9 +328,9 @@ public class WaypointManagerFragment extends BaseFragment {
             }
 
             if(isDeletable() && delete.mouseIntercepts(mouseX, mouseY)) {
-                var tooltip = new TextComponent("Delete");
+                var tooltip = new TextComponent("Delete"); // TODO: temporary
                 if(!Screen.hasShiftDown()) {
-                    service.drawTooltip(stack, mouseX, mouseY, tooltip, new TextComponent("Hold [Shift] to confirm").withStyle(ChatFormatting.YELLOW));
+                    service.drawTooltip(stack, mouseX, mouseY, tooltip, new TextComponent("Hold [Shift] to confirm").withStyle(ChatFormatting.YELLOW)); // TODO: temporary
                 } else {
                     service.drawTooltip(stack, mouseX, mouseY, tooltip.withStyle(ChatFormatting.RED));
                 }

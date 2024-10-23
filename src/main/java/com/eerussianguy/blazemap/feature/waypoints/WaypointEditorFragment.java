@@ -11,6 +11,7 @@ import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
 import com.eerussianguy.blazemap.api.markers.Waypoint;
 import com.eerussianguy.blazemap.feature.waypoints.service.WaypointChannelLocal;
+import com.eerussianguy.blazemap.feature.waypoints.service.WaypointGroup;
 import com.eerussianguy.blazemap.feature.waypoints.service.WaypointServiceClient;
 import com.eerussianguy.blazemap.lib.Colors;
 import com.eerussianguy.blazemap.lib.Helpers;
@@ -23,13 +24,19 @@ import com.eerussianguy.blazemap.lib.gui.fragment.FragmentContainer;
 public class WaypointEditorFragment extends BaseFragment {
     private final Waypoint waypoint;
     private final boolean creating;
+    private WaypointGroup group = null;
 
     public WaypointEditorFragment() {
         this(Minecraft.getInstance().player.blockPosition());
     }
 
     public WaypointEditorFragment(BlockPos pos) {
+        this(pos, null);
+    }
+
+    public WaypointEditorFragment(BlockPos pos, WaypointGroup group) {
         this(new Waypoint(BlazeMap.resource("waypoint/"+System.nanoTime()), Minecraft.getInstance().level.dimension(), pos, "New Waypoint", BlazeMapReferences.Icons.WAYPOINT, Colors.randomBrightColor()), true);
+        this.group = group;
     }
 
     public WaypointEditorFragment(Waypoint waypoint) {
@@ -115,9 +122,13 @@ public class WaypointEditorFragment extends BaseFragment {
             waypoint.setIcon(icons.getValue());
             waypoint.setColor(color.get());
             if(creating) {
-                WaypointServiceClient.instance().getPool(WaypointChannelLocal.PRIVATE_POOL).getGroups(waypoint.getDimension())
-                    .stream().filter(g -> g.type == WaypointChannelLocal.GROUP_DEFAULT).findFirst()
-                    .ifPresent(g -> g.add(waypoint));
+                if(group == null) {
+                    group = WaypointServiceClient.instance().getPool(WaypointChannelLocal.PRIVATE_POOL).getGroups(waypoint.getDimension())
+                        .stream().filter(g -> g.type == WaypointChannelLocal.GROUP_DEFAULT).findFirst().orElse(null);
+                }
+                if(group != null) {
+                    group.add(waypoint);
+                }
             }
             container.dismiss();
         });

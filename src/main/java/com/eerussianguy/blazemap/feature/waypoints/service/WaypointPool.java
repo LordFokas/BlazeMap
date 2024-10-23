@@ -20,22 +20,27 @@ import com.eerussianguy.blazemap.api.markers.Waypoint;
 import com.eerussianguy.blazemap.api.util.MinecraftStreams;
 import com.eerussianguy.blazemap.api.util.StorageAccess;
 
-public abstract class WaypointPool extends ManagedContainer {
+public abstract class WaypointPool {
     protected final HashMap<ResourceKey<Level>, List<WaypointGroup>> groups = new HashMap<>();
     public final ResourceLocation id, icon;
     public final int tint;
     private final Component name;
+    protected final boolean canUserCreate;
 
-    public WaypointPool(ResourceLocation id, ManagementType manage, ResourceLocation icon, int tint, Component name) {
-        super(manage);
+    public WaypointPool(ResourceLocation id, boolean canUserCreate, ResourceLocation icon, int tint, Component name) {
         this.id = id;
         this.icon = icon;
         this.tint = tint;
         this.name = name;
+        this.canUserCreate = canUserCreate;
     }
 
     public Component getName() {
         return name;
+    }
+
+    public boolean canUserCreate() {
+        return canUserCreate;
     }
 
     public void iterate(ResourceKey<Level> dimension, Consumer<Waypoint> consumer) {

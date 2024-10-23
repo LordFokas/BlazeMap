@@ -18,7 +18,7 @@ public class WaypointChannelRemote extends WaypointChannel {
 
     public WaypointChannelRemote() {
         super(REGISTRY.findOrCreate(BlazeMap.resource("remote")));
-        WaypointGroup.define(GROUP, () -> new WaypointGroup(GROUP).setSystemName(PUBLIC_WAYPOINTS));
+        WaypointGroup.define(GROUP, () -> new WaypointGroup(GROUP, ManagementType.READONLY).setSystemName(PUBLIC_WAYPOINTS));
     }
 
     @Override
@@ -30,7 +30,7 @@ public class WaypointChannelRemote extends WaypointChannel {
         private static final ResourceLocation SERVER = BlazeMap.resource("server.waypoints");
 
         private ServerPool() {
-            super(SERVER_POOL, ManagementType.READONLY, BlazeMapReferences.Icons.INGOT, 0xFFFFFF00, new TextComponent("Server"));
+            super(SERVER_POOL, false, BlazeMapReferences.Icons.INGOT, 0xFFFFFF00, new TextComponent("Server"));
         }
 
         @Override
