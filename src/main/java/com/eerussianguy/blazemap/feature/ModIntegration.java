@@ -12,7 +12,7 @@ public class ModIntegration {
         public static final String RUBIDIUM = "rubidium";
 
         public static final String OPTIFINE = "optifine";
-        public static final String CHUNKPREGEN = "chunkpregen";
+        public static final String FANCY_MENU = "fancymenu";
     }
 
     public static final List<String> SODIUM_FAMILY = List.of(ModIDs.SODIUM, ModIDs.EMBEDDIUM, ModIDs.RUBIDIUM);

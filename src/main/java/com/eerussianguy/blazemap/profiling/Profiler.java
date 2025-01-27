@@ -69,13 +69,9 @@ public abstract class Profiler {
      * @return ProfilerFiller for the current thread, if on a thread with a profiler
      */
     public static ProfilerFiller getMCProfiler() {
-        // Short circuit to avoid spending time on string comparisons when profiler not active
-        if (Minecraft.getInstance().getProfiler() == InactiveProfiler.INSTANCE) {
-            return InactiveProfiler.INSTANCE;
-
         // Minecraft runs a separate profiler for the Client and Server thread.
         // Also, the Minecraft profiler only works in the context of those two main game threads.
-        } else if (Thread.currentThread().getName().equals("Render thread")) {
+        if (Thread.currentThread().getName().equals("Render thread")) {
             return Minecraft.getInstance().getProfiler();
 
         } else if (Thread.currentThread().getName().equals("Server thread") && serverInstance != null) {

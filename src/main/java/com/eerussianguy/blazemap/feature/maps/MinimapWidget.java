@@ -5,7 +5,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.core.BlockPos;
 
 import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.config.BlazeMapConfig;
@@ -71,8 +71,8 @@ public class MinimapWidget {
         }
 
         if (BlazeMapConfig.CLIENT.clientFeatures.displayCoords.get()) {
-            Vec3 pos = Helpers.getPlayer().position();
-            String coords = String.format("[ %d | %d | %d ]", (int) pos.x, (int) pos.y, (int) pos.z);
+            BlockPos pos = Helpers.getPlayer().blockPosition();
+            String coords = String.format("[ %d | %d | %d ]", pos.getX(), pos.getY(), pos.getZ());
             Font font = Minecraft.getInstance().font;
             int length = font.width(coords);
 

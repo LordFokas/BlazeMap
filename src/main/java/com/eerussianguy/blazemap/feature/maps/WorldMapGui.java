@@ -414,6 +414,11 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
             return true;
         }
 
+        if(key == GLFW.GLFW_KEY_F && Screen.hasControlDown() && search.isVisible() && !search.isFocused()) {
+            this.setFocused(search);
+            return true;
+        }
+
         if(!search.isFocused()) {
             if(key == BlazeMapFeaturesClient.KEY_MAPS.get().getKey().getValue()) {
                 this.onClose();

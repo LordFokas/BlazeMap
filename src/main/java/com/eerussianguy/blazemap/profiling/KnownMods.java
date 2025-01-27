@@ -34,7 +34,7 @@ public class KnownMods {
         add(COMPAT, ModIDs.RUBIDIUM);
 
         add(PROBLEM, ModIDs.OPTIFINE);
-        add(PROBLEM, ModIDs.CHUNKPREGEN);
+        add(PROBLEM, ModIDs.FANCY_MENU);
 
         add(BlazeMapAPI.MASTER_DATA);
         add(BlazeMapAPI.COLLECTORS);
