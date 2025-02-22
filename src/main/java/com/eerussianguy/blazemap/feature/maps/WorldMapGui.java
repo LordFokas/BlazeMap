@@ -76,6 +76,7 @@ public class WorldMapGui extends Screen implements MapHost, FragmentHost {
     private final List<Overlay> overlays;
     private final MouseSubpixelSmoother mouse;
     private final AbsoluteContainer windows = new AbsoluteContainer(0);
+    private final VolatileContainer volatiles = new VolatileContainer(0);
     private BaseComponent<?> legend;
     private EditBox search;
     private final Coordination coordination = new Coordination();
@@ -196,11 +197,14 @@ public class WorldMapGui extends Screen implements MapHost, FragmentHost {
 
         windows.setSize(width, height);
         addRenderableWidget(windows);
+
+        volatiles.setSize(width, height);
+        addRenderableWidget(volatiles);
     }
 
     @Override
     public boolean consumeFragment(BaseFragment fragment) {
-        HostWindowComponent window = new HostWindowComponent(fragment).setCloser(windows::remove);
+        HostWindowComponent window = new HostWindowComponent(fragment, volatiles).setCloser(windows::remove);
         windows.add(window, ContainerAnchor.MIDDLE_CENTER);
         return true;
     }

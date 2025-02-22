@@ -13,6 +13,14 @@ public interface ComponentSounds {
         playPitchedClick(0.8F);
     }
 
+    default void playUpSound() {
+        playPitchedClick(1.05F);
+    }
+
+    default void playDownSound() {
+        playPitchedClick(0.95F);
+    }
+
     default void playPitchedClick(float pitch) {
         Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, pitch));
     }

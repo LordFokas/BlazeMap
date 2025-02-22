@@ -95,7 +95,7 @@ public abstract class EntityOverlay extends GhostOverlay {
     public static class NPCs extends EntityOverlay {
         public NPCs() {
             super(
-                BlazeMapReferences.Overlays.VILLAGERS,
+                BlazeMapReferences.Overlays.NPCS,
                 Helpers.translate("blazemap.npcs"),
                 BlazeMap.resource("textures/map_icons/overlay_npcs.png"),
                 DEFAULT_ENTITY_MAX_VERTICAL_DISTANCE

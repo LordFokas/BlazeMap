@@ -21,6 +21,8 @@ import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
 import com.eerussianguy.blazemap.api.maps.*;
 import com.eerussianguy.blazemap.api.pipeline.*;
 import com.eerussianguy.blazemap.api.util.RegionPos;
+import com.eerussianguy.blazemap.config.BlazeMapConfig;
+import com.eerussianguy.blazemap.config.ServerConfig;
 import com.eerussianguy.blazemap.engine.Pipeline;
 import com.eerussianguy.blazemap.engine.PipelineProfiler;
 import com.eerussianguy.blazemap.engine.UnsafeGenerics;
@@ -102,8 +104,13 @@ class ClientPipeline extends Pipeline {
         cold = false;
     }
 
+    private boolean canPlayerWriteMap() {
+        return BlazeMapConfig.SERVER.mapItemRequirement.canPlayerAccessMap(Helpers.getPlayer(), ServerConfig.MapAccess.WRITE);
+    }
+
     @Override
     public void insertMasterData(ChunkPos pos, List<MasterDatum> data) {
+        if(!canPlayerWriteMap()) return;
         AsyncChainItem<Void, Void> chain = async.begin();
         if(cold) chain = chain.thenDelay((int) (500 + ((System.nanoTime() / 1000) % 1000)));
         chain
@@ -152,6 +159,12 @@ class ClientPipeline extends Pipeline {
             async.runOnGameThread(() -> sendMapUpdates(updates));
         }
         return null;
+    }
+
+    @Override
+    protected void begin(ChunkPos pos) {
+        if(!canPlayerWriteMap()) return;
+        super.begin(pos);
     }
 
     // Redraw tiles based on MD changes

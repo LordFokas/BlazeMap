@@ -115,8 +115,13 @@ public abstract class Layer extends NamedMapComponent<Layer> implements Consumer
      * Automatically accounts for the fact chunk tile sizes vary with resolution.
      */
     protected static void foreachPixel(TileResolution resolution, PixelConsumer consumer) {
-        for(int x = 0; x < resolution.chunkWidth; x++) {
-            for(int z = 0; z < resolution.chunkWidth; z++) {
+        // Note: It's more efficient overall to run the loops this way around with x as the inner loop.
+        // This is for the same reason the data format is expected to be `data[z][x]` down below.
+        // Namely, that the PNG tiles are constructed with the whole first row of x values read first,
+        // then the whole second row of x values, etc.
+        // The CPU cache can better optimise its memory fetches if they're accessed in order.
+        for(int z = 0; z < resolution.chunkWidth; z++) {
+            for(int x = 0; x < resolution.chunkWidth; x++) {
                 consumer.accept(x, z);
             }
         }
@@ -131,6 +136,8 @@ public abstract class Layer extends NamedMapComponent<Layer> implements Consumer
      * When running at lower resolutions than FULL, this utility allows to collect all data points that will be rendered
      * into a single pixel. Meant to be used with ArrayAggregator or similar utilities, to aggregate the multiple data
      * points into a single value.
+     *
+     * Note: Data is expected to be in the format `data[z][x]` for CPU cache fetch optimisation reasons.
      */
     protected static int[] relevantData(TileResolution resolution, int x, int z, int[][] data) {
         int[] objects = new int[resolution.pixelWidth * resolution.pixelWidth];
@@ -138,9 +145,9 @@ public abstract class Layer extends NamedMapComponent<Layer> implements Consumer
         z *= resolution.pixelWidth;
         int idx = 0;
 
-        for(int dx = 0; dx < resolution.pixelWidth; dx++) {
-            for(int dz = 0; dz < resolution.pixelWidth; dz++) {
-                objects[idx++] = data[dx + x][dz + z];
+        for(int dz = 0; dz < resolution.pixelWidth; dz++) {
+            for(int dx = 0; dx < resolution.pixelWidth; dx++) {
+                objects[idx++] = data[dz + z][dx + x];
             }
         }
 
@@ -151,6 +158,8 @@ public abstract class Layer extends NamedMapComponent<Layer> implements Consumer
      * When running at lower resolutions than FULL, this utility allows to collect all data points that will be rendered
      * into a single pixel. Meant to be used with ArrayAggregator or similar utilities, to aggregate the multiple data
      * points into a single value.
+     * 
+     * Note: Data is expected to be in the format `data[z][x]` for CPU cache fetch optimisation reasons.
      */
     protected static float[] relevantData(TileResolution resolution, int x, int z, float[][] data) {
         float[] objects = new float[resolution.pixelWidth * resolution.pixelWidth];
@@ -158,9 +167,9 @@ public abstract class Layer extends NamedMapComponent<Layer> implements Consumer
         z *= resolution.pixelWidth;
         int idx = 0;
 
-        for(int dx = 0; dx < resolution.pixelWidth; dx++) {
-            for(int dz = 0; dz < resolution.pixelWidth; dz++) {
-                objects[idx++] = data[dx + x][dz + z];
+        for(int dz = 0; dz < resolution.pixelWidth; dz++) {
+            for(int dx = 0; dx < resolution.pixelWidth; dx++) {
+                objects[idx++] = data[dz + z][dx + x];
             }
         }
 
@@ -171,6 +180,8 @@ public abstract class Layer extends NamedMapComponent<Layer> implements Consumer
      * When running at lower resolutions than FULL, this utility allows to collect all data points that will be rendered
      * into a single pixel. Meant to be used with ArrayAggregator or similar utilities, to aggregate the multiple data
      * points into a single value.
+     * 
+     * Note: Data is expected to be in the format `data[z][x]` for CPU cache fetch optimisation reasons.
      */
     @SuppressWarnings("unchecked")
     protected static <T> T[] relevantData(TileResolution resolution, int x, int z, T[][] data, Class<T> cls) {
@@ -179,9 +190,9 @@ public abstract class Layer extends NamedMapComponent<Layer> implements Consumer
         z *= resolution.pixelWidth;
         int idx = 0;
 
-        for(int dx = 0; dx < resolution.pixelWidth; dx++) {
-            for(int dz = 0; dz < resolution.pixelWidth; dz++) {
-                objects[idx++] = data[dx + x][dz + z];
+        for(int dz = 0; dz < resolution.pixelWidth; dz++) {
+            for(int dx = 0; dx < resolution.pixelWidth; dx++) {
+                objects[idx++] = data[dz + z][dx + x];
             }
         }
 

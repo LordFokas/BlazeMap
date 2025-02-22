@@ -14,8 +14,7 @@ import com.eerussianguy.blazemap.api.BlazeRegistry;
 
 public class Marker<T extends Marker<T>> {
     private final ResourceLocation id;
-    private final ResourceKey<Level> dimension;
-    private final Set<String> tags;
+    private ResourceKey<Level> dimension;
     private BlockPos.MutableBlockPos position;
     private ResourceLocation icon;
     private int width = 32, height = 32;
@@ -24,6 +23,7 @@ public class Marker<T extends Marker<T>> {
     private int color = -1;
     private float rotation = 0F;
     private boolean usesZoom = false;
+    private final Set<String> tags;
     private BlazeRegistry.Key<ObjectRenderer<?>> renderer = BlazeMapReferences.ObjectRenderers.DEFAULT;
 
     @SuppressWarnings("unchecked")
@@ -100,6 +100,12 @@ public class Marker<T extends Marker<T>> {
 
     public final Set<String> getTags() {
         return tags;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T setDimension(ResourceKey<Level> dimension) {
+        this.dimension = dimension;
+        return (T) this;
     }
 
     @SuppressWarnings("unchecked")

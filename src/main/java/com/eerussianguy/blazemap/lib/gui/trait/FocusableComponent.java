@@ -1,11 +1,10 @@
 package com.eerussianguy.blazemap.lib.gui.trait;
 
-import net.minecraft.client.gui.components.events.GuiEventListener;
-
 import com.eerussianguy.blazemap.lib.Colors;
+import com.eerussianguy.blazemap.lib.gui.core.UIEventListener;
 import com.mojang.blaze3d.vertex.PoseStack;
 
-public interface FocusableComponent extends BorderedComponent, GuiEventListener {
+public interface FocusableComponent extends BorderedComponent, UIEventListener {
     boolean isFocused();
     void setFocused(boolean focused);
 

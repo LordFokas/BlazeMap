@@ -6,6 +6,7 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 
 import com.eerussianguy.blazemap.api.maps.Renderable;
+import com.eerussianguy.blazemap.lib.RenderHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 public abstract class BaseComponent<T extends BaseComponent<T>> extends Positionable<T> implements Renderable, Widget, NarratableEntry {
@@ -50,6 +51,12 @@ public abstract class BaseComponent<T extends BaseComponent<T>> extends Position
         stack.popPose();
     }
 
+    protected void renderWithScissor(int x, int y, int w, int h, Runnable function) {
+        x += getGlobalPositionX();
+        y += getGlobalPositionY();
+        RenderHelper.renderWithScissorScaled(x, y, w, h, function);
+    }
+
     @Override
     public boolean mouseIntercepts(double mouseX, double mouseY) {
         if(!isVisible()) return false;
@@ -87,4 +94,10 @@ public abstract class BaseComponent<T extends BaseComponent<T>> extends Position
 
     @Override //TODO: maybe, just MAYBE, one day do this
     public void updateNarration(NarrationElementOutput p_169152_) {}
+
+    /** Transforms an input into its equivalent component representation */
+    @FunctionalInterface
+    public interface Materializer<T> {
+        BaseComponent<?> transform(T input);
+    }
 }

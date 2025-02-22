@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
@@ -70,6 +71,10 @@ public class KnownMods {
 
     public static String getOwnerName(BlazeRegistry.Key<?> key) {
         return API_CALL.get(key.location.getNamespace()).name;
+    }
+
+    public static String getOwnerName(ResourceLocation key) {
+        return API_CALL.get(key.getNamespace()).name;
     }
 
     @SafeVarargs

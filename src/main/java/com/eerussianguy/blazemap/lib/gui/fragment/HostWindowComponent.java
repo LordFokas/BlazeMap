@@ -17,14 +17,14 @@ import com.mojang.blaze3d.vertex.PoseStack;
 public class HostWindowComponent extends LineContainer {
     private Consumer<? super HostWindowComponent> closer = $ -> {};
 
-    public HostWindowComponent(BaseFragment content) {
+    public HostWindowComponent(BaseFragment content, VolatileContainer volatiles) {
         super(ContainerAxis.VERTICAL, ContainerDirection.POSITIVE, 0);
 
         TitleBar titleBar = new TitleBar(this::close);
         this.add(titleBar);
 
         FragmentContainer window = new FragmentContainer(this::close, titleBar::setTitle, 5).withBackground();
-        content.compose(window, null);
+        content.compose(window, volatiles, null);
         this.add(window);
     }
 

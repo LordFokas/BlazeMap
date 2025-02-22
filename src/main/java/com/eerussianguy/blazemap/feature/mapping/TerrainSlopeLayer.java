@@ -45,13 +45,13 @@ public class TerrainSlopeLayer extends Layer {
             return;
 
         } else if (slope > 0) {
-            float slopeLog = (float)Helpers.clamp(0, (Math.log(slope) * 10), SHADING_RANGE);
-            int shadow = Colors.interpolate(0x30000000, 0, 0x70000000, SHADING_RANGE, slopeLog);
+            float slopeLog = (float)Helpers.clamp(-SHADING_RANGE * 0.75f, (Math.log(slope) * 10), SHADING_RANGE);
+            int shadow = Colors.interpolate(0x00000000, -SHADING_RANGE * 0.75f, 0x70000000, SHADING_RANGE, slopeLog);
             tile.setPixelRGBA(x, z, shadow);
 
         } else {
-            float slopeLog = (float)Helpers.clamp(0, (Math.log(-slope) * 10), SHADING_RANGE);
-            int sunlight = Colors.interpolate(0x20FFFFFF, 0, 0x60FFFFFF, SHADING_RANGE, slopeLog);
+            float slopeLog = (float)Helpers.clamp(-SHADING_RANGE * 0.5f, (Math.log(-slope) * 10), SHADING_RANGE);
+            int sunlight = Colors.interpolate(0x00FFFFFF, -SHADING_RANGE * 0.5f, 0x60FFFFFF, SHADING_RANGE, slopeLog);
             tile.setPixelRGBA(x, z, sunlight);
         }
     }

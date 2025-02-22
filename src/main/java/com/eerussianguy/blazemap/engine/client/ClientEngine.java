@@ -18,7 +18,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.event.DimensionChangedEvent;
-import com.eerussianguy.blazemap.api.event.ServerJoinedEvent;
+import com.eerussianguy.blazemap.api.event.ClientEngineEvent;
 import com.eerussianguy.blazemap.api.maps.LayerRegion;
 import com.eerussianguy.blazemap.api.markers.MarkerStorage;
 import com.eerussianguy.blazemap.api.pipeline.MasterDatum;
@@ -29,6 +29,7 @@ import com.eerussianguy.blazemap.engine.BlazeMapAsync;
 import com.eerussianguy.blazemap.engine.RegistryController;
 import com.eerussianguy.blazemap.engine.storage.InternalStorage;
 import com.eerussianguy.blazemap.engine.cache.ChunkMDCache;
+import com.eerussianguy.blazemap.engine.storage.PublicStorage;
 import com.eerussianguy.blazemap.engine.storage.StorageType;
 import com.eerussianguy.blazemap.lib.Helpers;
 import com.eerussianguy.blazemap.network.BlazeNetwork;
@@ -42,8 +43,10 @@ public class ClientEngine {
     private static File baseDir;
     private static String serverID;
     private static InternalStorage storage;
+    private static PublicStorage addon;
     private static boolean isServerSource;
     private static String mdSource;
+    private static boolean running = false;
 
     public static void init() {
         BlazeNetwork.initEngine();
@@ -56,16 +59,22 @@ public class ClientEngine {
 
     @SubscribeEvent
     public static void onJoinServer(ClientPlayerNetworkEvent.LoggedInEvent event) {
+        if(running) throw new IllegalStateException("Cannot start twice");
+
         RegistryController.ensureRegistriesReady();
         LocalPlayer player = event.getPlayer();
         if(player == null) return;
         serverID = Helpers.getServerID();
         storage = new InternalStorage(StorageType.SERVER, getStorageDir());
+        addon = storage.addon();
         isServerSource = detectRemote(event.getConnection());
-        ServerJoinedEvent serverJoined = new ServerJoinedEvent(serverID, storage.addon(), isServerSource);
-        MinecraftForge.EVENT_BUS.post(serverJoined);
-        switchToPipeline(player.level.dimension());
         mdSource = "unknown";
+        running = true;
+
+        ClientEngineEvent starting = new ClientEngineEvent.EngineStartingEvent(serverID, addon, isServerSource);
+        MinecraftForge.EVENT_BUS.post(starting);
+
+        switchToPipeline(player.level.dimension());
     }
 
     private static File getStorageDir() {
@@ -89,6 +98,11 @@ public class ClientEngine {
 
     @SubscribeEvent
     public static void onLeaveServer(ClientPlayerNetworkEvent.LoggedOutEvent event) {
+        if(!running) return;
+
+        ClientEngineEvent stopping = new ClientEngineEvent.EngineStoppingEvent(serverID, addon, isServerSource);
+        MinecraftForge.EVENT_BUS.post(stopping);
+
         PIPELINES.clear();
         if(activePipeline != null) {
             activePipeline.shutdown();
@@ -97,6 +111,7 @@ public class ClientEngine {
         activeLabels = null;
         serverID = null;
         storage = null;
+        running = false;
     }
 
     @SubscribeEvent

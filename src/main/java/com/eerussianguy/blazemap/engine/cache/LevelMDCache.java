@@ -52,12 +52,18 @@ public class LevelMDCache {
                             cache.read(stream);
                         }
                         catch (Exception e) {
+                            // Unlocking old cache before we discard cache
+                            // TODO: There must be a better way of doing this?
+                            cache.fileLock.readLock().unlock();
+
                             // Couldn't populate the cache from the existing cache file (corruption?)
                             // so behaving as if no cache file was found
                             cache = new RegionMDCache(key, debouncer);
                         }
                         finally {
-                            cache.fileLock.readLock().unlock();
+                            if (cache.fileLock.getReadHoldCount() > 0) {
+                                cache.fileLock.readLock().unlock();
+                            }
                         }
                     }
 

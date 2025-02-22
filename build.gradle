@@ -81,6 +81,11 @@ dependencies {
     implementation fg.deobf("_:ftb-library:$ftblib_version")
     implementation fg.deobf("_:architectury:${architectury_version}")
 
+    // implementation fg.deobf("_:journeymap:1.20.1-5.10.0-forge")
+    // implementation fg.deobf("_:Xaeros_Minimap:24.2.0_Forge_1.20")
+    // implementation fg.deobf("_:XaerosWorldMap:1.38.8_Forge_1.20")
+
+
     // Apply Mixin AP
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }

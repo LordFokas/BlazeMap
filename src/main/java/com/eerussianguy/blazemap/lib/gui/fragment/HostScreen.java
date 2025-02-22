@@ -5,18 +5,21 @@ import java.util.List;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
-import com.eerussianguy.blazemap.lib.gui.core.AbsoluteContainer;
-import com.eerussianguy.blazemap.lib.gui.core.ContainerAnchor;
-import com.eerussianguy.blazemap.lib.gui.core.MetaContainer;
-import com.eerussianguy.blazemap.lib.gui.core.TooltipService;
+import com.eerussianguy.blazemap.lib.gui.core.*;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 public class HostScreen extends Screen implements TooltipService {
     private final BaseFragment fragment;
+    private final Runnable callback;
 
     public HostScreen(BaseFragment fragment) {
+        this(fragment, () -> {});
+    }
+
+    public HostScreen(BaseFragment fragment, Runnable callback) {
         super(fragment.getTitle());
         this.fragment = fragment;
+        this.callback = callback;
     }
 
     @Override
@@ -24,10 +27,11 @@ public class HostScreen extends Screen implements TooltipService {
         MetaContainer root = new MetaContainer(width, height);
         AbsoluteContainer main = new AbsoluteContainer(0);
         FragmentContainer container = new FragmentContainer(this::onClose, 5).withBackground();
+        VolatileContainer volatiles = new VolatileContainer(0);
         AbsoluteContainer extra = new AbsoluteContainer(0);
-        root.add(main, extra);
+        root.add(main, extra, volatiles);
 
-        fragment.compose(container, extra);
+        fragment.compose(container, volatiles, extra);
         main.add(container, ContainerAnchor.MIDDLE_CENTER);
 
         this.addRenderableWidget(root);
@@ -42,5 +46,11 @@ public class HostScreen extends Screen implements TooltipService {
     @Override
     public void drawTooltip(PoseStack stack, int x, int y, List<? extends Component> lines) {
         renderTooltip(stack, lines.stream().map(Component::getVisualOrderText).toList(), x, y);
+    }
+
+    @Override
+    public void onClose() {
+        super.onClose();
+        this.callback.run();
     }
 }

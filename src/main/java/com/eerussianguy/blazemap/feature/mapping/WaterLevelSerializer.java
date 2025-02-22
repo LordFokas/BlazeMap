@@ -18,9 +18,9 @@ public class WaterLevelSerializer implements DataType<WaterLevelMD> {
     public void serialize(MinecraftStreams.Output stream, WaterLevelMD water) throws IOException {
         stream.writeShort(water.sea);
 
-        for(int x = 0; x < 16; x++) {
-            for(int z = 0; z < 16; z++) {
-                stream.writeShort(water.level[x][z]);
+        for(int z = 0; z < 16; z++) {
+            for(int x = 0; x < 16; x++) {
+                stream.writeShort(water.level[z][x]);
             }
         }
     }
@@ -31,9 +31,9 @@ public class WaterLevelSerializer implements DataType<WaterLevelMD> {
 
         int[][] level = new int[16][16];
 
-        for(int x = 0; x < 16; x++) {
-            for(int z = 0; z < 16; z++) {
-                level[x][z] = stream.readShort();
+        for(int z = 0; z < 16; z++) {
+            for(int x = 0; x < 16; x++) {
+                level[z][x] = stream.readShort();
             }
         }
 

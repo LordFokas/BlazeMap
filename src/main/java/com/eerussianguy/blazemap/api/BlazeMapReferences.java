@@ -58,7 +58,7 @@ public class BlazeMapReferences {
     public static class Overlays {
         public static final Key<Overlay> GRID = new Key<>(OVERLAYS, MODID, "grid");
         public static final Key<Overlay> PLAYERS = new Key<>(OVERLAYS, MODID, "players");
-        public static final Key<Overlay> VILLAGERS = new Key<>(OVERLAYS, MODID, "villagers");
+        public static final Key<Overlay> NPCS = new Key<>(OVERLAYS, MODID, "npcs");
         public static final Key<Overlay> ANIMALS = new Key<>(OVERLAYS, MODID, "animals");
         public static final Key<Overlay> ENEMIES = new Key<>(OVERLAYS, MODID, "enemies");
         public static final Key<Overlay> WAYPOINTS = new Key<>(OVERLAYS, MODID, "waypoints");

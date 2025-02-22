@@ -6,7 +6,9 @@ import net.minecraftforge.client.gui.IIngameOverlay;
 import net.minecraftforge.client.gui.OverlayRegistry;
 
 import com.eerussianguy.blazemap.config.BlazeMapConfig;
+import com.eerussianguy.blazemap.config.ServerConfig;
 import com.eerussianguy.blazemap.feature.maps.MinimapRenderer;
+import com.eerussianguy.blazemap.lib.Helpers;
 import com.eerussianguy.blazemap.profiling.overlay.ProfilingRenderer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -23,6 +25,8 @@ public class IngameOverlays {
     }
 
     public static void renderMinimap(ForgeIngameGui gui, PoseStack stack, float partialTicks, int width, int height) {
+        if(!BlazeMapConfig.SERVER.mapItemRequirement.canPlayerAccessMap(Helpers.getPlayer(), ServerConfig.MapAccess.READ_LIVE)) return;
+
         stack.pushPose();
         var buffers = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
         MinimapRenderer.INSTANCE.draw(stack, buffers, gui, width, height);

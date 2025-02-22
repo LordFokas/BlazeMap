@@ -110,7 +110,7 @@ public abstract class Pipeline {
 
     // =================================================================================================================
     // Pipeline internals
-    private void begin(ChunkPos pos) {
+    protected void begin(ChunkPos pos) {
         async.startOnGameThread($ -> this.runCollectors(pos))
             .thenOnDataThread(data -> this.processMasterData(pos, data))
             .execute();

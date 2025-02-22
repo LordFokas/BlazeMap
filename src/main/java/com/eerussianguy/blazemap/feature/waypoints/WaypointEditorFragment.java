@@ -5,29 +5,39 @@ import java.util.function.Function;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
 
 import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
 import com.eerussianguy.blazemap.api.markers.Waypoint;
-import com.eerussianguy.blazemap.lib.Colors;
-import com.eerussianguy.blazemap.lib.Helpers;
-import com.eerussianguy.blazemap.lib.IntHolder;
-import com.eerussianguy.blazemap.lib.ObjHolder;
+import com.eerussianguy.blazemap.feature.waypoints.service.WaypointGroup;
+import com.eerussianguy.blazemap.feature.waypoints.service.WaypointServiceClient;
+import com.eerussianguy.blazemap.lib.*;
 import com.eerussianguy.blazemap.lib.gui.components.*;
+import com.eerussianguy.blazemap.lib.gui.components.selection.DropdownList;
+import com.eerussianguy.blazemap.lib.gui.components.selection.SelectionGrid;
+import com.eerussianguy.blazemap.lib.gui.core.VolatileContainer;
 import com.eerussianguy.blazemap.lib.gui.fragment.BaseFragment;
 import com.eerussianguy.blazemap.lib.gui.fragment.FragmentContainer;
 
 public class WaypointEditorFragment extends BaseFragment {
     private final Waypoint waypoint;
     private final boolean creating;
+    private WaypointGroup defaultGroup = null;
 
     public WaypointEditorFragment() {
         this(Minecraft.getInstance().player.blockPosition());
     }
 
     public WaypointEditorFragment(BlockPos pos) {
+        this(pos, null);
+    }
+
+    public WaypointEditorFragment(BlockPos pos, WaypointGroup defaultGroup) {
         this(new Waypoint(BlazeMap.resource("waypoint/"+System.nanoTime()), Minecraft.getInstance().level.dimension(), pos, "New Waypoint", BlazeMapReferences.Icons.WAYPOINT, Colors.randomBrightColor()), true);
+        this.defaultGroup = defaultGroup;
     }
 
     public WaypointEditorFragment(Waypoint waypoint) {
@@ -41,7 +51,7 @@ public class WaypointEditorFragment extends BaseFragment {
     }
 
     @Override
-    public void compose(FragmentContainer container) {
+    public void compose(FragmentContainer container, VolatileContainer volatiles) {
         int y = 0;
 
         if(container.titleConsumer.isPresent()) {
@@ -64,6 +74,30 @@ public class WaypointEditorFragment extends BaseFragment {
         container.add(VanillaComponents.makeIntField(font, 38, 14, posY), 61 , y);
         container.add(VanillaComponents.makeIntField(font, 58, 14, posZ), 102, y);
 
+        DropdownList<ResourceKey<Level>> dimensions = new DropdownList<>(volatiles, d -> new Label(d.location().toString()));
+        var dimensionsModel = dimensions.getModel();
+        dimensionsModel.setElements(RegistryHelper.getAllDimensions());
+        dimensionsModel.setSelected(waypoint.getDimension());
+        container.add(dimensions.setSize(160, 14), 0, y += 17);
+
+        DropdownList<WaypointGroup> groups = new DropdownList<>(volatiles, g -> new Label(g.getName()));
+        var groupsModel = groups.getModel();
+        ArraySet<WaypointGroup> groupSet = new ArraySet<>();
+        dimensionsModel.addSelectionListener(dimension -> {
+            groupSet.clear();
+            WaypointServiceClient.instance().getPools().forEach(pool -> {
+                pool.getGroups(dimension).stream().filter(g -> g.management.canCreateChild).forEach(groupSet::add);
+            });
+            groupsModel.setElements(groupSet);
+            if(groupsModel.getSelected() == null) {
+                if(defaultGroup != null && groupSet.contains(defaultGroup)) {
+                    groupsModel.setSelected(defaultGroup);
+                } else {
+                    groupsModel.selectFirst();
+                }
+            }
+        });
+        container.add(groups.setSize(160, 14), 0, y += 17);
 
         // APPEARANCE ==================================================================================================
         container.add(new SectionLabel("Appearance").setWidth(160), 0, y += 22);
@@ -107,13 +141,15 @@ public class WaypointEditorFragment extends BaseFragment {
 
 
         // SUBMIT ======================================================================================================
-        TextButton submit = new TextButton(Helpers.translate("blazemap.gui.waypoint_editor.save"), button -> {
+        TextButton submit = new TextButton(Helpers.translate("blazemap.gui.button.save"), button -> {
             waypoint.setName(name.get());
             waypoint.setPosition(new BlockPos(posX.get(), posY.get(), posZ.get()));
+            waypoint.setDimension(dimensions.getModel().getSelected());
             waypoint.setIcon(icons.getValue());
             waypoint.setColor(color.get());
+            WaypointGroup group = groupsModel.getSelected();
             if(creating) {
-                // TODO: submit the waypoint for creation
+                group.add(waypoint);
             }
             container.dismiss();
         });

@@ -50,6 +50,17 @@ public class MetaContainer extends BaseContainer<MetaContainer> {
     }
 
     @Override
+    public Optional<BaseComponent<?>> getComponentAt(double x, double y, ReferenceFrame reference) {
+        for(var container : containers) {
+            var component = container.getComponentAt(x, y, reference);
+            if(component.isPresent()) {
+                return component;
+            }
+        }
+        return Optional.empty();
+    }
+
+    @Override
     public Optional<GuiEventListener> getLeafListenerAt(double x, double y) {
         for(var container : containers) {
             var listener = container.getLeafListenerAt(x, y);

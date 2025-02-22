@@ -10,7 +10,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
-public abstract class BaseContainer<T extends BaseContainer<T>> extends BaseComponent<T> implements GuiEventListener {
+public abstract class BaseContainer<T extends BaseContainer<T>> extends BaseComponent<T> implements UIEventListener {
     private final List<BaseComponent<?>> renderables = new ArrayList<>();
     private final List<GuiEventListener> listeners = new ArrayList<>();
     private GuiEventListener focus;
@@ -27,6 +27,26 @@ public abstract class BaseContainer<T extends BaseContainer<T>> extends BaseComp
         if(child instanceof GuiEventListener) {
             listeners.remove(child);
         }
+    }
+
+    protected void clear() {
+        if(size() == 0) return;
+
+        // Clear focus if it is our direct child
+        // FIXME: when focus is deeper child
+        BaseComponent<?> parent = this;
+        while(parent != null) {
+            if(parent instanceof BaseContainer<?> container) {
+                if(listeners.contains(container.focus)) {
+                    container.focus = null;
+                    break; // only root container can have focus
+                }
+            }
+            parent = parent.getParent();
+        }
+
+        renderables.clear();
+        listeners.clear();
     }
 
     public int size() {

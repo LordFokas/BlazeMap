@@ -1,4 +1,4 @@
-package com.eerussianguy.blazemap.lib.gui.components;
+package com.eerussianguy.blazemap.lib.gui.components.selection;
 
 import java.util.ArrayList;
 import java.util.Collection;
