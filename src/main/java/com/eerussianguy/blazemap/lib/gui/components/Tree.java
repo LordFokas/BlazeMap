@@ -59,7 +59,7 @@ public class Tree extends BaseScrollable<Tree> {
             var items = parent().items;
             this.clear();
             if(items.size() == 0) return;
-            int y = deepAdd(items, 0) - spacing;
+            int y = deepAdd(items, 0) - padding;
             this.setSize(0, y);
 
             super.recalculate();
@@ -71,7 +71,7 @@ public class Tree extends BaseScrollable<Tree> {
                 item.setUpdater(tree::recalculate);
                 var component = (BaseComponent<?>) item;
                 add(component);
-                y += component.getHeight() + spacing;
+                y += component.getHeight() + padding;
                 y = deepAdd(item.getChildren(), y);
             }
             return y;

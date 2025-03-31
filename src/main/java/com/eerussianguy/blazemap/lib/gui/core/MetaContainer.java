@@ -16,8 +16,9 @@ public class MetaContainer extends BaseContainer<MetaContainer> {
         this.setSize(width, height);
     }
 
-    public void add(AbsoluteContainer ... children) {
+    public MetaContainer add(AbsoluteContainer ... children) {
         for(var child : children) add(child);
+        return this;
     }
 
     public void add(AbsoluteContainer child) {
@@ -32,7 +33,7 @@ public class MetaContainer extends BaseContainer<MetaContainer> {
         for(var layer : renderables) {
             stack.translate(0, 0, 25);
             stack.pushPose();
-            layer.render(stack, hasMouse, mouseX, mouseY);
+            layer.renderAsChild(stack, hasMouse, mouseX, mouseY);
             stack.popPose();
         }
         stack.pushPose();
@@ -52,6 +53,7 @@ public class MetaContainer extends BaseContainer<MetaContainer> {
     @Override
     public Optional<BaseComponent<?>> getComponentAt(double x, double y, ReferenceFrame reference) {
         for(var container : containers) {
+            if(!container.isVisible()) continue;
             var component = container.getComponentAt(x, y, reference);
             if(component.isPresent()) {
                 return component;
@@ -63,6 +65,7 @@ public class MetaContainer extends BaseContainer<MetaContainer> {
     @Override
     public Optional<GuiEventListener> getLeafListenerAt(double x, double y) {
         for(var container : containers) {
+            if(!container.isVisible()) continue;
             var listener = container.getLeafListenerAt(x, y);
             if(listener.isPresent()) {
                 return listener;

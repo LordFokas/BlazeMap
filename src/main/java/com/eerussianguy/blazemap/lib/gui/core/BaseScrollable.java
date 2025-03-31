@@ -83,14 +83,14 @@ public abstract class BaseScrollable<T extends BaseScrollable<T>> extends BaseCo
 
         @Override // Dynamically stick to parent width very carefully to not cause Stack Overflows
         public int getWidth() {
-            return parent().getWidth() - (parent().scroll.isVisible() ? SCROLLBAR_WIDTH : 0) - (spacing+1) * 2;
+            return parent().getWidth() - (parent().scroll.isVisible() ? SCROLLBAR_WIDTH : 0) - (padding +1) * 2;
         }
 
         protected void recalculate() {
             var parent = parent();
             if(parent == null) return;
 
-            int viewport = (parent.getHeight() - spacing * 2);
+            int viewport = (parent.getHeight() - padding * 2);
             int self = getHeight();
             if(viewport < self) {
                 trackSize = self - viewport;
@@ -106,7 +106,7 @@ public abstract class BaseScrollable<T extends BaseScrollable<T>> extends BaseCo
 
             // set track pos
             this.trackPos = Helpers.clamp(0, nextPos, trackSize);
-            this.setPosition(spacing, spacing - this.trackPos);
+            this.setPosition(padding, padding - this.trackPos);
 
             if(sound) { // play feedback sound
                 if(this.trackPos < previous) {

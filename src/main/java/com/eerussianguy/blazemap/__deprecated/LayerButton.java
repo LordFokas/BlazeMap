@@ -8,11 +8,10 @@ import net.minecraft.network.chat.TextComponent;
 import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
 import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.MapType;
-import com.eerussianguy.blazemap.feature.maps.MapHost;
+import com.eerussianguy.blazemap.feature.maps.ui.MapHost;
 import com.eerussianguy.blazemap.integration.KnownMods;
 import com.eerussianguy.blazemap.lib.Colors;
 import com.eerussianguy.blazemap.lib.RenderHelper;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 @Deprecated
@@ -45,8 +44,8 @@ public class LayerButton extends ImageButton {
 
     @Override
     public void renderToolTip(PoseStack stack, int x, int y) {
-        RenderSystem.setShaderColor(1, 1, 1, 1);
-        host.drawTooltip(stack, x, y, key.value().getName(), owner);
+        //RenderSystem.setShaderColor(1, 1, 1, 1);
+        //host.drawTooltip(stack, x, y, key.value().getName(), owner);
     }
 
     public void checkVisible() {

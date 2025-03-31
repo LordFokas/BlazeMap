@@ -12,6 +12,10 @@ import com.mojang.blaze3d.vertex.PoseStack;
 public abstract class BaseComponent<T extends BaseComponent<T>> extends Positionable<T> implements Renderable, Widget, NarratableEntry {
     private static float partial = 0F;
     private boolean enabled = true, visible = true, focused = false;
+    private ContainerAxis axis;
+    private ContainerDirection direction;
+    private BaseComponent<?> target;
+    private int spacing;
 
     public static float getPartialTick() {
         return partial;
@@ -21,7 +25,12 @@ public abstract class BaseComponent<T extends BaseComponent<T>> extends Position
     public abstract void render(PoseStack stack, boolean hasMouse, int mouseX, int mouseY);
     protected void renderTooltip(PoseStack stack, int mouseX, int mouseY, TooltipService service){}
 
-    protected final void renderInternal(PoseStack stack, boolean hasMouse, int mouseX, int mouseY) {
+    protected final void renderTooltipAsChild(PoseStack stack, int mouseX, int mouseY, TooltipService service){
+        if(!isVisible()) return;
+        renderTooltip(stack, mouseX, mouseY, service);
+    }
+
+    protected final void renderAsChild(PoseStack stack, boolean hasMouse, int mouseX, int mouseY) {
         if(!isVisible()) return;
         render(stack, hasMouse, mouseX, mouseY);
     }
@@ -41,7 +50,7 @@ public abstract class BaseComponent<T extends BaseComponent<T>> extends Position
             mouseY -= positionY;
         }
 
-        this.renderInternal(stack, hasMouse, mouseX, mouseY);
+        this.render(stack, hasMouse, mouseX, mouseY);
 
         stack.translate(0, 0, 100);
         if(hasMouse && Minecraft.getInstance().screen instanceof TooltipService service) {
@@ -61,6 +70,52 @@ public abstract class BaseComponent<T extends BaseComponent<T>> extends Position
     public boolean mouseIntercepts(double mouseX, double mouseY) {
         if(!isVisible()) return false;
         return super.mouseIntercepts(mouseX, mouseY);
+    }
+
+    protected T anchorTo(BaseComponent<?> target, ContainerAxis axis, ContainerDirection direction, int spacing) {
+        this.target = target;
+        this.axis = axis;
+        this.direction = direction;
+        this.spacing = spacing;
+        return this.setAnchor(target.getAnchor());
+    }
+
+    public int getAnchorX() {
+        if(target == null) return super.getPositionX();
+        if(axis == ContainerAxis.VERTICAL) return target.getAnchorX();
+
+        int tx = target.getAnchorX();
+        if(!target.isVisible()) return tx;
+
+        int offset = target.getWidth() + spacing;
+        return switch(direction) {
+            case POSITIVE -> tx + offset;
+            case NEGATIVE -> tx - offset;
+        };
+    }
+
+    public int getAnchorY() {
+        if(target == null) return super.getPositionY();
+        if(axis == ContainerAxis.HORIZONTAL) return target.getAnchorY();
+
+        int ty = target.getAnchorY();
+        if(!target.isVisible()) return ty;
+
+        int offset = target.getHeight() + spacing;
+        return switch(direction) {
+            case POSITIVE -> ty + offset;
+            case NEGATIVE -> ty - offset;
+        };
+    }
+
+    @Override
+    public int getPositionX() {
+        return getAnchorX() - getAnchor().getPositionX(getWidth(), 0);
+    }
+
+    @Override
+    public int getPositionY() {
+        return getAnchorY() - getAnchor().getPositionY(getHeight(), 0);
     }
 
     public boolean isEnabled() {

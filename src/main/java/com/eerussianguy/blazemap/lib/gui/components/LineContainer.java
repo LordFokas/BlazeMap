@@ -15,11 +15,16 @@ public class LineContainer extends BaseContainer<LineContainer> {
     private int background = 0;
     protected final ContainerAxis axis;
     protected final ContainerDirection direction;
-    protected final int spacing;
+    protected final int padding, spacing;
 
-    public LineContainer(ContainerAxis axis, ContainerDirection direction, int spacing) {
+    public LineContainer(ContainerAxis axis, ContainerDirection direction, int padding) {
+        this(axis, direction, padding, padding);
+    }
+
+    public LineContainer(ContainerAxis axis, ContainerDirection direction, int padding, int spacing) {
         this.axis = Objects.requireNonNull(axis);
         this.direction = Objects.requireNonNull(direction);
+        this.padding = padding;
         this.spacing = spacing;
     }
 
@@ -39,7 +44,7 @@ public class LineContainer extends BaseContainer<LineContainer> {
                     forEach(c -> c.moveY(height));
                 }
             }
-            child.setPosition(spacing, spacing);
+            child.setPosition(padding, padding);
             super.add(child);
         }
     }
@@ -52,10 +57,10 @@ public class LineContainer extends BaseContainer<LineContainer> {
     }
 
     public LineContainer addSpacer() {
-        var spacer = new Spacer(spacing, Colors.DISABLED);
+        var spacer = new Spacer(padding, Colors.DISABLED);
         switch(axis) {
-            case HORIZONTAL -> spacer.setSize(1 + spacing*2, getHeight() - spacing*2);
-            case VERTICAL -> spacer.setSize(getWidth() - spacing*2, 1 + spacing*2);
+            case HORIZONTAL -> spacer.setSize(1 + padding *2, getHeight() - padding *2);
+            case VERTICAL -> spacer.setSize(getWidth() - padding *2, 1 + padding *2);
         }
         add(spacer);
         return this;
@@ -82,8 +87,8 @@ public class LineContainer extends BaseContainer<LineContainer> {
         if(size() == 0) return 0;
 
         return switch(axis) {
-            case HORIZONTAL -> sum(BaseComponent::getIndependentWidth) + (size()+1) * spacing;
-            case VERTICAL -> max(BaseComponent::getIndependentWidth) + 2 * spacing;
+            case HORIZONTAL -> sum(BaseComponent::getIndependentWidth) + (size()-1) * spacing + padding * 2;
+            case VERTICAL -> max(BaseComponent::getIndependentWidth) + 2 * padding;
         };
     }
 
@@ -92,22 +97,22 @@ public class LineContainer extends BaseContainer<LineContainer> {
         if(size() == 0) return 0;
 
         return switch(axis) {
-            case HORIZONTAL -> max(BaseComponent::getIndependentHeight) + 2 * spacing;
-            case VERTICAL -> sum(BaseComponent::getIndependentHeight) + (size()+1) * spacing;
+            case HORIZONTAL -> max(BaseComponent::getIndependentHeight) + 2 * padding;
+            case VERTICAL -> sum(BaseComponent::getIndependentHeight) + (size()-1) * spacing + padding * 2;
         };
     }
 
     public int nextChildX() {
         return switch(axis) {
-            case HORIZONTAL -> size() == 0 ? spacing : getWidth();
-            case VERTICAL -> spacing;
+            case HORIZONTAL -> size() == 0 ? padding : getWidth() - padding + spacing;
+            case VERTICAL -> padding;
         };
     }
 
     public int nextChildY() {
         return switch(axis) {
-            case HORIZONTAL -> spacing;
-            case VERTICAL -> size() == 0 ? spacing : getHeight();
+            case HORIZONTAL -> padding;
+            case VERTICAL -> size() == 0 ? padding : getHeight() - padding + spacing;
         };
     }
 

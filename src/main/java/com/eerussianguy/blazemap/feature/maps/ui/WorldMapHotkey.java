@@ -1,4 +1,4 @@
-package com.eerussianguy.blazemap.feature.maps;
+package com.eerussianguy.blazemap.feature.maps.ui;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
