@@ -42,6 +42,7 @@ public class BlazeMapFeaturesClient {
     public static final KeyMapping KEY_MAPS = new KeyMapping("blazemap.key.maps", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_B, BlazeMap.MOD_NAME);
     public static final KeyMapping KEY_ZOOM = new KeyMapping("blazemap.key.zoom", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_LEFT_BRACKET, BlazeMap.MOD_NAME);
     public static final KeyMapping KEY_WAYPOINTS = new KeyMapping("blazemap.key.waypoints", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_N, BlazeMap.MOD_NAME);
+    public static final KeyMapping KEY_TOGGLE_MINIMAP = new KeyMapping("blazemap.key.toggle_minimap", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_BACKSLASH, BlazeMap.MOD_NAME);
 
     private static boolean mapping = false;
     private static boolean maps = false;
@@ -99,6 +100,7 @@ public class BlazeMapFeaturesClient {
         ClientRegistry.registerKeyBinding(KEY_MAPS);
         ClientRegistry.registerKeyBinding(KEY_ZOOM);
         ClientRegistry.registerKeyBinding(KEY_WAYPOINTS);
+        ClientRegistry.registerKeyBinding(KEY_TOGGLE_MINIMAP);
 
         BlazeMapAPI.OBJECT_RENDERERS.register(new DefaultObjectRenderer());
 
@@ -156,6 +158,11 @@ public class BlazeMapFeaturesClient {
                     MinimapRenderer.INSTANCE.synchronizer.zoomIn();
                 }
             }
+        }
+        if (KEY_TOGGLE_MINIMAP.isDown()) {
+            boolean currentMinimapEnabledValue = BlazeMapConfig.CLIENT.minimap.enabled.get();
+            BlazeMapConfig.CLIENT.minimap.enabled.set(!currentMinimapEnabledValue);
+            IngameOverlays.reload();
         }
     }
 
