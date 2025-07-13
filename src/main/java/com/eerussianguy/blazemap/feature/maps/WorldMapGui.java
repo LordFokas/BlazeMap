@@ -1,10 +1,25 @@
 package com.eerussianguy.blazemap.feature.maps;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import com.eerussianguy.blazemap.api.BlazeMapReferences;
+import com.eerussianguy.blazemap.api.builtin.TerrainHeightMD;
+import com.eerussianguy.blazemap.api.pipeline.DataType;
+import com.eerussianguy.blazemap.api.pipeline.MasterDatum;
+import com.eerussianguy.blazemap.config.ServerConfig;
+import com.eerussianguy.blazemap.engine.UnsafeGenerics;
+import com.eerussianguy.blazemap.engine.cache.ChunkMDCache;
+import com.eerussianguy.blazemap.engine.cache.ChunkMDCacheView;
+import com.eerussianguy.blazemap.engine.client.ClientEngine;
+import com.eerussianguy.blazemap.feature.waypoints.WaypointEditorFragment;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
+import net.minecraft.world.level.ChunkPos;
 import org.lwjgl.glfw.GLFW;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -63,6 +78,7 @@ public class WorldMapGui extends Screen implements FragmentHost, TooltipService 
         new WorldMapHotkey("LMB", "Drag to pan the map"),
         new WorldMapHotkey("RMB", "Open context menu"),
         new WorldMapHotkey("Scroll", "Zoom in / out"),
+        new WorldMapHotkey(BlazeMapFeaturesClient.KEY_WAYPOINTS.getKey().getDisplayName().getString().toUpperCase(),"Create waypoint at cursor"),
         new WorldMapHotkey("F1", "Toggle map UI"),
         new WorldMapHotkey("F3", "Toggle debug info"),
         new WorldMapHotkey("F12", "Export atlas"),
@@ -213,6 +229,33 @@ public class WorldMapGui extends Screen implements FragmentHost, TooltipService 
         if(key == BlazeMapFeaturesClient.KEY_MAPS.getKey().getValue()) {
             this.onClose();
             return true;
+        }
+
+        if (key == BlazeMapFeaturesClient.KEY_WAYPOINTS.getKey().getValue()) {
+            Level level = Minecraft.getInstance().level;
+            int posY = level == null ? 60 : level.getSeaLevel();
+            Coordination coordination = map.getCoordination();
+            BlockPos position = new BlockPos(coordination.blockX, posY, coordination.blockZ);
+            ChunkPos chunkPos = new ChunkPos(position);
+
+            // Attempt to get y actual level from MDCache
+            ChunkMDCache mdCache = ClientEngine.getMDCache(chunkPos);
+            if (mdCache != null) {
+                ChunkMDCacheView mdView = new ChunkMDCacheView().setSource(mdCache);
+                Set<BlazeRegistry.Key<DataType>> filterKeys = new HashSet<>();
+                filterKeys.add(UnsafeGenerics.stripKey(BlazeMapReferences.MasterData.TERRAIN_HEIGHT));
+                mdView.setFilter(filterKeys);
+
+                TerrainHeightMD heightMD = (TerrainHeightMD) mdView.get(BlazeMapReferences.MasterData.TERRAIN_HEIGHT);
+
+                if (heightMD != null) {
+                    int chunkX = SectionPos.sectionRelative(position.getX());
+                    int chunkZ = SectionPos.sectionRelative(position.getZ());
+                    posY = heightMD.heightmap[chunkX][chunkZ];
+                    position = position.atY(posY);
+                }
+            }
+            new WaypointEditorFragment(position).open();
         }
 
         return false;
