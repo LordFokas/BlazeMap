@@ -17,6 +17,7 @@
   "blazemap.key.maps": "Open World Map / [Shift] Edit Minimap",
   "blazemap.key.waypoints": "Create Waypoint / [Shift] Manage Waypoints",
   "blazemap.key.zoom": "Zoom In / [Shift] Zoom Out",
+  "blazemap.key.toggle_minimap": "Toggle Minimap Visibility",
 
   "blazemap.gui.button.delete": "Delete",
   "blazemap.gui.button.save": "Save",
