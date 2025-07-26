@@ -12,6 +12,7 @@ import com.eerussianguy.blazemap.engine.UnsafeGenerics;
 import com.eerussianguy.blazemap.engine.cache.ChunkMDCache;
 import com.eerussianguy.blazemap.engine.client.ClientEngine;
 import com.eerussianguy.blazemap.feature.waypoints.WaypointEditorFragment;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.ChunkPos;
@@ -64,20 +65,20 @@ public class WorldMapGui extends Screen implements FragmentHost, TooltipService 
     }
 
     public static void apply(Consumer<WorldMapGui> function) {
-        if (Minecraft.getInstance().screen instanceof WorldMapGui gui) {
+        if(Minecraft.getInstance().screen instanceof WorldMapGui gui) {
             function.accept(gui);
         }
     }
 
-    private static final WorldMapHotkey[] HOTKEYS = new WorldMapHotkey[]{
-            new WorldMapHotkey("LMB", "Drag to pan the map"),
-            new WorldMapHotkey("RMB", "Open context menu"),
-            new WorldMapHotkey("Scroll", "Zoom in / out"),
-            new WorldMapHotkey(BlazeMapFeaturesClient.KEY_WAYPOINTS.getKey().getDisplayName().getString().toUpperCase(), "Create waypoint at cursor"),
-            new WorldMapHotkey("F1", "Toggle map UI"),
-            new WorldMapHotkey("F3", "Toggle debug info"),
-            new WorldMapHotkey("F12", "Export atlas"),
-            new WorldMapHotkey("W A S D", "Pan the map")
+    private static final WorldMapHotkey[] HOTKEYS = new WorldMapHotkey[] {
+        new WorldMapHotkey("LMB", "Drag to pan the map"),
+        new WorldMapHotkey("RMB", "Open context menu"),
+        new WorldMapHotkey("Scroll", "Zoom in / out"),
+        new WorldMapHotkey(BlazeMapFeaturesClient.KEY_WAYPOINTS.getKey().getDisplayName().getString().toUpperCase(), "Create waypoint at cursor"),
+        new WorldMapHotkey("F1", "Toggle map UI"),
+        new WorldMapHotkey("F3", "Toggle debug info"),
+        new WorldMapHotkey("F12", "Export atlas"),
+        new WorldMapHotkey("W A S D", "Pan the map")
     };
 
 
@@ -131,14 +132,14 @@ public class WorldMapGui extends Screen implements FragmentHost, TooltipService 
         maps.add(new Image(HEADER_MAPS, 16, 16).tooltip(new TextComponent("Maps")));
         maps.addSpacer();
         List<LineContainer> layerSets = new ArrayList<>();
-        for (var mapType : mapTypes) {
+        for(var mapType : mapTypes) {
             LineContainer layerSet = new LineContainer(ContainerAxis.VERTICAL, ContainerDirection.NEGATIVE, 2).withBackground();
             components.anchor(layerSet, brand_icon, ContainerAxis.VERTICAL, ContainerDirection.POSITIVE);
             layerSets.add(layerSet);
             maps.add(new MapTypeButton(mapType.getID(), map, layerSets, layerSet));
 
             layerSet.setVisible(map.getMapType().getID().equals(mapType.getID()));
-            for (var layer : mapType.getLayers()) {
+            for(var layer : mapType.getLayers()) {
                 layerSet.add(new LayerButton(layer, map));
             }
             layerSet.addSpacer().add(new Image(HEADER_LAYERS, 16, 16).tooltip(new TextComponent("Layers")));
@@ -148,7 +149,7 @@ public class WorldMapGui extends Screen implements FragmentHost, TooltipService 
         LineContainer overlaySet = new LineContainer(ContainerAxis.HORIZONTAL, ContainerDirection.POSITIVE, 2).withBackground();
         overlaySet.add(new Image(HEADER_OVERLAYS, 16, 16).tooltip(new TextComponent("Overlays")));
         overlaySet.addSpacer();
-        for (var overlay : overlays) {
+        for(var overlay : overlays) {
             overlaySet.add(new OverlayButton(overlay.getID(), map));
         }
         components.add(overlaySet, ContainerAnchor.BOTTOM_LEFT);
@@ -182,7 +183,7 @@ public class WorldMapGui extends Screen implements FragmentHost, TooltipService 
     private void updateLegend() {
         var legend = WrappedComponent.ofNullable(map.getMapType().getLayers().iterator().next().value().getLegendWidget());
 
-        if (legend == null) {
+        if(legend == null) {
             this.legend.clear();
         } else {
             this.legend.add(legend);
@@ -203,30 +204,30 @@ public class WorldMapGui extends Screen implements FragmentHost, TooltipService 
 
     @Override
     public boolean keyPressed(int key, int scancode, int modifiers) {
-        if (key == GLFW.GLFW_KEY_F1) {
+        if(key == GLFW.GLFW_KEY_F1) {
             visibilityController.toggleVisible();
             return true;
         }
 
-        if (key == GLFW.GLFW_KEY_F12) {
+        if(key == GLFW.GLFW_KEY_F12) {
             AtlasExporter.exportAsync(new AtlasTask(this.dimension, map.getMapType().getID(), map.getRenderer().getVisibleLayers(), TileResolution.FULL, map.getRenderer().getCenterRegion()));
             return true;
         }
 
-        if (key == GLFW.GLFW_KEY_F3) {
+        if(key == GLFW.GLFW_KEY_F3) {
             renderDebug = !renderDebug;
             return true;
         }
 
-        if (root.keyPressed(key, scancode, modifiers)) return true;
-        if (super.keyPressed(key, scancode, modifiers)) return true;
+        if(root.keyPressed(key, scancode, modifiers)) return true;
+        if(super.keyPressed(key, scancode, modifiers)) return true;
 
-        if (key == BlazeMapFeaturesClient.KEY_MAPS.getKey().getValue()) {
+        if(key == BlazeMapFeaturesClient.KEY_MAPS.getKey().getValue()) {
             this.onClose();
             return true;
         }
 
-        if (key == BlazeMapFeaturesClient.KEY_WAYPOINTS.getKey().getValue()) {
+        if(key == BlazeMapFeaturesClient.KEY_WAYPOINTS.getKey().getValue()) {
             Level level = Minecraft.getInstance().level;
             int posY = level == null ? 60 : level.getSeaLevel();
             Coordination coordination = map.getCoordination();
@@ -235,12 +236,12 @@ public class WorldMapGui extends Screen implements FragmentHost, TooltipService 
 
             // Attempt to get y actual level from MDCache
             ChunkMDCache mdCache = ClientEngine.getMDCache(chunkPos);
-            if (mdCache != null) {
+            if(mdCache != null) {
                 TerrainHeightMD heightMD = (TerrainHeightMD) mdCache.get(
-                        UnsafeGenerics.stripKey(BlazeMapReferences.MasterData.TERRAIN_HEIGHT)
+                    UnsafeGenerics.stripKey(BlazeMapReferences.MasterData.TERRAIN_HEIGHT)
                 );
 
-                if (heightMD != null) {
+                if(heightMD != null) {
                     int chunkX = SectionPos.sectionRelative(position.getX());
                     int chunkZ = SectionPos.sectionRelative(position.getZ());
                     posY = heightMD.heightmap[chunkX][chunkZ];
