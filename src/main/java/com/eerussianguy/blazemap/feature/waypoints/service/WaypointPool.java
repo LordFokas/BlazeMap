@@ -61,6 +61,10 @@ public abstract class WaypointPool {
         }
     }
 
+    public void iterateAll(BiConsumer<Waypoint, WaypointGroup> consumer) {
+        groups.keySet().forEach(dimension -> iterate(dimension, consumer));
+    }
+
     public List<WaypointGroup> getGroups(ResourceKey<Level> dimension) {
         return groups.computeIfAbsent(dimension, $ -> makeDefaultGroups());
     }
@@ -77,6 +81,7 @@ public abstract class WaypointPool {
     }
 
     public abstract void save(StorageAccess.ServerStorage storage);
+
     public abstract void load(StorageAccess.ServerStorage storage);
 
     protected void save(StorageAccess.ServerStorage storage, ResourceLocation file) {
@@ -116,7 +121,7 @@ public abstract class WaypointPool {
                 groups.putAll(WaypointSerialization.FORMAT.readLegacy(input));
             }
             catch(IOException e) {
-                BlazeMap.LOGGER.error("Error loading legacy waypoints for level \""+key+"\". Not all waypoints could be loaded", e);
+                BlazeMap.LOGGER.error("Error loading legacy waypoints for level \"" + key + "\". Not all waypoints could be loaded", e);
             }
         });
 

@@ -88,7 +88,8 @@ dependencies {
     implementation fg.deobf("curse.maven:$ftbchunks_project_id:$ftbchunks_file_id")
     implementation fg.deobf("curse.maven:$ftblib_project_id:$ftblib_file_id")
     implementation fg.deobf("curse.maven:$ftbteams_project_id:$ftbteams_file_id")
-
+    implementation fg.deobf("curse.maven:$waystones_project_id:$waystones_file_id")
+    implementation fg.deobf("curse.maven:$balm_project_id:$balm_file_id")
 
     // implementation fg.deobf("_:ftb-chunks:${ftbchunks_version}")
     // implementation fg.deobf("_:ftb-teams:${ftbteams_version}")
