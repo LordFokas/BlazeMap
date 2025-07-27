@@ -5,44 +5,51 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import com.eerussianguy.blazemap.api.BlazeMapReferences;
-import com.eerussianguy.blazemap.api.builtin.TerrainHeightMD;
-import com.eerussianguy.blazemap.api.pipeline.DataType;
-import com.eerussianguy.blazemap.engine.UnsafeGenerics;
-import com.eerussianguy.blazemap.engine.cache.ChunkMDCache;
-import com.eerussianguy.blazemap.engine.client.ClientEngine;
-import com.eerussianguy.blazemap.feature.waypoints.WaypointEditorFragment;
-
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.SectionPos;
-import net.minecraft.world.level.ChunkPos;
 import org.lwjgl.glfw.GLFW;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 
 import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.BlazeMapAPI;
+import com.eerussianguy.blazemap.api.BlazeMapReferences;
 import com.eerussianguy.blazemap.api.BlazeRegistry;
+import com.eerussianguy.blazemap.api.builtin.TerrainHeightMD;
 import com.eerussianguy.blazemap.api.maps.MapType;
 import com.eerussianguy.blazemap.api.maps.Overlay;
 import com.eerussianguy.blazemap.api.maps.TileResolution;
 import com.eerussianguy.blazemap.config.BlazeMapConfig;
+import com.eerussianguy.blazemap.engine.UnsafeGenerics;
+import com.eerussianguy.blazemap.engine.cache.ChunkMDCache;
+import com.eerussianguy.blazemap.engine.client.ClientEngine;
 import com.eerussianguy.blazemap.feature.BlazeMapFeaturesClient;
-import com.eerussianguy.blazemap.feature.atlas.*;
-import com.eerussianguy.blazemap.feature.maps.ui.*;
-import com.eerussianguy.blazemap.feature.maps.ui.NamedMapComponentButton.*;
+import com.eerussianguy.blazemap.feature.atlas.AtlasExportProgress;
+import com.eerussianguy.blazemap.feature.atlas.AtlasExporter;
+import com.eerussianguy.blazemap.feature.atlas.AtlasTask;
+import com.eerussianguy.blazemap.feature.maps.ui.InteractiveMapDisplay;
+import com.eerussianguy.blazemap.feature.maps.ui.MapScaleDisplay;
+import com.eerussianguy.blazemap.feature.maps.ui.NamedMapComponentButton.LayerButton;
+import com.eerussianguy.blazemap.feature.maps.ui.NamedMapComponentButton.MapTypeButton;
+import com.eerussianguy.blazemap.feature.maps.ui.NamedMapComponentButton.OverlayButton;
+import com.eerussianguy.blazemap.feature.maps.ui.WorldMapDebug;
+import com.eerussianguy.blazemap.feature.maps.ui.WorldMapHotkey;
+import com.eerussianguy.blazemap.feature.waypoints.WaypointEditorFragment;
 import com.eerussianguy.blazemap.lib.ObjHolder;
 import com.eerussianguy.blazemap.lib.gui.components.Image;
 import com.eerussianguy.blazemap.lib.gui.components.LineContainer;
 import com.eerussianguy.blazemap.lib.gui.components.Placeholder;
 import com.eerussianguy.blazemap.lib.gui.components.VanillaComponents;
 import com.eerussianguy.blazemap.lib.gui.core.*;
-import com.eerussianguy.blazemap.lib.gui.fragment.*;
+import com.eerussianguy.blazemap.lib.gui.fragment.BaseFragment;
+import com.eerussianguy.blazemap.lib.gui.fragment.FragmentHost;
+import com.eerussianguy.blazemap.lib.gui.fragment.HostWindowComponent;
 import com.eerussianguy.blazemap.lib.gui.util.VisibilityController;
 import com.eerussianguy.blazemap.profiling.Profiler;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -228,27 +235,9 @@ public class WorldMapGui extends Screen implements FragmentHost, TooltipService 
         }
 
         if(key == BlazeMapFeaturesClient.KEY_WAYPOINTS.getKey().getValue()) {
-            Level level = Minecraft.getInstance().level;
-            int posY = level == null ? 60 : level.getSeaLevel();
-            Coordination coordination = map.getCoordination();
-            BlockPos position = new BlockPos(coordination.blockX, posY, coordination.blockZ);
-            ChunkPos chunkPos = new ChunkPos(position);
-
-            // Attempt to get y actual level from MDCache
-            ChunkMDCache mdCache = ClientEngine.getMDCache(chunkPos);
-            if(mdCache != null) {
-                TerrainHeightMD heightMD = (TerrainHeightMD) mdCache.get(
-                    UnsafeGenerics.stripKey(BlazeMapReferences.MasterData.TERRAIN_HEIGHT)
-                );
-
-                if(heightMD != null) {
-                    int chunkX = SectionPos.sectionRelative(position.getX());
-                    int chunkZ = SectionPos.sectionRelative(position.getZ());
-                    posY = heightMD.heightmap[chunkX][chunkZ];
-                    position = position.atY(posY);
-                }
-            }
+            var position = getCursorBlockPos();
             new WaypointEditorFragment(position).open();
+            return true;
         }
 
         return false;
@@ -265,5 +254,30 @@ public class WorldMapGui extends Screen implements FragmentHost, TooltipService 
     public void addInspector(MDInspectorWidget<?> widget) {
         this.addRenderableWidget(widget);
         widget.setDismisser(() -> this.removeWidget(widget));
+    }
+
+    public BlockPos getCursorBlockPos() {
+        Level level = Minecraft.getInstance().level;
+        int posY = level == null ? 65 : level.getSeaLevel();
+        Coordination coordination = map.getCoordination();
+        BlockPos position = new BlockPos(coordination.blockX, posY, coordination.blockZ);
+        ChunkPos chunkPos = new ChunkPos(position);
+
+        // Attempt to get y actual level from MDCache
+        ChunkMDCache mdCache = ClientEngine.getMDCache(chunkPos);
+        if(mdCache != null) {
+            TerrainHeightMD heightMD = (TerrainHeightMD) mdCache.get(
+                UnsafeGenerics.stripKey(BlazeMapReferences.MasterData.TERRAIN_HEIGHT)
+            );
+
+            if(heightMD != null) {
+                int chunkX = SectionPos.sectionRelative(position.getX());
+                int chunkZ = SectionPos.sectionRelative(position.getZ());
+                posY = heightMD.heightmap[chunkX][chunkZ];
+                position = position.atY(posY);
+            }
+        }
+
+        return position;
     }
 }
