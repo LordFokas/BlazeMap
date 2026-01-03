@@ -17,10 +17,6 @@ import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.KelpBlock;
-import net.minecraft.world.level.block.KelpPlantBlock;
-import net.minecraft.world.level.block.SeagrassBlock;
-import net.minecraft.world.level.block.TallSeagrassBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.MaterialColor;
@@ -93,11 +89,6 @@ public class BlockColorCollector extends ClientOnlyCollector<BlockColorMD> {
 
             BlockColor processedBlock = new BlockColor(state, level, blockPos, blockColors, transparentBlocks.isEmpty(), argb, spareArray);
 
-            // TODO: See if this inequality is the cause of the transparency bug
-            if (processedBlock.totalColor <= 0) {
-                continue;
-            }
-
             if (processedBlock.getTransparencyState() != TransparencyState.OPAQUE) {
                 transparentBlocks.add(processedBlock);
                 continue;
@@ -139,25 +130,7 @@ public class BlockColorCollector extends ClientOnlyCollector<BlockColorMD> {
         return color;
     }
 
-
-    /**
-     * These blocks don't return accurate colours using the other methods,
-     * so unfortunately need to set a colour manually
-     */
-    protected static int handleSpecialCases(BlockState state) {
-        var block = state.getBlock();
-
-        // By default, the colour returned for seagrass is purple, so replacing with a green picked from
-        // its texture 
-        if (block instanceof SeagrassBlock || block instanceof TallSeagrassBlock || block instanceof KelpPlantBlock || block instanceof KelpBlock) {
-            return 0x215800;
-        }
-
-        return 0;
-    }
-
     protected static int getColorAtPos(Level level, BlockColors blockColors, BlockState state, BlockPos blockPos) {
-        // int color = handleSpecialCases(state);
         int color;
 
         // Get color from texture
@@ -174,13 +147,14 @@ public class BlockColorCollector extends ClientOnlyCollector<BlockColorMD> {
         // Fallback 1: get block tint
         if(color == 0) {
             color = blockColors.getColor(state, level, blockPos, 0);
-        }
 
-        // Fallback 2: get block map color
-        if(color <= 0) {
-            MaterialColor mapColor = state.getMapColor(level, blockPos);
-            if(mapColor != MaterialColor.NONE) {
-                color = mapColor.col;
+            // Fallback 2: get block map color
+            // These magic numbers are dependent on blockColors.getColor's return value specifically
+            if(color == 0 || color == -1) {
+                MaterialColor mapColor = state.getMapColor(level, blockPos);
+                if(mapColor != MaterialColor.NONE) {
+                    color = mapColor.col;
+                }
             }
         }
 
@@ -260,7 +234,7 @@ public class BlockColorCollector extends ClientOnlyCollector<BlockColorMD> {
                 }
             }
 
-            return pixel & 0x00FFFFFF;
+            return pixel;
         });
     }
 

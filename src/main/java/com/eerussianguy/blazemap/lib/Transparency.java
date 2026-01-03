@@ -1,8 +1,8 @@
 package com.eerussianguy.blazemap.lib;
 
 import java.util.Map;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.minecraft.core.BlockPos;
@@ -12,12 +12,13 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.AbstractGlassBlock;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.BushBlock;
 import net.minecraft.world.level.block.HalfTransparentBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
+// TODO: Check if comment needs updating post refactor
 /**
  * Minecraft doesn't have an easy way to tell if a block will render with transparency or not
  * based on the block data itself. There seems to be _no_ way to do this on the server side based
@@ -46,21 +47,17 @@ public class Transparency {
     public static final float OPACITY_LOW = 0.1875f; // 3/16ths
     public static final float OPACITY_HIGH = 0.875f; // 7/8ths
 
-    private static final Set<Class<?>> transparentClasses = initialiseTransparentClassSet(false);
-    private static final Set<Class<?>> quiteTransparentClasses = initialiseTransparentClassSet(true);
-
-    private static final Set<TagKey<Fluid>> transparentFluidTags = initialiseTransparentFluidSet(false);
-    private static final Set<TagKey<Fluid>> quiteTransparentFluidTags = initialiseTransparentFluidSet(true);
-
-    private static final Set<TagKey<Block>> transparentBlockTags = initialiseTransparentBlockSet(false);
-    private static final Set<TagKey<Block>> quiteTransparentBlockTags = initialiseTransparentBlockSet(true);
+    // TODO: See if I need to make these threadsafe datastructures
+    private static final SortedSet<TransparencyMapping> transparentBlockTypes = initialiseTransparentBlocks();
+    private static final SortedSet<TransparencyMapping> transparentFluidTypes = initialiseTransparentFluids();
 
     private static final Map<BlockState, BlockComposition> knownBlocks = new ConcurrentHashMap<>();
 
     public enum TransparencyState {
         AIR(0f),
         QUITE_TRANSPARENT(OPACITY_LOW),
-        SEMI_TRANSPARENT(OPACITY_HIGH),
+        HALF_TRANSPARENT(0.5f),
+        SLIGHTLY_TRANSPARENT(OPACITY_HIGH),
         OPAQUE(1f),
         ;
 
@@ -99,123 +96,73 @@ public class Transparency {
         AIR,                    // Should only represent air blocks
     }
 
-    private static final Set<Class<?>> initialiseTransparentClassSet (boolean isQuiteTransparent) {
-        Set<Class<?>> newTransparencyList = new HashSet<Class<?>>();
 
-        if (isQuiteTransparent) {
-            newTransparencyList.add(AbstractGlassBlock.class); // Glass of all colours and types
-        } else { // is only semi-transparent
-            newTransparencyList.add(HalfTransparentBlock.class); // Slime, honey, ice, glass (is parent of AbstractGlassBlock)
-        }
-        // Both
-        // N/A for now
-
-        return newTransparencyList;
-    }
-
-    private static final Set<TagKey<Fluid>> initialiseTransparentFluidSet (boolean isQuiteTransparent) {
-        Set<TagKey<Fluid>> newTransparencyList = new HashSet<TagKey<Fluid>>();
-
-        // if (isQuiteTransparent) {
-        //     // N/A for now
-        // } else { // is only semi-transparent
-        //     // N/A for now
-        // }
-
-        // Both
-        newTransparencyList.add(FluidTags.WATER); // The wet stuff we all know and love
-
-        return newTransparencyList;
-    }
-
-    private static final Set<TagKey<Block>> initialiseTransparentBlockSet (boolean isQuiteTransparent) {
-        Set<TagKey<Block>> newTransparencyList = new HashSet<TagKey<Block>>();
-
-        // if (isQuiteTransparent) {
-        //     // N/A for now
-        // } else { // is only semi-transparent
-        //     // N/A for now
-        // }
-
-        // Both
-        // N/A for now
-
-        return newTransparencyList;
-    }
-
-    /**
-     * Eg: Slime, honey, ice, glass
+    /** 
+     * Default transparency mappings for blocks + block entities
+     * 
+     * All default mappings have priorities < 0, so those added by API without providing a priority (and defaulting to 0)
+     * will always override the defaults provided by Blaze Map
      */
-    public static boolean isTransparentBlock(BlockState testBlockState) {
-        Block testBlock = testBlockState.getBlock();
+    private static final SortedSet<TransparencyMapping> initialiseTransparentBlocks() {
+        SortedSet<TransparencyMapping> transparentBlockTypesSet = new TreeSet<TransparencyMapping>();
 
-        for (Class<?> transparentClass : transparentClasses) {
-            if (transparentClass.isAssignableFrom(testBlock.getClass())) {
-                return true;
-            }
-        }
+        transparentBlockTypesSet.add(new TransparencyClassMapping(
+            HalfTransparentBlock.class, TransparencyState.SLIGHTLY_TRANSPARENT, -2
+        ));
+        transparentBlockTypesSet.add(new TransparencyClassMapping(
+            AbstractGlassBlock.class, TransparencyState.QUITE_TRANSPARENT, -1
+        ));
 
-        for (TagKey<Block> transparentBlock: transparentBlockTags) {
-            if (testBlockState.is(transparentBlock)) {
-                return true;
-            }
-        }
+        transparentBlockTypesSet.add(new TransparencyClassMapping(
+            BushBlock.class, TransparencyState.HALF_TRANSPARENT, -1
+        ));
 
-        // Else, hasn't matched anything above
-        return false;
+        // Currently, there are no default TransparencyBlockTagMapping to add. 
+        // But if there were, they would go here.
+
+        return transparentBlockTypesSet;
     }
 
-    /**
-     * Eg: Water
+    /** 
+     * Default transparency mappings for fluids.
+     * 
+     * All default mappings have priorities < 0, so those added by API without providing a priority (and defaulting to 0)
+     * will always override the defaults provided by Blaze Map
      */
-    public static boolean isTransparentFluid(BlockState testBlockState) {
-        FluidState testFluid = testBlockState.getFluidState();
+    private static final SortedSet<TransparencyMapping> initialiseTransparentFluids () {
+        SortedSet<TransparencyMapping> transparentFluidTypesSet = new TreeSet<TransparencyMapping>();
 
-        for (TagKey<Fluid> transparentFluid: transparentFluidTags) {
-            if (testFluid.is(transparentFluid)) {
-                return true;
-            }
-        }
+        transparentFluidTypesSet.add(new TransparencyFluidTagMapping(
+            FluidTags.WATER, TransparencyState.QUITE_TRANSPARENT, -1
+        ));
 
-        // Else, hasn't matched anything above
-        return false;
+        return transparentFluidTypesSet;
     }
 
-    /**
-     * Eg: Glass
-     */
-    public static boolean isQuiteTransparentBlock(BlockState testBlockState) {
-        Block testBlock = testBlockState.getBlock();
-
-        for (Class<?> transparentClass : quiteTransparentClasses) {
-            if (transparentClass.isAssignableFrom(testBlock.getClass())) {
-                return true;
+    public static TransparencyState getBlockTransparencyState(BlockState testBlockState) {
+        // The natural sorting of transparentBlockTypes will mean this is checked from
+        // highest priority to lowest
+        for (TransparencyMapping blockMapping : transparentBlockTypes) {
+            if (blockMapping.appliesTo(testBlockState)) {
+                return blockMapping.transparency;
             }
         }
 
-        for (TagKey<Block> transparentBlock: quiteTransparentBlockTags) {
-            if (testBlockState.is(transparentBlock)) {
-                return true;
-            }
-        }
-
-        // Else, hasn't matched anything above
-        return false;
+        // No transparency mappings match, so must be considered opaque
+        return TransparencyState.OPAQUE;
     }
-    /**
-     * Eg: Water
-     */
-    public static boolean isQuiteTransparentFluid(BlockState testBlockState) {
-        FluidState testFluid = testBlockState.getFluidState();
 
-        for (TagKey<Fluid> transparentFluid: quiteTransparentFluidTags) {
-            if (testFluid.is(transparentFluid)) {
-                return true;
+    public static TransparencyState getFluidTransparencyState(BlockState testBlockState) {
+        // The natural sorting of transparentFluidTypes will mean this is checked from
+        // highest priority to lowest
+        for (TransparencyMapping blockMapping : transparentFluidTypes) {
+            if (blockMapping.appliesTo(testBlockState)) {
+                return blockMapping.transparency;
             }
         }
 
-        // Else, hasn't matched anything above
-        return false;
+        // No transparency mappings match, so must be considered opaque
+        return TransparencyState.OPAQUE;
     }
 
     public static BlockComposition getBlockComposition(BlockState state, Level level, BlockPos pos) {
@@ -232,21 +179,96 @@ public class Transparency {
     // blocks rather than having block identifiers added to our list, but that's a future task for when people
     // outside the BME project care enough to actually proactively make their mods work better with BME
 
-    /** Add a new block class to mark it as transparent (transmits some light) */
-    public static void addTransparentBlockClass(Class<?> block) { transparentClasses.add(block); };
-    /** Add a new block class to mark it as quite transparent (very low opacity, like glass). Block must also be marked separately as transparent */
-    public static void addQuiteTransparentBlockClass(Class<?> block) { quiteTransparentClasses.add(block); };
+    /** Add a new block class to mark it as transparent */
+    public static void addTransparentBlockClass(Class<?> block, TransparencyState transparencyLevel) { addTransparentBlockClass(block, transparencyLevel, 0); };
+    public static void addTransparentBlockClass(Class<?> block, TransparencyState transparencyLevel, int priority) { 
+        transparentBlockTypes.add(new TransparencyClassMapping(block, transparencyLevel, priority));
+    };
 
-    /** Add a new fluid tag to mark it as transparent (transmits some light) */
-    public static void addTransparentFluidTag(TagKey<Fluid> fluid) { transparentFluidTags.add(fluid); };
-    /** Add a new fluid tag to mark it as quite transparent (very low opacity, like water). Block must also be marked separately as transparent */
-    public static void addQuiteTransparentFluidTag(TagKey<Fluid> fluid) { quiteTransparentFluidTags.add(fluid); };
+    /** Add a new block tag to mark it as transparent */
+    public static void addTransparentBlockTag(TagKey<Block> block, TransparencyState transparencyLevel) { addTransparentBlockTag(block, transparencyLevel, 0); };
+    public static void addTransparentBlockTag(TagKey<Block> block, TransparencyState transparencyLevel, int priority) { 
+        transparentBlockTypes.add(new TransparencyBlockTagMapping(block, transparencyLevel, priority));
+    };
 
-    /** Add a new block tag to mark it as transparent (transmits some light) */
-    public static void addTransparentBlockTag(TagKey<Block> block) { transparentBlockTags.add(block); };
-    /** Add a new block tag to mark it as quite transparent (very low opacity, like glass). Block must also be marked separately as transparent */
-    public static void addQuiteTransparentBlockTag(TagKey<Block> block) { quiteTransparentBlockTags.add(block); };
+    /** Add a new fluid tag to mark it as transparent */
+    public static void addTransparentFluidTag(TagKey<Fluid> fluid, TransparencyState transparencyLevel) { addTransparentFluidTag(fluid, transparencyLevel, 0); };
+    public static void addTransparentFluidTag(TagKey<Fluid> fluid, TransparencyState transparencyLevel, int priority) { 
+        transparentBlockTypes.add(new TransparencyFluidTagMapping(fluid, transparencyLevel, priority));
+    };
 
+    private static abstract class TransparencyMapping implements Comparable<TransparencyMapping> {
+        public static int mappingCount = 0;
+
+        public final TransparencyState transparency;
+        public final int priority;
+        public final int orderAdded; // Tie breaker for priority
+
+        public TransparencyMapping(TransparencyState transparency, int priority) {
+            this.transparency = transparency;
+            this.priority = priority;
+
+            this.orderAdded = TransparencyMapping.mappingCount;
+            TransparencyMapping.mappingCount++;
+        }
+
+        /**
+         * Check if this mapping entry applies to the provided BlockState
+         */
+        public abstract boolean appliesTo(BlockState testBlockState);
+
+        // This will return the highest priority mapping first, so we can always use the first hit
+        public int compareTo(TransparencyMapping other) {
+            int priorityCompare = other.priority - this.priority;
+
+            if (priorityCompare == 0) {
+                // Priority the same. Use order added as a tie breaker for consistency
+                // (mappings added later override those added earlier)
+                return other.orderAdded - this.orderAdded;
+            }
+
+            return priorityCompare;
+        }
+    }
+
+    private static class TransparencyClassMapping extends TransparencyMapping {
+        public final Class<?> mappedClass;
+
+        public TransparencyClassMapping(Class<?> mappedClass, TransparencyState transparency, int priority) {
+            super(transparency, priority);
+            this.mappedClass = mappedClass;
+        }
+
+        public boolean appliesTo(BlockState testBlockState) {
+            return this.mappedClass.isAssignableFrom(testBlockState.getBlock().getClass());
+        }
+    }
+
+    private static class TransparencyBlockTagMapping extends TransparencyMapping {
+        public final TagKey<Block> blockTag;
+
+        public TransparencyBlockTagMapping(TagKey<Block> blockTag, TransparencyState transparency, int priority) {
+            super(transparency, priority);
+            this.blockTag = blockTag;
+        }
+
+        public boolean appliesTo(BlockState testBlockState) {
+            return testBlockState.is(blockTag);
+        }
+    }
+
+    private static class TransparencyFluidTagMapping extends TransparencyMapping {
+        public final TagKey<Fluid> fluidTag;
+
+        public TransparencyFluidTagMapping(TagKey<Fluid> fluidTag, TransparencyState transparency, int priority) {
+            super(transparency, priority);
+            this.fluidTag = fluidTag;
+        }
+
+        public boolean appliesTo(BlockState testBlockState) {
+            return testBlockState.getFluidState().is(fluidTag);
+        }
+    }
 
     public static class BlockComposition {
         public final TransparencyState totalTransparencyLevel;
@@ -271,26 +293,14 @@ public class Transparency {
             // Set base transparency levels
             if (isBlockEmpty) {
                 this.blockTransparencyLevel = TransparencyState.AIR;
-            } else if (isTransparentBlock(state)) {
-                if (isQuiteTransparentBlock(state)) {
-                    this.blockTransparencyLevel = TransparencyState.QUITE_TRANSPARENT;
-                } else {
-                    this.blockTransparencyLevel = TransparencyState.SEMI_TRANSPARENT;
-                }
             } else {
-                this.blockTransparencyLevel = TransparencyState.OPAQUE;
+                this.blockTransparencyLevel = getBlockTransparencyState(state);
             }
 
             if (state.getFluidState().isEmpty()) {
                 this.fluidTransparencyLevel = TransparencyState.AIR;
-            } else if (isTransparentFluid(state)) {
-                if (isQuiteTransparentFluid(state)) {
-                    this.fluidTransparencyLevel = TransparencyState.QUITE_TRANSPARENT;
-                } else {
-                    this.fluidTransparencyLevel = TransparencyState.SEMI_TRANSPARENT;
-                }
             } else {
-                this.fluidTransparencyLevel = TransparencyState.OPAQUE;
+                this.fluidTransparencyLevel = getFluidTransparencyState(state);
             }
 
             // Find overall transparency state based on block shape
@@ -325,7 +335,7 @@ public class Transparency {
                     // Normal block transparency rules, but can be at most semi-transparent due to
                     // light traveling through the gaps
                     this.compositionState = CompositionState.NON_FULL_BLOCK;
-                    this.totalTransparencyLevel = TransparencyState.min(blockTransparencyLevel, TransparencyState.SEMI_TRANSPARENT);
+                    this.totalTransparencyLevel = TransparencyState.min(blockTransparencyLevel, TransparencyState.SLIGHTLY_TRANSPARENT);
 
                 } else {
                     // Filter block color through fluid colour based on fluid transparency rules.
@@ -336,7 +346,7 @@ public class Transparency {
                     // (otherwise partial block is considering "blocking too much of the light")
                     this.totalTransparencyLevel = TransparencyState.max(
                         fluidTransparencyLevel, 
-                        TransparencyState.min(blockTransparencyLevel, TransparencyState.SEMI_TRANSPARENT)
+                        TransparencyState.min(blockTransparencyLevel, TransparencyState.SLIGHTLY_TRANSPARENT)
                     );
                 }
             }
