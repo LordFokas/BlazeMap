@@ -174,7 +174,8 @@ public class BlockColorCollector extends ClientOnlyCollector<BlockColorMD> {
             }
 
             int flag = 0;
-            int r = 0, g = 0, b = 0, total = 0;
+            int r = 0, g = 0, b = 0;
+            float total = 0;
 
             for(BakedQuad quad : quads) {
                 if(quad.isTinted()) {
