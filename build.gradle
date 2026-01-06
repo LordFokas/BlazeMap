@@ -67,38 +67,17 @@ repositories {
             includeGroup "curse.maven"
         }
     }
-
-    // flatDir {
-    //     dirs 'libs'
-    // }
 }
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
     compileOnly "curse.maven:$rubidium_project_id:$rubidium_file_id"
-    // compileOnly fg.deobf("_:rubidium:0.5.6")
-    // implementation fg.deobf("_:rubidium:0.5.6")
-
-    // implementation fg.deobf("_:Patchouli:1.18.2-71.1")
-    // implementation fg.deobf("_:TerraFirmaCraft:Forge-1.18.2-2.1.11-beta")
-    // implementation fg.deobf("_:Cartography:1.18.2-0.4.0-alpha3")
 
     implementation fg.deobf("curse.maven:$architectury_project_id:$architectury_file_id")
     implementation fg.deobf("curse.maven:$ftbchunks_project_id:$ftbchunks_file_id")
     implementation fg.deobf("curse.maven:$ftblib_project_id:$ftblib_file_id")
     implementation fg.deobf("curse.maven:$ftbteams_project_id:$ftbteams_file_id")
-
-
-    // implementation fg.deobf("_:ftb-chunks:${ftbchunks_version}")
-    // implementation fg.deobf("_:ftb-teams:${ftbteams_version}")
-    // implementation fg.deobf("_:ftb-library:$ftblib_version")
-    // implementation fg.deobf("_:architectury:${architectury_version}")
-
-    // implementation fg.deobf("_:journeymap:1.20.1-5.10.0-forge")
-    // implementation fg.deobf("_:Xaeros_Minimap:24.2.0_Forge_1.20")
-    // implementation fg.deobf("_:XaerosWorldMap:1.38.8_Forge_1.20")
-
 
     // Apply Mixin AP
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
