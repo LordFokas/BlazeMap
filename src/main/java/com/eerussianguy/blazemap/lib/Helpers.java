@@ -23,10 +23,43 @@ public class Helpers {
         return Minecraft.getInstance().player;
     }
 
-    public static boolean isInRenderDistance(BlockPos pos) {
-        Minecraft mc = Minecraft.getInstance();
+    // Fog adjustment factor based on the values used in FogRenderer::setupFog for the generic "in air" rendering case
+    private static final float FOG_ADJUSTMENT_FACTOR = 1F - 0.05F;
+
+    /** 
+     * Get the current render distance in blocks.
+     * 
+     * If isFogAdjusted == true, then the distance will be shrunk to compensate for the world fog
+     * at the boundary of the render distance, ensuring rendered objects are still visible.
+     * 
+     * Can pass in an existing mc object to save a lookup.
+     */
+    public static float getRenderDistance() { return getRenderDistance(Minecraft.getInstance(), false); }
+    public static float getRenderDistance(Minecraft mc) { return getRenderDistance(mc, false); }
+    public static float getRenderDistance(boolean isFogAdjusted) { return getRenderDistance(Minecraft.getInstance(), isFogAdjusted); }
+    public static float getRenderDistance(Minecraft mc, boolean isFogAdjusted) {
+        float renderDist = mc.options.getEffectiveRenderDistance() * 16;
+
+        if (isFogAdjusted) {
+            renderDist *= Helpers.FOG_ADJUSTMENT_FACTOR;
+        }
+        return renderDist;
+    }
+
+    /** 
+     * Check if pos is within render distance.
+     * 
+     * If isFogAdjusted == true, then the distance will be shrunk to compensate for the world fog
+     * at the boundary of the render distance, ensuring rendered objects are still visible.
+     * 
+     * Can pass in an existing mc object to save a lookup.
+     */
+    public static boolean isInRenderDistance(BlockPos pos) { return isInRenderDistance(Minecraft.getInstance(), pos, false); }
+    public static boolean isInRenderDistance(Minecraft mc, BlockPos pos) { return isInRenderDistance(mc, pos, false); }
+    public static boolean isInRenderDistance(BlockPos pos, boolean isFogAdjusted) { return isInRenderDistance(Minecraft.getInstance(), pos, false); }
+    public static boolean isInRenderDistance(Minecraft mc, BlockPos pos, boolean isFogAdjusted) {
         Entity entity = mc.cameraEntity;
-        double renderDist = mc.options.getEffectiveRenderDistance() * 16;
+        double renderDist = getRenderDistance(mc, isFogAdjusted);
         return entity != null && entity.blockPosition().distSqr(pos) < renderDist * renderDist;
     }
 

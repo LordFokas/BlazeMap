@@ -39,11 +39,15 @@ public class WaypointRenderer {
     public static void onLevelStageRender(RenderLevelStageEvent event) {
         if(!BlazeMapConfig.SERVER.mapItemRequirement.canPlayerAccessMap(Helpers.getPlayer(), ServerConfig.MapAccess.READ_LIVE)) return;
 
+        Minecraft mc = Minecraft.getInstance();
+
+        // Distance to furthest visible block, accounting for default sky fog.
+        float toEdgeOfRenderView = Helpers.getRenderDistance(mc, true);
+
         // Forge Doc:
         // Use this to render custom effects into the world, such as custom entity-like objects or special rendering effects. Called within a fabulous graphics target. Happens after entities render.
         // ForgeRenderTypes.TRANSLUCENT_ON_PARTICLES_TARGET
         if(event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES && BlazeMapConfig.CLIENT.clientFeatures.renderWaypointsInWorld.get()) {
-            Minecraft mc = Minecraft.getInstance();
             Entity playerCamera = mc.cameraEntity;
             PoseStack stack = event.getPoseStack();
             MultiBufferSource.BufferSource buffers = mc.renderBuffers().bufferSource();
@@ -63,13 +67,11 @@ public class WaypointRenderer {
                     // To check if camera pointing towards the waypoint beam
                     final AABB fakeAABB = new AABB(pos).setMinY(level.getMinBuildHeight()).setMaxY(level.getMaxBuildHeight());
 
-                    if(Helpers.isInRenderDistance(playerHeightPos) && Helpers.isInFogDistance(playerHeightPos) && event.getFrustum().isVisible(fakeAABB)) {
+                    if(Helpers.isInRenderDistance(mc, playerHeightPos, true) && event.getFrustum().isVisible(fakeAABB)) {
                         renderWaypoint(mc, stack, buffers, w, posVec, playerCamera, partialTick);
                     }
                     else {
-                        // Waypoint is out of render distance. Render in furthest visible chunk instead
-                        float toEdgeOfRenderView = Math.min(RenderSystem.getShaderFogStart(), mc.options.getEffectiveRenderDistance() * 16);
-
+                        // Waypoint is out of view beyond fog/render distance. Render at the furthest visible block instead
                         // Find angle from player to waypoint
                         double xDelta = posVec.x() - playerCamera.getX();
                         double yDelta = posVec.y() - playerCamera.getY();
