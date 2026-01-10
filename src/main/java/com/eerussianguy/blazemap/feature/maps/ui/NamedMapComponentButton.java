@@ -1,4 +1,4 @@
-package com.eerussianguy.blazemap.feature.maps;
+package com.eerussianguy.blazemap.feature.maps.ui;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,7 +74,7 @@ public abstract class NamedMapComponentButton<T extends NamedMapComponent<T>> ex
         populateTooltip();
         tooltip.add(0, name);
         tooltip.add(owner);
-        host.drawTooltip(stack, mouseX, mouseY, tooltip);
+        service.drawTooltip(stack, mouseX, mouseY, tooltip);
     }
 
     protected void populateTooltip() {

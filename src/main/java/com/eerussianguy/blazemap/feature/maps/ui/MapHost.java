@@ -1,14 +1,11 @@
-package com.eerussianguy.blazemap.feature.maps;
-
-import net.minecraft.client.gui.components.events.GuiEventListener;
+package com.eerussianguy.blazemap.feature.maps.ui;
 
 import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
 import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.MapType;
 import com.eerussianguy.blazemap.api.maps.Overlay;
-import com.eerussianguy.blazemap.lib.gui.core.TooltipService;
 
-public interface MapHost extends TooltipService {
+public interface MapHost {
     boolean isLayerVisible(Key<Layer> layerID);
     void toggleLayer(Key<Layer> layerID);
 
@@ -17,6 +14,4 @@ public interface MapHost extends TooltipService {
 
     MapType getMapType();
     void setMapType(MapType map);
-
-    Iterable<? extends GuiEventListener> getChildren();
 }

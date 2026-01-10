@@ -1,4 +1,4 @@
-package com.eerussianguy.blazemap.feature.maps;
+package com.eerussianguy.blazemap.feature.maps.ui;
 
 import java.util.function.BooleanSupplier;
 
@@ -7,6 +7,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 
 import com.eerussianguy.blazemap.engine.BlazeMapAsync;
 import com.eerussianguy.blazemap.engine.render.MapRenderer;
+import com.eerussianguy.blazemap.feature.maps.Coordination;
 import com.eerussianguy.blazemap.lib.Colors;
 import com.eerussianguy.blazemap.lib.RenderHelper;
 import com.eerussianguy.blazemap.lib.gui.core.BaseComponent;

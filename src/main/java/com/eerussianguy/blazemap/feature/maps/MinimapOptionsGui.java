@@ -1,11 +1,7 @@
 package com.eerussianguy.blazemap.feature.maps;
 
-import java.util.List;
-
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
@@ -23,6 +19,7 @@ import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.config.ClientConfig;
 import com.eerussianguy.blazemap.config.MinimapConfigFacade;
 import com.eerussianguy.blazemap.engine.render.MapRenderer;
+import com.eerussianguy.blazemap.feature.maps.ui.MapHost;
 import com.eerussianguy.blazemap.lib.Helpers;
 import com.mojang.blaze3d.vertex.PoseStack;
 
@@ -74,15 +71,10 @@ public class MinimapOptionsGui extends BlazeGui implements MapHost {
         mapRenderer.setMapType(map);
     }
 
-    @Override
+    /*@Override
     public void drawTooltip(PoseStack stack, int x, int y, List<? extends Component> lines) {
         renderTooltip(stack, lines.stream().map(Component::getVisualOrderText).toList(), x, y);
-    }
-
-    @Override
-    public Iterable<? extends GuiEventListener> getChildren() {
-        return children();
-    }
+    }*/
 
     @Override
     protected void init() {

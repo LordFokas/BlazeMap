@@ -13,7 +13,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 public abstract class BaseContainer<T extends BaseContainer<T>> extends BaseComponent<T> implements UIEventListener {
     private final List<BaseComponent<?>> renderables = new ArrayList<>();
     private final List<GuiEventListener> listeners = new ArrayList<>();
-    private GuiEventListener focus;
+    private GuiEventListener focus, fallback;
 
     protected void add(BaseComponent<?> child) {
         renderables.add(child.withParent(this));
@@ -53,6 +53,10 @@ public abstract class BaseContainer<T extends BaseContainer<T>> extends BaseComp
         return renderables.size();
     }
 
+    public final boolean isGlobal() {
+        return getReferenceFrame() == ReferenceFrame.GLOBAL;
+    }
+
     protected void renderBackground(PoseStack stack, boolean hasMouse, int mouseX, int mouseY) {}
 
     @Override
@@ -62,7 +66,7 @@ public abstract class BaseContainer<T extends BaseContainer<T>> extends BaseComp
             int childY = child.getPositionY();
             stack.pushPose();
             stack.translate(childX, childY, 0.1);
-            child.renderTooltip(stack, mouseX - childX, mouseY - childY, service);
+            child.renderTooltipAsChild(stack, mouseX - childX, mouseY - childY, service);
             stack.popPose();
         });
     }
@@ -75,7 +79,7 @@ public abstract class BaseContainer<T extends BaseContainer<T>> extends BaseComp
             int childX = child.getPositionX(), childY = child.getPositionY();
             int childMouseX = mouseX - childX, childMouseY = mouseY - childY;
             stack.translate(childX, childY, 0.1);
-            child.renderInternal(stack, hasMouse && child.mouseIntercepts(childMouseX, childMouseY), childMouseX, childMouseY);
+            child.renderAsChild(stack, hasMouse && child.mouseIntercepts(childMouseX, childMouseY), childMouseX, childMouseY);
             stack.popPose();
         }
     }
@@ -113,6 +117,7 @@ public abstract class BaseContainer<T extends BaseContainer<T>> extends BaseComp
         }
         var components = (List<BaseComponent<?>>) list;
         for(var component : components) {
+            if(!component.isVisible()) continue;
             if(component.mouseIntercepts(x - component.getPositionX(), y - component.getPositionY())) {
                 return Optional.of((E) component);
             }
@@ -162,44 +167,47 @@ public abstract class BaseContainer<T extends BaseContainer<T>> extends BaseComp
             }
         }
 
-        return passthrough(mouseX, mouseY, listener -> listener.mouseClicked(offsetX(mouseX, listener), offsetY(mouseY, listener), button), false);
+        return passthrough(mouseX, mouseY, listener -> listener.mouseClicked(offsetX(mouseX, listener), offsetY(mouseY, listener), button), isGlobal());
     }
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        return passthrough(mouseX, mouseY, listener -> listener.mouseReleased(offsetX(mouseX, listener), offsetY(mouseY, listener), button), false);
+        return passthrough(mouseX, mouseY, listener -> listener.mouseReleased(offsetX(mouseX, listener), offsetY(mouseY, listener), button), isGlobal());
     }
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double draggedX, double draggedY) {
-        return passthrough(mouseX, mouseY, listener -> listener.mouseDragged(offsetX(mouseX, listener), offsetY(mouseY, listener), button, draggedX, draggedY), false);
+        return passthrough(mouseX, mouseY, listener -> listener.mouseDragged(offsetX(mouseX, listener), offsetY(mouseY, listener), button, draggedX, draggedY), isGlobal());
     }
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scroll) {
-        return passthrough(mouseX, mouseY, listener -> listener.mouseScrolled(offsetX(mouseX, listener), offsetY(mouseY, listener), scroll), false);
+        return passthrough(mouseX, mouseY, listener -> listener.mouseScrolled(offsetX(mouseX, listener), offsetY(mouseY, listener), scroll), isGlobal());
     }
 
     @Override
     public boolean keyPressed(int key, int scancode, int modifiers) {
-        if(getReferenceFrame() == ReferenceFrame.GLOBAL && focus != null) {
-            return focus.keyPressed(key, 0, 0);
+        var consumer = getInputConsumer();
+        if(getReferenceFrame() == ReferenceFrame.GLOBAL && consumer != null) {
+            return consumer.keyPressed(key, 0, 0);
         }
         return false;
     }
 
     @Override
     public boolean keyReleased(int key, int scancode, int modifiers) {
-        if(getReferenceFrame() == ReferenceFrame.GLOBAL && focus != null) {
-            return focus.keyReleased(key, 0, 0);
+        var consumer = getInputConsumer();
+        if(getReferenceFrame() == ReferenceFrame.GLOBAL && consumer != null) {
+            return consumer.keyReleased(key, 0, 0);
         }
         return false;
     }
 
     @Override
     public boolean charTyped(char ch, int modifier) {
-        if(getReferenceFrame() == ReferenceFrame.GLOBAL && focus != null) {
-            return focus.charTyped(ch, modifier);
+        var consumer = getInputConsumer();
+        if(getReferenceFrame() == ReferenceFrame.GLOBAL && consumer != null) {
+            return consumer.charTyped(ch, modifier);
         }
         return false;
     }
@@ -212,6 +220,16 @@ public abstract class BaseContainer<T extends BaseContainer<T>> extends BaseComp
     @Override
     public boolean isMouseOver(double mouseX, double mouseY) {
         return isVisible() && this.mouseIntercepts(mouseX, mouseY);
+    }
+
+    protected GuiEventListener getInputConsumer() {
+        return focus == null ? fallback : focus;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T setInputConsumer(GuiEventListener fallback) {
+        this.fallback = fallback;
+        return (T) this;
     }
 
     protected int sum(SizeSupplier supplier){

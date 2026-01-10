@@ -22,6 +22,7 @@ import com.eerussianguy.blazemap.lib.IntHolder;
 import com.eerussianguy.blazemap.lib.RenderHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
 
+@Deprecated
 public class WorldMapPopup implements Widget {
     private static final ResourceLocation MENU_ROOT = BlazeMap.resource("map.menu");
     private static final TextComponent MENU_ROOT_TEXT = new TextComponent("");
