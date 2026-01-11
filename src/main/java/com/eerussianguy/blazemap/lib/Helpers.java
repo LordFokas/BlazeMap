@@ -42,6 +42,7 @@ public class Helpers {
 
         if (isFogAdjusted) {
             renderDist *= Helpers.FOG_ADJUSTMENT_FACTOR;
+            renderDist -= 4;
         }
         return renderDist;
     }
