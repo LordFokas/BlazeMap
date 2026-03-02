@@ -22,6 +22,7 @@ import com.eerussianguy.blazemap.feature.BlazeMapFeaturesCommon;
 import com.eerussianguy.blazemap.integration.KnownMods;
 import com.eerussianguy.blazemap.integration.ModIntegration;
 import com.eerussianguy.blazemap.integration.ftbchunks.FTBChunksPlugin;
+import com.eerussianguy.blazemap.integration.waystones.WaystonesPlugin;
 import com.mojang.logging.LogUtils;
 import org.slf4j.Logger;
 
@@ -35,7 +36,8 @@ public class BlazeMap {
     public static final String MOD_NAME = "Blaze Map";
 
     public static final List<ModIntegration> INTEGRATIONS = List.of(
-        new FTBChunksPlugin()
+        new FTBChunksPlugin(),
+        new WaystonesPlugin()
     );
 
     public static ResourceLocation resource(String name) {
@@ -55,8 +57,7 @@ public class BlazeMap {
             // Enabling this will log when certain events happen in the world, allowing you
             // to crossreference what's happening on screen with what's happening in the logs.
             // DebuggingEventHandler.init();
-        }
-        else {
+        } else {
             // Client side objects are forbidden in the dedicated server.
             // The others are frozen by the RegistryController when the time comes.
             RegistryController.freezeClientRegistries();
@@ -75,7 +76,7 @@ public class BlazeMap {
         // This might be helpful later on, on server side, where we want the engine off but other features on.
         // So removing the mod to disable the server engine will not be an option.
         // For now, though, there are no other server features.
-        if(BlazeMapConfig.COMMON.enableServerEngine.get()){
+        if(BlazeMapConfig.COMMON.enableServerEngine.get()) {
             ServerEngine.init();
         }
 

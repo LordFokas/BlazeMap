@@ -16,13 +16,16 @@ public class WaypointChannelLocal extends WaypointChannel {
     public static final ResourceLocation GROUP_DEFAULT = BlazeMap.resource("waypoint/group/default");
     private static final ResourceLocation GROUP_DEFAULT_FIRST = BlazeMap.resource("waypoint/group/default_first");
     public static final ResourceLocation GROUP_DEATH = BlazeMap.resource("waypoint/group/death");
+    public static final ResourceLocation GROUP_WAYSTONE = BlazeMap.resource("waypoint/group/waystone");
     public static final Component DEATHS = new TextComponent("Deaths").withStyle(ChatFormatting.YELLOW);
+    public static final Component WAYSTONES = new TextComponent("Waystones").withStyle(ChatFormatting.DARK_PURPLE);
 
     public WaypointChannelLocal() {
         super(REGISTRY.findOrCreate(BlazeMap.resource("local")));
         WaypointGroup.define(GROUP_DEFAULT, () -> new WaypointGroup(GROUP_DEFAULT).setUserGivenName("New Group"));
         WaypointGroup.define(GROUP_DEFAULT_FIRST, () -> new WaypointGroup(GROUP_DEFAULT).setUserGivenName("My Waypoints"));
         WaypointGroup.define(GROUP_DEATH, () -> new WaypointGroup(GROUP_DEATH, ManagementType.INBOX).setSystemName(DEATHS));
+        WaypointGroup.define(GROUP_WAYSTONE, () -> new WaypointGroup(GROUP_WAYSTONE, ManagementType.INBOX).setSystemName(WAYSTONES));
     }
 
     @Override

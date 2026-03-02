@@ -17,6 +17,8 @@ public class ModIDs {
     public static final String FTB_TEAMS = "ftbteams";
     public static final String FTB_LIBRARY = "ftblibrary";
     public static final String ARCHITECTURY = "architectury";
+    public static final String WAYSTONES = "waystones";
+    public static final String BALM = "balm";
 
     public static final List<String> SODIUM_FAMILY = List.of(SODIUM, EMBEDDIUM, RUBIDIUM);
 

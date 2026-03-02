@@ -36,6 +36,8 @@ public class KnownMods {
         add(COMPAT, ModIDs.SODIUM);
         add(COMPAT, ModIDs.EMBEDDIUM);
         add(COMPAT, ModIDs.RUBIDIUM);
+        add(COMPAT, ModIDs.WAYSTONES);
+        add(COMPAT, ModIDs.BALM);
 
         add(PROBLEM, ModIDs.OPTIFINE);
         add(PROBLEM, ModIDs.FANCY_MENU);
@@ -48,16 +50,16 @@ public class KnownMods {
             mods.addAll(Arrays.asList(integration.dependencies));
         }
 
-        for(String mod : mods){
+        for(String mod : mods) {
             add(ANNOUNCED, mod);
         }
     }
 
     @SafeVarargs
-    public static boolean isAnyLoaded(Iterable<String> ... lists) {
-        for(var list : lists){
-            for(var key : list){
-                if(ALL_KNOWN.contains(key)){
+    public static boolean isAnyLoaded(Iterable<String>... lists) {
+        for(var list : lists) {
+            for(var key : list) {
+                if(ALL_KNOWN.contains(key)) {
                     return true;
                 }
             }
@@ -78,35 +80,35 @@ public class KnownMods {
     }
 
     @SafeVarargs
-    public static <T> T[] getCore(Class<T> t, Function<ModInfo, ? extends T> function, T ... fallbacks){
+    public static <T> T[] getCore(Class<T> t, Function<ModInfo, ? extends T> function, T... fallbacks) {
         return mapEntries(CORE, t, function, fallbacks);
     }
 
     @SafeVarargs
-    public static <T> T[] getCompat(Class<T> t, Function<ModInfo, ? extends T> function, T ... fallbacks){
+    public static <T> T[] getCompat(Class<T> t, Function<ModInfo, ? extends T> function, T... fallbacks) {
         return mapEntries(COMPAT, t, function, fallbacks);
     }
 
     @SafeVarargs
-    public static <T> T[] getProblem(Class<T> t, Function<ModInfo, ? extends T> function, T ... fallbacks){
+    public static <T> T[] getProblem(Class<T> t, Function<ModInfo, ? extends T> function, T... fallbacks) {
         return mapEntries(PROBLEM, t, function, fallbacks);
     }
 
     @SafeVarargs
-    public static <T> T[] getAPICall(Class<T> t, Function<ModInfo, ? extends T> function, T ... fallbacks){
+    public static <T> T[] getAPICall(Class<T> t, Function<ModInfo, ? extends T> function, T... fallbacks) {
         return mapEntries(API_CALL, t, function, fallbacks);
     }
 
     @SafeVarargs
-    public static <T> T[] getAnnounced(Class<T> t, Function<ModInfo, ? extends T> function, T ... fallbacks){
+    public static <T> T[] getAnnounced(Class<T> t, Function<ModInfo, ? extends T> function, T... fallbacks) {
         return mapEntries(ANNOUNCED, t, function, fallbacks);
     }
 
     @SafeVarargs
-    private static <T> T[] mapEntries(HashMap<String, ModInfo> map, Class<T> t, Function<ModInfo, ? extends T> function, T ... fallbacks){
-        if(map.size() == 0){
+    private static <T> T[] mapEntries(HashMap<String, ModInfo> map, Class<T> t, Function<ModInfo, ? extends T> function, T... fallbacks) {
+        if(map.size() == 0) {
             return fallbacks;
-        }else{
+        } else {
             return map.values().stream().map(function).collect(Collectors.toList()).toArray((T[]) Array.newInstance(t, map.size()));
         }
     }
@@ -115,14 +117,14 @@ public class KnownMods {
         add(COMPAT, integration.modID);
     }
 
-    public static void addRegistry(BlazeRegistry<?> registry){
-        for(var key : registry.keys()){
+    public static void addRegistry(BlazeRegistry<?> registry) {
+        for(var key : registry.keys()) {
             String mod = key.location.getNamespace();
             add(API_CALL, mod);
         }
     }
 
-    private static void add(HashMap<String, ModInfo> map, String modId){
+    private static void add(HashMap<String, ModInfo> map, String modId) {
         var container = ModList.get().getModContainerById(modId);
         if(container.isEmpty()) return;
         map.put(modId, new ModInfo(container.get()));
@@ -132,7 +134,7 @@ public class KnownMods {
     public static class ModInfo {
         public final String id, name, version;
 
-        public ModInfo(ModContainer container){
+        public ModInfo(ModContainer container) {
             this.id = container.getModId();
             var info = container.getModInfo();
             this.name = info.getDisplayName();
