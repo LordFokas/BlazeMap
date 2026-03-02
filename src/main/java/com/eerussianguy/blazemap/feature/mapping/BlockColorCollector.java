@@ -4,20 +4,19 @@ import java.util.function.IntFunction;
 
 import java.util.Queue;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.HashMap;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.renderer.block.BlockModelShaper;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.KelpBlock;
-import net.minecraft.world.level.block.KelpPlantBlock;
-import net.minecraft.world.level.block.SeagrassBlock;
-import net.minecraft.world.level.block.TallSeagrassBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.MaterialColor;
@@ -90,11 +89,6 @@ public class BlockColorCollector extends ClientOnlyCollector<BlockColorMD> {
 
             BlockColor processedBlock = new BlockColor(state, level, blockPos, blockColors, transparentBlocks.isEmpty(), argb, spareArray);
 
-            // TODO: See if this inequality is the cause of the transparency bug
-            if (processedBlock.totalColor <= 0) {
-                continue;
-            }
-
             if (processedBlock.getTransparencyState() != TransparencyState.OPAQUE) {
                 transparentBlocks.add(processedBlock);
                 continue;
@@ -136,32 +130,14 @@ public class BlockColorCollector extends ClientOnlyCollector<BlockColorMD> {
         return color;
     }
 
-
-    /**
-     * These blocks don't return accurate colours using the other methods,
-     * so unfortunately need to set a colour manually
-     */
-    protected static int handleSpecialCases(BlockState state) {
-        var block = state.getBlock();
-
-        // By default, the colour returned for seagrass is purple, so replacing with a green picked from
-        // its texture 
-        if (block instanceof SeagrassBlock || block instanceof TallSeagrassBlock || block instanceof KelpPlantBlock || block instanceof KelpBlock) {
-            return 0x215800;
-        }
-
-        return 0;
-    }
-
     protected static int getColorAtPos(Level level, BlockColors blockColors, BlockState state, BlockPos blockPos) {
-        // int color = handleSpecialCases(state);
         int color;
 
         // Get color from texture
         if(state.is(BlockTags.FLOWERS)) {
             color = getBestTexturePixel(level, state, null, BlockColorCollector::avoidGreen);
         } else {
-            color = getAverageTextureColor(level, state, Direction.UP);
+            color = getAverageTextureColor(level, state);
         }
 
         if((color & Colors.ALPHA) == TINTED_FLAG) {
@@ -171,34 +147,44 @@ public class BlockColorCollector extends ClientOnlyCollector<BlockColorMD> {
         // Fallback 1: get block tint
         if(color == 0) {
             color = blockColors.getColor(state, level, blockPos, 0);
-        }
 
-        // Fallback 2: get block map color
-        if(color <= 0) {
-            MaterialColor mapColor = state.getMapColor(level, blockPos);
-            if(mapColor != MaterialColor.NONE) {
-                color = mapColor.col;
+            // Fallback 2: get block map color
+            // These magic numbers are dependent on blockColors.getColor's return value specifically
+            if(color == 0 || color == -1) {
+                MaterialColor mapColor = state.getMapColor(level, blockPos);
+                if(mapColor != MaterialColor.NONE) {
+                    color = mapColor.col;
+                }
             }
         }
 
         return color;
     }
 
-    private static int getAverageTextureColor(Level level, BlockState state, Direction direction) {
+    private static int getAverageTextureColor(Level level, BlockState state) {
         return colors.computeIfAbsent(state, $ -> {
             var mc = Minecraft.getInstance();
-            var model = mc.getModelManager().getModel(BlockModelShaper.stateToModelLocation(state));
-            var quads = model.getQuads(state, direction, level.getRandom(), EmptyModelData.INSTANCE);
+            BakedModel model = mc.getModelManager().getModel(BlockModelShaper.stateToModelLocation(state));
+            List<BakedQuad> quads = model.getQuads(state, Direction.UP, level.getRandom(), EmptyModelData.INSTANCE);
+
+            if (quads.size() == 0) {
+                // Cross-shaped blocks (and others without a top surface) don't respond to the direction right,
+                // so grabbing all faces to average out instead
+                quads = model.getQuads(state, null, level.getRandom(), EmptyModelData.INSTANCE);
+            }
 
             int flag = 0;
-            int r = 0, g = 0, b = 0, total = 0;
+            int r = 0, g = 0, b = 0;
+            float total = 0;
 
-            for(var quad : quads) {
+            for(BakedQuad quad : quads) {
                 if(quad.isTinted()) {
                     flag = TINTED_FLAG;
                 }
+
                 var texture = quad.getSprite();
                 int w = texture.getWidth(), h = texture.getHeight();
+
                 for(int x = 0; x < w; x++) {
                     for(int y = 0; y < h; y++) {
                         var pixel = Colors.decomposeRGBA(texture.getPixelRGBA(0, x, y));
@@ -207,7 +193,7 @@ public class BlockColorCollector extends ClientOnlyCollector<BlockColorMD> {
                         r += (255 * pixel[3] * alpha);
                         g += (255 * pixel[2] * alpha);
                         b += (255 * pixel[1] * alpha);
-                        total++;
+                        total += alpha;
                     }
                 }
             }
@@ -226,13 +212,17 @@ public class BlockColorCollector extends ClientOnlyCollector<BlockColorMD> {
     private static int getBestTexturePixel(Level level, BlockState state, Direction direction, IntFunction<Integer> fitness) {
         return colors.computeIfAbsent(state, $ -> {
             var mc = Minecraft.getInstance();
-            var model = mc.getModelManager().getModel(BlockModelShaper.stateToModelLocation(state));
-            var quads = model.getQuads(state, direction, level.getRandom(), EmptyModelData.INSTANCE);
-            int pixel = 0, best = Integer.MIN_VALUE;
+            BakedModel model = mc.getModelManager().getModel(BlockModelShaper.stateToModelLocation(state));
+            List<BakedQuad> quads = model.getQuads(state, direction, level.getRandom(), EmptyModelData.INSTANCE);
 
-            for(var quad : quads) {
+            int best = Integer.MIN_VALUE;
+            int pixel = 0;
+
+            for(BakedQuad quad : quads) {
                 var texture = quad.getSprite();
-                int w = texture.getWidth(), h = texture.getHeight();
+                int w = texture.getWidth();
+                int h = texture.getHeight();
+
                 for(int x = 0; x < w; x++) {
                     for(int y = 0; y < h; y++) {
                         int color = Colors.abgr(texture.getPixelRGBA(0, x, y));

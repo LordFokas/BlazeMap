@@ -38,7 +38,7 @@ public class KnownMods {
         add(COMPAT, ModIDs.RUBIDIUM);
 
         add(PROBLEM, ModIDs.OPTIFINE);
-        add(PROBLEM, ModIDs.CHUNKPREGEN);
+        add(PROBLEM, ModIDs.FANCY_MENU);
 
         HashSet<String> mods = new HashSet<>();
         MinecraftForge.EVENT_BUS.post(new ModAnnouncementEvent(mods));

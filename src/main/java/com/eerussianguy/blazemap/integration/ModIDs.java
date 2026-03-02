@@ -24,4 +24,5 @@ public class ModIDs {
     // Troublemakers
     public static final String OPTIFINE = "optifine";
     public static final String CHUNKPREGEN = "chunkpregen";
+    public static final String FANCY_MENU = "fancymenu";
 }

@@ -69,7 +69,7 @@ public class TerrainSlopeCollector extends Collector<TerrainSlopeMD> {
             && (
                 TransparencyState.isAtLeastAsTransparentAs(
                     blockComposition.getTransparencyState(),
-                    TransparencyState.SEMI_TRANSPARENT
+                    TransparencyState.SLIGHTLY_TRANSPARENT
                 )
                 // TODO: Make work better with bamboo
                 || blockComposition.getBlockCompositionState() == CompositionState.NON_FULL_BLOCK
