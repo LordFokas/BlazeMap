@@ -1,53 +1,53 @@
 package com.eerussianguy.blazemap.feature.maps;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.lwjgl.glfw.GLFW;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.components.Widget;
-import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 
-import com.eerussianguy.blazemap.api.maps.TileResolution;
-import com.eerussianguy.blazemap.config.BlazeMapConfig;
+import com.eerussianguy.blazemap.BlazeMap;
 import com.eerussianguy.blazemap.api.BlazeMapAPI;
 import com.eerussianguy.blazemap.api.BlazeRegistry;
-import com.eerussianguy.blazemap.api.maps.IScreenSkipsMinimap;
-import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.MapType;
-import com.eerussianguy.blazemap.engine.BlazeMapAsync;
+import com.eerussianguy.blazemap.api.maps.Overlay;
+import com.eerussianguy.blazemap.api.maps.TileResolution;
+import com.eerussianguy.blazemap.config.BlazeMapConfig;
 import com.eerussianguy.blazemap.feature.BlazeMapFeaturesClient;
-import com.eerussianguy.blazemap.feature.atlas.AtlasExporter;
-import com.eerussianguy.blazemap.feature.atlas.AtlasTask;
-import com.eerussianguy.blazemap.gui.Image;
-import com.eerussianguy.blazemap.gui.MouseSubpixelSmoother;
-import com.eerussianguy.blazemap.profiling.overlay.ProfilingRenderer;
-import com.eerussianguy.blazemap.util.Colors;
-import com.eerussianguy.blazemap.util.Helpers;
+import com.eerussianguy.blazemap.feature.atlas.*;
+import com.eerussianguy.blazemap.feature.maps.ui.*;
+import com.eerussianguy.blazemap.feature.maps.ui.NamedMapComponentButton.*;
+import com.eerussianguy.blazemap.lib.ObjHolder;
+import com.eerussianguy.blazemap.lib.gui.components.Image;
+import com.eerussianguy.blazemap.lib.gui.components.LineContainer;
+import com.eerussianguy.blazemap.lib.gui.components.Placeholder;
+import com.eerussianguy.blazemap.lib.gui.components.VanillaComponents;
+import com.eerussianguy.blazemap.lib.gui.core.*;
+import com.eerussianguy.blazemap.lib.gui.fragment.*;
+import com.eerussianguy.blazemap.lib.gui.util.VisibilityController;
 import com.eerussianguy.blazemap.profiling.Profiler;
-import com.eerussianguy.blazemap.util.RenderHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
 
-public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost {
-    private static final TextComponent EMPTY = new TextComponent("");
-    private static final ResourceLocation ICON = Helpers.identifier("textures/mod_icon.png");
-    private static final ResourceLocation NAME = Helpers.identifier("textures/mod_name.png");
+public class WorldMapGui extends Screen implements FragmentHost, TooltipService {
+    private static final ResourceLocation HEADER_MAPS = BlazeMap.resource("textures/map_icons/header_maps.png");
+    private static final ResourceLocation HEADER_LAYERS = BlazeMap.resource("textures/map_icons/header_layers.png");
+    private static final ResourceLocation HEADER_OVERLAYS = BlazeMap.resource("textures/map_icons/header_overlays.png");
+    private static final ResourceLocation BLAZEMAP_ICON = BlazeMap.resource("textures/mod_icon.png");
+    private static final ResourceLocation BLAZEMAP_NAME = BlazeMap.resource("textures/mod_name.png");
     public static final double MIN_ZOOM = 0.125, MAX_ZOOM = 8;
+    private static final int MARGIN = 5;
     private static final Profiler.TimeProfiler renderTime = new Profiler.TimeProfilerSync("world_map_render", 10);
     private static final Profiler.TimeProfiler uploadTime = new Profiler.TimeProfilerSync("world_map_upload", 10);
-    private static boolean showWidgets = true, renderDebug = false;
+    private static final VisibilityController visibilityController = new VisibilityController();
+    private static boolean renderDebug = false;
 
     public static void open() {
         Minecraft.getInstance().setScreen(new WorldMapGui());
@@ -59,347 +59,146 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
         }
     }
 
+    private static final WorldMapHotkey[] HOTKEYS = new WorldMapHotkey[] {
+        new WorldMapHotkey("LMB", "Drag to pan the map"),
+        new WorldMapHotkey("RMB", "Open context menu"),
+        new WorldMapHotkey("Scroll", "Zoom in / out"),
+        new WorldMapHotkey("F1", "Toggle map UI"),
+        new WorldMapHotkey("F3", "Toggle debug info"),
+        new WorldMapHotkey("F12", "Export atlas"),
+        new WorldMapHotkey("W A S D", "Pan the map")
+    };
+
 
     // =================================================================================================================
 
 
-    private double zoom = 1;
-    private final ResourceKey<Level> dimension;
-    private final MapRenderer mapRenderer;
+    private final ResourceKey<Level> dimension = Minecraft.getInstance().level.dimension();
+    private final List<MapType> mapTypes = BlazeMapAPI.MAPTYPES.keys().stream().map(BlazeRegistry.Key::value).filter(m -> m.shouldRenderInDimension(dimension)).toList();
+    private final List<Overlay> overlays = BlazeMapFeaturesClient.OVERLAYS.stream().map(BlazeRegistry.Key::value).filter(o -> o.shouldRenderInDimension(dimension)).toList();
     private final MapConfigSynchronizer synchronizer;
-    private final List<MapType> mapTypes;
-    private final int layersBegin;
-    private final MouseSubpixelSmoother mouse;
-    private Widget legend;
-    private EditBox search;
-    private final Coordination coordination = new Coordination();
-    private double rawMouseX = -1, rawMouseY = -1;
-    private WorldMapPopup contextMenu;
+    private final InteractiveMapDisplay map;
+    private AbsoluteContainer windows, components;
+    private VolatileContainer volatiles;
+    private MetaContainer root;
+    private Placeholder legend;
 
     public WorldMapGui() {
-        super(EMPTY);
-        mapRenderer = new MapRenderer(-1, -1, Helpers.identifier("dynamic/map/worldmap"), MIN_ZOOM, MAX_ZOOM, true).setProfilers(renderTime, uploadTime);
-        synchronizer = new MapConfigSynchronizer(mapRenderer, BlazeMapConfig.CLIENT.worldMap);
-        dimension = Minecraft.getInstance().level.dimension();
-        mapTypes = BlazeMapAPI.MAPTYPES.keys().stream().map(BlazeRegistry.Key::value).filter(m -> m.shouldRenderInDimension(dimension)).collect(Collectors.toUnmodifiableList());
-        layersBegin = 50 + (mapTypes.size() * 20);
-        mouse = new MouseSubpixelSmoother();
-        zoom = mapRenderer.getZoom();
+        super(TextComponent.EMPTY);
 
-        mapRenderer.setSearchHost(active -> {
-            if(search != null) {
-                search.visible = active;
-            }
-        });
+        map = new InteractiveMapDisplay(BlazeMap.resource("dynamic/map/worldmap"), MIN_ZOOM, MAX_ZOOM);
+        var renderer = map.getRenderer();
+        synchronizer = new MapConfigSynchronizer(renderer, BlazeMapConfig.CLIENT.worldMap);
+        map.setSynchronizer(synchronizer).setProfilers(renderTime, uploadTime).onMapChange(this::updateLegend);
     }
 
     @Override
-    public boolean isLayerVisible(BlazeRegistry.Key<Layer> layerID) {
-        return mapRenderer.isLayerVisible(layerID);
-    }
-
-    @Override
-    public void toggleLayer(BlazeRegistry.Key<Layer> layerID) {
-        synchronizer.toggleLayer(layerID);
-    }
-
-    @Override
-    public MapType getMapType() {
-        return mapRenderer.getMapType();
-    }
-
-    @Override
-    public void setMapType(MapType map) {
-        synchronizer.setMapType(map);
-        search.setValue("");
-        updateLegend();
-    }
-
-    @Override
-    public void drawTooltip(PoseStack stack, Component component, int x, int y) {
-        renderTooltip(stack, component, x, y);
-    }
-
-    @Override
-    public Iterable<? extends GuiEventListener> getChildren() {
-        return children();
+    public void drawTooltip(PoseStack stack, int x, int y, List<? extends Component> lines) {
+        renderTooltip(stack, lines.stream().map(Component::getVisualOrderText).collect(Collectors.toList()), x, y);
     }
 
     @Override
     protected void init() {
-        double scale = getMinecraft().getWindow().getGuiScale();
-        mapRenderer.resize((int) (Math.ceil(width * scale / MAX_ZOOM) * MAX_ZOOM), (int) (Math.ceil(height * scale / MAX_ZOOM) * MAX_ZOOM));
+        // UI LAYERS
+        volatiles = new VolatileContainer(0);
+        windows = new AbsoluteContainer(0);
+        components = new AbsoluteContainer(MARGIN);
+        AbsoluteContainer background = new AbsoluteContainer(0);
+        background.add(map.setVolatiles(volatiles).setSize(width, height), 0, 0);
+        root = addRenderableWidget(new MetaContainer(width, height).add(background, components, windows, volatiles).setInputConsumer(map));
+        visibilityController.clear().add(components, windows, volatiles);
 
-        addRenderableOnly(new Image(ICON, 5, 5, 20, 20));
-        addRenderableOnly(new Image(NAME, 30, 5, 110, 20));
-        int y = 20;
-        for(MapType mapType : mapTypes) {
-            BlazeRegistry.Key<MapType> key = mapType.getID();
-            int px = 7, py = (y += 20);
-            addRenderableWidget(new MapTypeButton(px, py, 16, 16, key, this));
-            MapType map = key.value();
-            int layerY = layersBegin;
-            List<BlazeRegistry.Key<Layer>> childLayers = map.getLayers().stream().collect(Collectors.toList());
-            Collections.reverse(childLayers);
-            for(BlazeRegistry.Key<Layer> layer : childLayers) {
-                if(layer.value().isOpaque()) continue;
-                LayerButton lb = new LayerButton(px, layerY, 16, 16, layer, map, this);
-                layerY += 20;
-                lb.checkVisible();
-                addRenderableWidget(lb);
+        // BRANDING
+        var brand_icon = new Image(BLAZEMAP_ICON, 20, 20);
+        var brand_logo = new Image(BLAZEMAP_NAME, 110, 20);
+        components.add(brand_icon, ContainerAnchor.TOP_LEFT);
+        components.add(brand_logo, ContainerAnchor.TOP_CENTER);
+
+        // MAPS AND LAYERS
+        LineContainer maps = new LineContainer(ContainerAxis.HORIZONTAL, ContainerDirection.POSITIVE, 2).withBackground();
+        components.anchor(maps,brand_icon, ContainerAxis.HORIZONTAL, ContainerDirection.POSITIVE);
+        maps.add(new Image(HEADER_MAPS, 16, 16).tooltip(new TextComponent("Maps")));
+        maps.addSpacer();
+        List<LineContainer> layerSets = new ArrayList<>();
+        for(var mapType : mapTypes) {
+            LineContainer layerSet = new LineContainer(ContainerAxis.VERTICAL, ContainerDirection.NEGATIVE, 2).withBackground();
+            components.anchor(layerSet, brand_icon, ContainerAxis.VERTICAL, ContainerDirection.POSITIVE);
+            layerSets.add(layerSet);
+            maps.add(new MapTypeButton(mapType.getID(), map, layerSets, layerSet));
+
+            layerSet.setVisible(map.getMapType().getID().equals(mapType.getID()));
+            for(var layer : mapType.getLayers()) {
+                layerSet.add(new LayerButton(layer, map));
             }
+            layerSet.addSpacer().add(new Image(HEADER_LAYERS, 16, 16).tooltip(new TextComponent("Layers")));
         }
 
-        search = addRenderableWidget(new EditBox(getMinecraft().font, (width - 120) / 2, height - 15, 120, 12, EMPTY));
-        search.setResponder(mapRenderer::setSearch);
-        mapRenderer.pingSearchHost();
+        // OVERLAYS
+        LineContainer overlaySet = new LineContainer(ContainerAxis.HORIZONTAL, ContainerDirection.POSITIVE, 2).withBackground();
+        overlaySet.add(new Image(HEADER_OVERLAYS, 16, 16).tooltip(new TextComponent("Overlays")));
+        overlaySet.addSpacer();
+        for(var overlay : overlays) {
+            overlaySet.add(new OverlayButton(overlay.getID(), map));
+        }
+        components.add(overlaySet, ContainerAnchor.BOTTOM_LEFT);
 
+        // SEARCH
+        ObjHolder<String> text = new ObjHolder<>();
+        BaseComponent<?> search = VanillaComponents.makeTextField(getMinecraft().font, 120, 15, text);
+        components.add(search, ContainerAnchor.BOTTOM_CENTER);
+        text.setResponder(map.getRenderer()::setSearch);
+        var renderer = map.getRenderer();
+        renderer.setSearchHost(search::setVisible);
+        renderer.pingSearchHost();
+
+        // HOTKEYS
+        var hotkeys = new LineContainer(ContainerAxis.VERTICAL, ContainerDirection.POSITIVE, 3).withBackground().with(HOTKEYS);
+        components.anchor(hotkeys, overlaySet, ContainerAxis.VERTICAL, ContainerDirection.NEGATIVE);
+
+        // LEGEND
+        legend = new Placeholder();
+        components.add(legend, ContainerAnchor.BOTTOM_RIGHT);
         updateLegend();
+
+        // SCALE
+        MapScaleDisplay scale = new MapScaleDisplay(256, map.getRenderer());
+        components.anchor(scale, legend, ContainerAxis.HORIZONTAL, ContainerDirection.NEGATIVE);
+
+        components.add(new AtlasExportProgress(), ContainerAnchor.TOP_RIGHT);
+        components.anchor(new WorldMapDebug(map.getRenderer().debug, map.getCoordination(), renderTime, uploadTime, () -> renderDebug), maps, ContainerAxis.VERTICAL, ContainerDirection.POSITIVE);
     }
 
     private void updateLegend() {
-        legend = mapRenderer.getMapType().getLayers().iterator().next().value().getLegendWidget();
-    }
+        var legend = WrappedComponent.ofNullable(map.getMapType().getLayers().iterator().next().value().getLegendWidget());
 
-    @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double draggedX, double draggedY) {
-        setMouse(mouseX, mouseY);
-        if(button == GLFW.GLFW_MOUSE_BUTTON_1) {
-            double scale = getMinecraft().getWindow().getGuiScale();
-            mouse.addMovement(draggedX * scale / zoom, draggedY * scale / zoom);
-            mapRenderer.moveCenter(-mouse.movementX(), -mouse.movementY());
-            return true;
-        }
-        return super.mouseDragged(mouseX, mouseY, button, draggedX, draggedY);
-    }
-
-    @Override
-    public void mouseMoved(double mouseX, double mouseY) {
-        setMouse(mouseX, mouseY);
-        super.mouseMoved(mouseX, mouseY);
-    }
-
-    @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scroll) {
-        boolean zoomed;
-        if(scroll > 0) {
-            zoomed = synchronizer.zoomIn();
-        }
-        else {
-            zoomed = synchronizer.zoomOut();
-        }
-        zoom = mapRenderer.getZoom();
-        setMouse(mouseX, mouseY);
-        return zoomed;
-    }
-
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        setMouse(mouseX, mouseY);
-
-        if(contextMenu != null){ // On existing menu, pass into
-            var result = contextMenu.onClick((int) rawMouseX, (int) rawMouseY, button);
-            if(result.shouldDismiss) {
-                contextMenu = null;
-            }
-            if(result.wasHandled) {
-                return true;
-            }
-        }
-
-        if(super.mouseClicked(mouseX, mouseY, button)) { // If super handled, exit
-            return true;
-        }
-
-        if(button == GLFW.GLFW_MOUSE_BUTTON_2) { // If right click open new menu
-            int scale = (int) getMinecraft().getWindow().getGuiScale();
-            contextMenu = new WorldMapPopup(coordination, width * scale, height * scale, mapRenderer.getVisibleLayers());
-            return true;
-        }
-
-        return false;
-    }
-
-    private void setMouse(double mouseX, double mouseY) {
-        double scale = getMinecraft().getWindow().getGuiScale();
-        this.rawMouseX = mouseX * scale;
-        this.rawMouseY = mouseY * scale;
-        coordination.calculate((int) this.rawMouseX, (int) this.rawMouseY, mapRenderer.getBeginX(), mapRenderer.getBeginZ(), mapRenderer.getZoom());
-        if(contextMenu != null) {
-            contextMenu.setMouse(coordination.mousePixelX, coordination.mousePixelY);
+        if(legend == null) {
+            this.legend.clear();
+        } else {
+            this.legend.add(legend);
         }
     }
 
     @Override
-    public void render(PoseStack stack, int i0, int i1, float f0) {
-        float scale = (float) getMinecraft().getWindow().getGuiScale();
-
-        stack.pushPose();
-        stack.scale(1F / scale, 1F / scale, 1);
-        var buffers = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-        mapRenderer.render(stack, buffers);
-        buffers.endBatch();
-        if(contextMenu != null){
-            contextMenu.render(stack, i0, i1, f0);
-        }
-        stack.popPose();
-
-        if(legend != null) {
-            stack.pushPose();
-            stack.translate(width - 5, height - 5, 0);
-            legend.render(stack, -1, -1, 0);
-            stack.popPose();
-        }
-
-        if(showWidgets) {
-            renderAtlasExportProgress(stack, scale);
-
-            int maps = mapTypes.size();
-            if(maps > 0) {
-                stack.pushPose();
-                stack.translate(5, 38, 0);
-                RenderHelper.fillRect(stack.last().pose(), 20, maps * 20, Colors.WIDGET_BACKGROUND);
-                stack.popPose();
-            }
-            long layers = mapRenderer.getMapType().getLayers().stream().map(k -> k.value()).filter(l -> !l.isOpaque() && l.shouldRenderInDimension(dimension)).count();
-            if(layers > 0) {
-                stack.pushPose();
-                stack.translate(5, layersBegin - 2, 0);
-                RenderHelper.fillRect(stack.last().pose(), 20, layers * 20, Colors.WIDGET_BACKGROUND);
-                stack.popPose();
-            }
-            stack.pushPose();
-            super.render(stack, i0, i1, f0);
-            stack.popPose();
-        }
-
-        if(renderDebug) {
-            stack.pushPose();
-            renderDebug(stack);
-            stack.popPose();
-
-            stack.pushPose();
-            stack.scale(1F / scale, 1F / scale, 1);
-            renderCoordination(stack, scale);
-            stack.popPose();
-        }
-    }
-
-    private void renderAtlasExportProgress(PoseStack stack, float scale) {
-        AtlasTask task = AtlasExporter.getTask();
-        if(task == null) return;
-        Font font = Minecraft.getInstance().font;
-        stack.pushPose();
-
-        stack.translate(width - 205, 5, 0); // Go to corner
-        RenderHelper.fillRect(stack.last().pose(), 200, 30, Colors.WIDGET_BACKGROUND); // draw background
-
-        // Process flashing "animation"
-        int textColor = Colors.WHITE;
-        long flashUntil = ((long)task.getFlashUntil()) * 1000L;
-        long now = System.currentTimeMillis();
-        if(task.isErrored() || (flashUntil >= now && now % 333 < 166)) {
-            textColor = 0xFFFF0000;
-        }
-
-        // Render progress text
-        int total = task.getTilesTotal();
-        int current = task.getTilesCurrent();
-        font.draw(stack, String.format("Exporting  1:%d", task.resolution.pixelWidth), 5, 5, textColor);
-        String operation = switch(task.getStage()){
-            case QUEUED -> "queued";
-            case CALCULATING -> "calculating";
-            case STITCHING -> String.format("stitching %d / %d tiles", current, total);
-            case SAVING -> "saving";
-            case COMPLETE -> "complete";
-        };
-        font.draw(stack, operation, 195 - font.width(operation), 5, textColor);
-
-        // Render progress bar
-        double progress = ((double)current) / ((double)total);
-        stack.translate(5, 17, 0);
-        RenderHelper.fillRect(stack.last().pose(), 190, 10, Colors.LABEL_COLOR);
-        RenderHelper.fillRect(stack.last().pose(), (int)(190*progress), 10, textColor);
-
-        stack.popPose();
-    }
-
-    private void renderCoordination(PoseStack stack, float scale){
-        if(rawMouseX == -1 || rawMouseY == -1) return;
-
-        stack.pushPose();
-        stack.translate(coordination.regionPixelX, coordination.regionPixelY, 0.1);
-        RenderHelper.fillRect(stack.last().pose(), coordination.regionPixels, coordination.regionPixels, 0x400000FF);
-        stack.popPose();
-
-        stack.pushPose();
-        stack.translate(coordination.chunkPixelX, coordination.chunkPixelY, 0.2);
-        RenderHelper.fillRect(stack.last().pose(), coordination.chunkPixels, coordination.chunkPixels, 0x6000FF00);
-        stack.popPose();
-
-        stack.pushPose();
-        stack.translate(coordination.blockPixelX, coordination.blockPixelY, 0.3);
-        RenderHelper.fillRect(stack.last().pose(), coordination.blockPixels, coordination.blockPixels, 0x80FF0000);
-        stack.popPose();
-
-        stack.pushPose();
-        stack.translate(width * scale / 2, 10, 1);
-        stack.scale(3, 3, 0);
-        Font font = getMinecraft().font;
-        String region = String.format("Rg %d %d  |  px: %d %d", coordination.regionX, coordination.regionZ, coordination.regionPixelX, coordination.regionPixelY);
-        font.draw(stack, region, 0, 0, 0x0000FF);
-        String chunk = String.format("Ch %d %d  |  px: %d %d", coordination.chunkX, coordination.chunkZ, coordination.chunkPixelX, coordination.chunkPixelY);
-        font.draw(stack, chunk, 0, 10, 0x00FF00);
-        String block = String.format("Bl %d %d  |  px: %d %d", coordination.blockX, coordination.blockZ, coordination.blockPixelX, coordination.blockPixelY);
-        font.draw(stack, block, 0, 20, 0xFF0000);
-        stack.popPose();
-    }
-
-    private void renderDebug(PoseStack stack) {
-        stack.translate(32, 25, 0);
-        RenderHelper.fillRect(stack.last().pose(), 135, 110, 0x80000000);
-        font.draw(stack, "Debug Info", 5, 5, 0xFFFF0000);
-        stack.translate(5, 20, 0);
-        stack.scale(0.5F, 0.5F, 1);
-
-        font.draw(stack, "Atlas Time Profiling:", 0, 0, -1);
-        var buffers = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-        ProfilingRenderer.drawTimeProfiler(renderTime, 12, "Render", font, stack.last().pose(), buffers);
-        ProfilingRenderer.drawTimeProfiler(uploadTime, 24, "Upload", font, stack.last().pose(), buffers);
-        buffers.endBatch();
-
-        MapRenderer.DebugInfo debug = mapRenderer.debug;
-        int y = 30;
-        font.draw(stack, String.format("Renderer Size: %d x %d", debug.rw, debug.rh), 0, y += 12, -1);
-        font.draw(stack, String.format("Renderer Zoom: %sx", debug.zoom), 0, y += 12, -1);
-        font.draw(stack, String.format("Atlas Size: %d x %d", debug.mw, debug.mh), 0, y += 12, -1);
-        font.draw(stack, String.format("Atlas Frustum: [%d , %d] to [%d , %d]", debug.bx, debug.bz, debug.ex, debug.ez), 0, y += 12, -1);
-
-        font.draw(stack, String.format("Region Matrix: %d x %d", debug.ox, debug.oz), 0, y += 18, -1);
-        font.draw(stack, String.format("Active Layers: %d", debug.layers), 0, y += 12, -1);
-        font.draw(stack, String.format("Stitching: %s", debug.stitching), 0, y += 12, 0xFF0088FF);
-        font.draw(stack, String.format("Parallel Pool: %d", BlazeMapAsync.instance().cruncher.poolSize()), 0, y += 12, 0xFFFFFF00);
-
-        font.draw(stack, String.format("Addon Labels: %d", debug.labels), 0, y += 18, -1);
-        font.draw(stack, String.format("Player Waypoints: %d", debug.waypoints), 0, y += 12, -1);
+    public boolean consumeFragment(BaseFragment fragment) {
+        HostWindowComponent window = new HostWindowComponent(fragment, volatiles).setCloser(windows::remove);
+        windows.add(window, ContainerAnchor.MIDDLE_CENTER);
+        return true;
     }
 
     @Override
-    public void onClose() {
-        mapRenderer.close();
-        synchronizer.save();
-        super.onClose();
+    public boolean mouseDragged(double p_94699_, double p_94700_, int p_94701_, double p_94702_, double p_94703_) {
+        return super.mouseDragged(p_94699_, p_94700_, p_94701_, p_94702_, p_94703_);
     }
 
     @Override
-    public boolean keyPressed(int key, int x, int y) {
+    public boolean keyPressed(int key, int scancode, int modifiers) {
         if(key == GLFW.GLFW_KEY_F1) {
-            showWidgets = !showWidgets;
+            visibilityController.toggleVisible();
             return true;
         }
 
         if(key == GLFW.GLFW_KEY_F12) {
-            AtlasExporter.exportAsync(new AtlasTask(this.dimension, this.getMapType().getID(), this.mapRenderer.getVisibleLayers(), TileResolution.FULL, this.mapRenderer.getCenterRegion()));
+            AtlasExporter.exportAsync(new AtlasTask(this.dimension, map.getMapType().getID(), map.getRenderer().getVisibleLayers(), TileResolution.FULL, map.getRenderer().getCenterRegion()));
             return true;
         }
 
@@ -408,43 +207,23 @@ public class WorldMapGui extends Screen implements IScreenSkipsMinimap, IMapHost
             return true;
         }
 
-        if(key == GLFW.GLFW_KEY_F && Screen.hasControlDown() && search.isVisible() && !search.isFocused()) {
-            this.setFocused(search);
-            search.setFocus(true);
+        if(root.keyPressed(key, scancode, modifiers)) return true;
+        if(super.keyPressed(key, scancode, modifiers)) return true;
+
+        if(key == BlazeMapFeaturesClient.KEY_MAPS.getKey().getValue()) {
+            this.onClose();
             return true;
         }
 
-        if(!search.isFocused()) {
-            if(key == BlazeMapFeaturesClient.KEY_MAPS.getKey().getValue()) {
-                this.onClose();
-                return true;
-            }
-
-            int dx = 0;
-            int dz = 0;
-            if(key == GLFW.GLFW_KEY_W) {
-                dz -= 16;
-            }
-            if(key == GLFW.GLFW_KEY_S) {
-                dz += 16;
-            }
-            if(key == GLFW.GLFW_KEY_D) {
-                dx += 16;
-            }
-            if(key == GLFW.GLFW_KEY_A) {
-                dx -= 16;
-            }
-            if(dx != 0 || dz != 0) {
-                mapRenderer.moveCenter(dx, dz);
-                return true;
-            }
-        }
-        return super.keyPressed(key, x, y);
+        return false;
     }
 
     @Override
-    public Minecraft getMinecraft() {
-        return Minecraft.getInstance();
+    public void onClose() {
+        map.getRenderer().close();
+        synchronizer.save();
+        visibilityController.clear();
+        super.onClose();
     }
 
     public void addInspector(MDInspectorWidget<?> widget) {

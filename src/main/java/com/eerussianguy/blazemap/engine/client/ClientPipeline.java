@@ -21,11 +21,16 @@ import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
 import com.eerussianguy.blazemap.api.maps.*;
 import com.eerussianguy.blazemap.api.pipeline.*;
 import com.eerussianguy.blazemap.api.util.RegionPos;
-import com.eerussianguy.blazemap.engine.*;
-import com.eerussianguy.blazemap.engine.async.*;
+import com.eerussianguy.blazemap.config.BlazeMapConfig;
+import com.eerussianguy.blazemap.config.ServerConfig;
+import com.eerussianguy.blazemap.engine.Pipeline;
+import com.eerussianguy.blazemap.engine.PipelineProfiler;
+import com.eerussianguy.blazemap.engine.UnsafeGenerics;
 import com.eerussianguy.blazemap.engine.cache.ChunkMDCache;
 import com.eerussianguy.blazemap.engine.cache.ChunkMDCacheView;
-import com.eerussianguy.blazemap.util.Helpers;
+import com.eerussianguy.blazemap.engine.storage.InternalStorage;
+import com.eerussianguy.blazemap.lib.Helpers;
+import com.eerussianguy.blazemap.lib.async.*;
 import com.mojang.blaze3d.platform.NativeImage;
 
 import static com.eerussianguy.blazemap.profiling.Profilers.Client.*;
@@ -51,7 +56,7 @@ class ClientPipeline extends Pipeline {
     private final PriorityLock lock = new PriorityLock();
     private boolean active, cold;
 
-    public ClientPipeline(AsyncChainRoot async, DebouncingThread debouncer, ResourceKey<Level> dimension, StorageAccess.Internal storage, PipelineType type) {
+    public ClientPipeline(AsyncChainRoot async, DebouncingThread debouncer, ResourceKey<Level> dimension, InternalStorage storage, PipelineType type) {
         super(
             async, debouncer, CLIENT_PIPELINE_PROFILER, dimension, Helpers::levelOrThrow, storage,
             computeCollectorSet(dimension, type),
@@ -69,7 +74,7 @@ class ClientPipeline extends Pipeline {
         // Set up views (immutable sets) for the available maps and layers.
         this.availableMapTypes = BlazeMapAPI.MAPTYPES.keys().stream().filter(m -> m.value().shouldRenderInDimension(dimension)).collect(Collectors.toUnmodifiableSet());
         this.availableLayers = availableMapTypes.stream().map(k -> k.value().getLayers()).flatMap(Set::stream).filter(l -> l.value().shouldRenderInDimension(dimension)).collect(Collectors.toUnmodifiableSet());
-        this.layers = availableLayers.stream().map(Key::value).filter(l -> !(l instanceof FakeLayer)).toArray(Layer[]::new);
+        this.layers = availableLayers.stream().map(Key::value).filter(l -> l.type.isPipelined).toArray(Layer[]::new);
         this.numLayers = layers.length;
 
         // Set up debouncing mechanisms
@@ -78,7 +83,7 @@ class ClientPipeline extends Pipeline {
             TILE_TIME_PROFILER.begin();
             region.save();
             TILE_TIME_PROFILER.end();
-        }), 2500, 30000);
+        }), 2500, 30000, BlazeMap.LOGGER);
 
         this.useMDCache();
     }
@@ -88,7 +93,7 @@ class ClientPipeline extends Pipeline {
             .map(k -> k.value().getInputIDs()).map(ids -> BlazeMapAPI.COLLECTORS.keys().stream().filter(k -> ids.contains(k.value().getOutputID()))
                 .collect(Collectors.toUnmodifiableSet())).flatMap(Set::stream).filter(k -> k.value().shouldExecuteIn(dimension, type));
 
-        if(!BlazeMapClientEngine.isClientSource()) {
+        if(!ClientEngine.isClientSource()) {
             collectors = collectors.filter(k -> k.value() instanceof ClientOnlyCollector);
         }
 
@@ -99,8 +104,13 @@ class ClientPipeline extends Pipeline {
         cold = false;
     }
 
+    private boolean canPlayerWriteMap() {
+        return BlazeMapConfig.SERVER.mapItemRequirement.canPlayerAccessMap(Helpers.getPlayer(), ServerConfig.MapAccess.WRITE);
+    }
+
     @Override
     public void insertMasterData(ChunkPos pos, List<MasterDatum> data) {
+        if(!canPlayerWriteMap()) return;
         AsyncChainItem<Void, Void> chain = async.begin();
         if(cold) chain = chain.thenDelay((int) (500 + ((System.nanoTime() / 1000) % 1000)));
         chain
@@ -140,7 +150,7 @@ class ClientPipeline extends Pipeline {
             NativeImage layerChunkTile = new NativeImage(NativeImage.Format.RGBA, resolution.chunkWidth, resolution.chunkWidth, true);
             for(Layer layer : layers) {
                 Key<Layer> layerID = layer.getID();
-                LayerRegionTile layerRegionTile = getLayerRegionTile(layerID, regionPos, resolution, false);
+                LayerRegionTile layerRegionTile = getLayerRegionTile(layerID, regionPos, resolution);
                 layerRegionTile.updateTile(layerChunkTile, chunkPos);
                 updates.add(new LayerRegion(layerID, regionPos));
             }
@@ -149,6 +159,12 @@ class ClientPipeline extends Pipeline {
             async.runOnGameThread(() -> sendMapUpdates(updates));
         }
         return null;
+    }
+
+    @Override
+    protected void begin(ChunkPos pos) {
+        if(!canPlayerWriteMap()) return;
+        super.begin(pos);
     }
 
     // Redraw tiles based on MD changes
@@ -186,7 +202,7 @@ class ClientPipeline extends Pipeline {
                     if(layer.renderTile(layerChunkTile, resolution, view, xOff, zOff)) {
 
                         // update this chunk of the region
-                        LayerRegionTile layerRegionTile = getLayerRegionTile(layerID, regionPos, resolution, false);
+                        LayerRegionTile layerRegionTile = getLayerRegionTile(layerID, regionPos, resolution);
                         layerRegionTile.updateTile(layerChunkTile, chunkPos);
 
                         // asynchronously save this region later
@@ -209,7 +225,7 @@ class ClientPipeline extends Pipeline {
         }
     }
 
-    private LayerRegionTile getLayerRegionTile(Key<Layer> layer, RegionPos region, TileResolution resolution, boolean priority) {
+    private LayerRegionTile getLayerRegionTile(Key<Layer> layer, RegionPos region, TileResolution resolution) {
         try {
             return tiles
                 .computeIfAbsent(resolution, $ -> new ConcurrentHashMap<>())
@@ -236,7 +252,7 @@ class ClientPipeline extends Pipeline {
     private void sendMapUpdates(Set<LayerRegion> updates) {
         if(active) {
             for(LayerRegion update : updates) {
-                BlazeMapClientEngine.notifyLayerRegionChange(update);
+                ClientEngine.notifyLayerRegionChange(update);
             }
         }
     }
@@ -260,9 +276,15 @@ class ClientPipeline extends Pipeline {
         return this;
     }
 
-    public void consumeTile(Key<Layer> layer, RegionPos region, TileResolution resolution, Consumer<NativeImage> consumer) {
-        if(!availableLayers.contains(layer))
-            throw new IllegalArgumentException("Layer " + layer + " not available for dimension " + dimension);
-        getLayerRegionTile(layer, region, resolution, true).consume(consumer);
+    public void consumeTile(Key<Layer> key, RegionPos region, TileResolution resolution, Consumer<PixelSource> consumer) {
+        if(!availableLayers.contains(key)) {
+            throw new IllegalArgumentException("Layer " + key + " not available for dimension " + dimension);
+        }
+        Layer layer = key.value();
+        switch(layer.type) {
+            case PHYSICAL -> getLayerRegionTile(key, region, resolution).consume(consumer);
+            case SYNTHETIC -> consumer.accept(((SyntheticLayer)layer).getPixelSource(dimension, region, resolution));
+            case INVISIBLE -> throw new UnsupportedOperationException("Impossible to consume pixel data from invisible layer: " + key);
+        }
     }
 }

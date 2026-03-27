@@ -16,7 +16,7 @@ import com.eerussianguy.blazemap.api.BlazeMapAPI;
 import com.eerussianguy.blazemap.api.BlazeRegistry;
 import com.eerussianguy.blazemap.api.pipeline.DataType;
 import com.eerussianguy.blazemap.api.pipeline.MasterDatum;
-import com.eerussianguy.blazemap.engine.client.BlazeMapClientEngine;
+import com.eerussianguy.blazemap.engine.client.ClientEngine;
 
 public class PacketChunkMDUpdate {
     public final ResourceKey<Level> dimension;
@@ -36,7 +36,7 @@ public class PacketChunkMDUpdate {
     }
 
     void handle(NetworkEvent.Context context) {
-        BlazeMapClientEngine.submitChanges(dimension, pos, data, source);
+        ClientEngine.submitChanges(dimension, pos, data, source);
         context.setPacketHandled(true);
     }
 

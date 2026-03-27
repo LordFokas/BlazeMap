@@ -7,15 +7,17 @@ import net.minecraftforge.common.ForgeConfigSpec.*;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import com.eerussianguy.blazemap.BlazeMap;
+import com.eerussianguy.blazemap.api.BlazeMapAPI;
 import com.eerussianguy.blazemap.api.BlazeMapReferences;
 import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
 import com.eerussianguy.blazemap.api.maps.Layer;
 import com.eerussianguy.blazemap.api.maps.MapType;
+import com.eerussianguy.blazemap.api.maps.Overlay;
 import com.eerussianguy.blazemap.feature.maps.MinimapRenderer;
 import com.eerussianguy.blazemap.feature.maps.WorldMapGui;
-import com.eerussianguy.blazemap.util.IConfigAdapter;
-import com.eerussianguy.blazemap.util.LayerListAdapter;
-import com.eerussianguy.blazemap.util.MapTypeAdapter;
+import com.eerussianguy.blazemap.config.adapter.ConfigAdapter;
+import com.eerussianguy.blazemap.config.adapter.NamedMapComponentListAdapter;
+import com.eerussianguy.blazemap.config.adapter.MapTypeAdapter;
 
 /**
  * Forge configs happen to be a very simple way to serialize things across saves and hold data within a particular instance
@@ -58,6 +60,7 @@ public class ClientConfig {
         public final BooleanValue displayOtherPlayers;
         public final BooleanValue displayWaypointsOnMap;
         public final BooleanValue renderWaypointsInWorld;
+        public final BooleanValue deathWaypoints;
 
         FeaturesConfig(Function<String, Builder> builder) {
             this.displayCoords = builder.apply("displayCoords")
@@ -80,21 +83,27 @@ public class ClientConfig {
             this.renderWaypointsInWorld = builder.apply("renderWaypointsInWorld")
                 .comment("Enables waypoints to be rendered in the world")
                 .define("renderWaypointsInWorld", false);
+            this.deathWaypoints = builder.apply("deathWaypoints")
+                .comment("Automatically create special waypoints at the place of your death")
+                .define("deathWaypoints", true);
         }
     }
 
     public static class MapConfig {
-        public final IConfigAdapter<Key<MapType>> activeMap;
-        public final IConfigAdapter<List<Key<Layer>>> disabledLayers;
+        public final ConfigAdapter<Key<MapType>> activeMap;
+        public final ConfigAdapter<List<Key<Layer>>> disabledLayers;
+        public final ConfigAdapter<List<Key<Overlay>>> disabledOverlays;
         public final DoubleValue zoom;
 
         MapConfig(Function<String, Builder> builder, double minZoom, double maxZoom) {
             ConfigValue<String> _activeMap = builder.apply("activeMap").comment("List of disabled Layers, comma separated").define("activeMap", BlazeMapReferences.MapTypes.AERIAL_VIEW.toString());
             ConfigValue<List<? extends String>> _disabledLayers = builder.apply("disabledLayers").comment("List of disabled Layers, comma separated").defineList("disabledLayers", List::of, o -> o instanceof String);
+            ConfigValue<List<? extends String>> _disabledOverlays = builder.apply("disabledOverlays").comment("List of disabled Overlays, comma separated").defineList("disabledOverlays", List::of, o -> o instanceof String);
             this.zoom = builder.apply("zoom").comment("Zoom level. Must be a power of 2").defineInRange("zoom", 1.0, minZoom, maxZoom);
 
             this.activeMap = new MapTypeAdapter(_activeMap);
-            this.disabledLayers = new LayerListAdapter(_disabledLayers);
+            this.disabledLayers = new NamedMapComponentListAdapter<>(_disabledLayers, BlazeMapAPI.LAYERS);
+            this.disabledOverlays = new NamedMapComponentListAdapter<>(_disabledOverlays, BlazeMapAPI.OVERLAYS);
         }
     }
 

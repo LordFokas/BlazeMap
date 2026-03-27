@@ -23,6 +23,7 @@ eclipse
 run
 resources/__pycache__
 libs
+tmp
 
 # Files from Forge MDK
 forge*changelog.txt

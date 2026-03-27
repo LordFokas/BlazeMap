@@ -11,9 +11,9 @@ import com.eerussianguy.blazemap.api.util.MinecraftStreams;
 public class TerrainSlopeSerializer implements DataType<TerrainSlopeMD> {
     @Override
     public void serialize(MinecraftStreams.Output stream, TerrainSlopeMD terrain) throws IOException {
-        for(int x = 0; x < 16; x++) {
-            for(int z = 0; z < 16; z++) {
-                stream.writeFloat(terrain.slopemap[x][z]);
+        for(int z = 0; z < 16; z++) {
+            for(int x = 0; x < 16; x++) {
+                stream.writeFloat(terrain.slopemap[z][x]);
             }
         }
     }
@@ -22,9 +22,9 @@ public class TerrainSlopeSerializer implements DataType<TerrainSlopeMD> {
     public TerrainSlopeMD deserialize(MinecraftStreams.Input stream) throws IOException {
         float[][] slopemap = new float[16][16];
 
-        for(int x = 0; x < 16; x++) {
-            for(int z = 0; z < 16; z++) {
-                slopemap[x][z] = stream.readFloat();
+        for(int z = 0; z < 16; z++) {
+            for(int x = 0; x < 16; x++) {
+                slopemap[z][x] = stream.readFloat();
             }
         }
 

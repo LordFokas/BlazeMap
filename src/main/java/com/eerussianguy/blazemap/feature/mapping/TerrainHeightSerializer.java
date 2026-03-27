@@ -24,10 +24,9 @@ public class TerrainHeightSerializer implements DataType<TerrainHeightMD> {
         stream.writeShort(terrain.height);
         stream.writeShort(terrain.sea);
 
-
-        for(int x = 0; x < 16; x++) {
-            for(int z = 0; z < 16; z++) {
-                stream.writeShort(terrain.heightmap[x][z]);
+        for(int z = 0; z < 16; z++) {
+            for(int x = 0; x < 16; x++) {
+                stream.writeShort(terrain.heightmap[z][x]);
             }
         }
     }
@@ -42,9 +41,9 @@ public class TerrainHeightSerializer implements DataType<TerrainHeightMD> {
 
         int[][] heightmap = new int[16][16];
 
-        for(int x = 0; x < 16; x++) {
-            for(int z = 0; z < 16; z++) {
-                heightmap[x][z] = stream.readShort();
+        for(int z = 0; z < 16; z++) {
+            for(int x = 0; x < 16; x++) {
+                heightmap[z][x] = stream.readShort();
             }
         }
 

@@ -19,7 +19,7 @@ apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'maven-publish'
 
-version = '0.5.20-beta'
+version = '0.8.0-dev.0'
 group = 'com.eerussianguy.blazemap' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "BlazeMap-${minecraft_version}"
 
@@ -61,21 +61,23 @@ minecraft {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
-    flatDir {
-        dirs 'libs'
+    maven {
+        url "https://cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
     }
 }
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    compileOnly fg.deobf("_:rubidium:0.5.6")
-//    implementation fg.deobf("_:rubidium:0.5.6")
+    compileOnly "curse.maven:$rubidium_project_id:$rubidium_file_id"
 
-//    implementation fg.deobf("_:Patchouli:1.18.2-71.1")
-//    implementation fg.deobf("_:TerraFirmaCraft:Forge-1.18.2-2.1.11-beta")
-//    implementation fg.deobf("_:Cartography:1.18.2-0.4.0-alpha3")
-
+    implementation fg.deobf("curse.maven:$architectury_project_id:$architectury_file_id")
+    implementation fg.deobf("curse.maven:$ftbchunks_project_id:$ftbchunks_file_id")
+    implementation fg.deobf("curse.maven:$ftblib_project_id:$ftblib_file_id")
+    implementation fg.deobf("curse.maven:$ftbteams_project_id:$ftbteams_file_id")
 
     // Apply Mixin AP
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
@@ -114,7 +116,7 @@ jar {
 // This is the preferred method to reobfuscate your jar file
 jar.finalizedBy('reobfJar')
 // However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing
-//publish.dependsOn('reobfJar')
+// publish.dependsOn('reobfJar')
 
 publishing {
     publications {

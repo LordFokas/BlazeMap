@@ -11,7 +11,7 @@ import net.minecraft.world.level.Level;
 
 import com.eerussianguy.blazemap.api.BlazeRegistry.Key;
 import com.eerussianguy.blazemap.api.BlazeRegistry.RegistryEntry;
-import com.eerussianguy.blazemap.api.util.IDataSource;
+import com.eerussianguy.blazemap.api.util.DataSource;
 import com.eerussianguy.blazemap.api.util.RegionPos;
 
 /**
@@ -51,10 +51,10 @@ public abstract class Processor implements RegistryEntry, PipelineComponent, Con
     }
 
     /** Called for ExecutionMode.DIRECT, more performant */
-    public abstract void execute(ResourceKey<Level> dimension, RegionPos region, ChunkPos chunk, IDataSource data);
+    public abstract void execute(ResourceKey<Level> dimension, RegionPos region, ChunkPos chunk, DataSource data);
 
     /** Called for ExecutionMode.DIFFERENTIAL, more powerful */
-    public abstract void execute(ResourceKey<Level> dimension, RegionPos region, ChunkPos chunk, IDataSource current, IDataSource old);
+    public abstract void execute(ResourceKey<Level> dimension, RegionPos region, ChunkPos chunk, DataSource current, DataSource old);
 
 
     /**
@@ -69,7 +69,7 @@ public abstract class Processor implements RegistryEntry, PipelineComponent, Con
         }
 
         @Override
-        public final void execute(ResourceKey<Level> dimension, RegionPos region, ChunkPos chunk, IDataSource current, IDataSource old) {
+        public final void execute(ResourceKey<Level> dimension, RegionPos region, ChunkPos chunk, DataSource current, DataSource old) {
             throw new RuntimeException("Cannot execute differential mode on direct processor");
         }
     }
@@ -88,7 +88,7 @@ public abstract class Processor implements RegistryEntry, PipelineComponent, Con
         }
 
         @Override
-        public final void execute(ResourceKey<Level> dimension, RegionPos region, ChunkPos chunk, IDataSource data) {
+        public final void execute(ResourceKey<Level> dimension, RegionPos region, ChunkPos chunk, DataSource data) {
             throw new RuntimeException("Cannot execute direct mode on differential processor");
         }
     }

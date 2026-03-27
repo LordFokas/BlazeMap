@@ -21,8 +21,8 @@ public class NetherCollector extends Collector<TerrainHeightMD> {
     public TerrainHeightMD collect(Level level, int minX, int minZ, int maxX, int maxZ) {
         final int[][] heightmap = new int[16][16];
 
-        for(int x = 0; x < 16; x++) {
-            for(int z = 0; z < 16; z++) {
+        for(int z = 0; z < 16; z++) {
+            for(int x = 0; x < 16; x++) {
                 int height = 110;
                 while(isNotAir(level, minX + x, height - 1, minZ + z)) {
                     height--;
@@ -34,7 +34,7 @@ public class NetherCollector extends Collector<TerrainHeightMD> {
                         if(height <= level.getMinBuildHeight()) break;
                     }
                 }
-                heightmap[x][z] = height;
+                heightmap[z][x] = height;
             }
         }
 
