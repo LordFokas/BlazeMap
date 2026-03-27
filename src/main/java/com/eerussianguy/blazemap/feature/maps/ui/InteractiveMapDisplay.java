@@ -1,5 +1,6 @@
 package com.eerussianguy.blazemap.feature.maps.ui;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import org.lwjgl.glfw.GLFW;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
@@ -18,6 +19,15 @@ public class InteractiveMapDisplay extends MapDisplay implements UIEventListener
     private final Coordination coordination = new Coordination();
     private VolatileContainer volatiles;
     private double zoom;
+    int lastMouseX;
+    int lastMouseY;
+
+    @Override
+    public void render(PoseStack stack, boolean hasMouse, int mouseX, int mouseY) {
+        this.lastMouseX = mouseX;
+        this.lastMouseY = mouseY;
+        super.render(stack, hasMouse, mouseX, mouseY);
+    }
 
     public InteractiveMapDisplay(ResourceLocation mapLocation, double minZoom, double maxZoom) {
         this(0, 0, mapLocation, minZoom, maxZoom);
@@ -93,6 +103,7 @@ public class InteractiveMapDisplay extends MapDisplay implements UIEventListener
 
     @Override
     public boolean keyPressed(int key, int scancode, int modifiers) {
+        setMouse(lastMouseX, lastMouseY);
         int dx = 0, dz = 0;
 
         if( isKeyUp    (key) ){ dz -= 16; }
