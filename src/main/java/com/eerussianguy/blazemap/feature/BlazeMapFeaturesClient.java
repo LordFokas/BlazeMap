@@ -186,6 +186,7 @@ public class BlazeMapFeaturesClient {
 
     public static void initWaypoints() {
         IEventBus bus = MinecraftForge.EVENT_BUS;
+        bus.addListener(WaypointSharing::onChatReceive);
         bus.register(WaypointServiceClient.class);
         bus.register(WaypointServiceServer.class);
 
