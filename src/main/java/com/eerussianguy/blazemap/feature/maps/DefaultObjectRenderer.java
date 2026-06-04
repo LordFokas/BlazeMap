@@ -41,9 +41,9 @@ public class DefaultObjectRenderer implements ObjectRenderer<Marker<?>> {
             Minecraft mc = Minecraft.getInstance();
 
             stack.pushPose();
-            stack.translate(-mc.font.width(name), (10 + (height / scale)), 0);
-            stack.scale(scale, scale, 0);
-            mc.font.drawInBatch(name, 0, 0, search.color(color), true, stack.last().pose(), buffers, false, 0, LightTexture.FULL_BRIGHT);
+                stack.translate(-mc.font.width(name), (10 + (height / scale)), 0);
+                stack.scale(scale, scale, 0);
+                mc.font.drawInBatch(name, 0, 0, search.color(color), true, stack.last().pose(), buffers, false, 0, LightTexture.FULL_BRIGHT);
             stack.popPose();
         }
 

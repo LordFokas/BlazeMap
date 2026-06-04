@@ -28,17 +28,17 @@ public class IngameOverlays {
         if(!BlazeMapConfig.SERVER.mapItemRequirement.canPlayerAccessMap(Helpers.getPlayer(), ServerConfig.MapAccess.READ_LIVE)) return;
 
         stack.pushPose();
-        var buffers = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-        MinimapRenderer.INSTANCE.draw(stack, buffers, gui, width, height);
-        buffers.endBatch();
+            var buffers = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+            MinimapRenderer.INSTANCE.draw(stack, buffers, gui, width, height);
+            buffers.endBatch();
         stack.popPose();
     }
 
     public static void renderProfiler(ForgeIngameGui gui, PoseStack stack, float partialTicks, int width, int height) {
         stack.pushPose();
-        var buffers = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-        ProfilingRenderer.INSTANCE.draw(stack, buffers);
-        buffers.endBatch();
+            var buffers = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+            ProfilingRenderer.INSTANCE.draw(stack, buffers);
+            buffers.endBatch();
         stack.popPose();
     }
 }

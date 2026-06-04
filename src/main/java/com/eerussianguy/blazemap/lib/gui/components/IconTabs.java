@@ -30,38 +30,41 @@ public class IconTabs extends BaseComponent<IconTabs> implements BorderedCompone
     public void render(PoseStack stack, boolean hasMouse, int mouseX, int mouseY) {
         //render bottom line
         stack.pushPose();
-        stack.translate(-begin, getHeight() - 1, 0);
-        RenderHelper.fillRect(stack.last().pose(), getWidth() + begin + end, 1, Colors.UNFOCUSED);
+            stack.translate(-begin, getHeight() - 1, 0);
+            RenderHelper.fillRect(stack.last().pose(), getWidth() + begin + end, 1, Colors.UNFOCUSED);
         stack.popPose();
 
         // render tabs
         for(var tab : tabs) {
-            stack.pushPose();
-            stack.translate(tab.getPositionX(), tab.getPositionY(), 0);
             var item = tab.component;
 
-            if(tab == active) { // render active tab
-                renderBorderedBox(stack, -1, -1, tab.getWidth()+2, tab.getHeight()+2, Colors.UNFOCUSED, Colors.BLACK);
-                stack.pushPose();
-                stack.translate(0, tab.getHeight(), 0);
-                RenderHelper.fillRect(stack.last().pose(), tab.getWidth(), 1, 0xFF303030);
-                stack.popPose();
-                Minecraft.getInstance().font.draw(stack, item.getName(), size + 2, size / 2f - 4, Colors.WHITE);
-            }
-            else { // render inactive tabs
-                renderBorderedBox(stack, -1, 0, tab.getWidth()+2, tab.getHeight()+1, Colors.UNFOCUSED, Colors.BLACK);
+            stack.pushPose();
+                stack.translate(tab.getPositionX(), tab.getPositionY(), 0);
 
-                // hover only for inactive tabs
-                if(hasMouse && tab.mouseIntercepts(mouseX, mouseY)) {
+                if(tab == active) { // render active tab
+                    renderBorderedBox(stack, -1, -1, tab.getWidth()+2, tab.getHeight()+2, Colors.UNFOCUSED, Colors.BLACK);
+                    
                     stack.pushPose();
-                    stack.translate(0, 1, 0);
-                    RenderHelper.fillRect(stack.last().pose(), tab.getWidth(), tab.getHeight()-1, 0xFF222222); // render hover
+                        stack.translate(0, tab.getHeight(), 0);
+                        RenderHelper.fillRect(stack.last().pose(), tab.getWidth(), 1, 0xFF303030);
                     stack.popPose();
+                    
+                    Minecraft.getInstance().font.draw(stack, item.getName(), size + 2, size / 2f - 4, Colors.WHITE);
                 }
-            }
+                else { // render inactive tabs
+                    renderBorderedBox(stack, -1, 0, tab.getWidth()+2, tab.getHeight()+1, Colors.UNFOCUSED, Colors.BLACK);
 
-            // render icon
-            RenderHelper.drawTexturedQuad(item.getIcon(), item.getIconTint(), stack, 1, 1, size-2, size-2);
+                    // hover only for inactive tabs
+                    if(hasMouse && tab.mouseIntercepts(mouseX, mouseY)) {
+                        stack.pushPose();
+                            stack.translate(0, 1, 0);
+                            RenderHelper.fillRect(stack.last().pose(), tab.getWidth(), tab.getHeight()-1, 0xFF222222); // render hover
+                        stack.popPose();
+                    }
+                }
+
+                // render icon
+                RenderHelper.drawTexturedQuad(item.getIcon(), item.getIconTint(), stack, 1, 1, size-2, size-2);
 
             stack.popPose();
         }

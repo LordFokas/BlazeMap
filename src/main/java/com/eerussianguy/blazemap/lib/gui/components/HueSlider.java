@@ -11,9 +11,9 @@ public class HueSlider extends Slider {
 
     protected void renderBackground(PoseStack stack, boolean hasMouse, int mouseX, int mouseY) {
         stack.pushPose();
-        renderFocusableFlatBackground(stack);
-        stack.translate(1, 1, 0);
-        RenderHelper.renderChromaticGradient(stack, getWidth() - 2, getHeight() - 2);
+            renderFocusableFlatBackground(stack);
+            stack.translate(1, 1, 0);
+            RenderHelper.renderChromaticGradient(stack, getWidth() - 2, getHeight() - 2);
         stack.popPose();
     }
 

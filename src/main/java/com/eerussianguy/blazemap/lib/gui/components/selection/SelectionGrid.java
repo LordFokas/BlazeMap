@@ -95,10 +95,10 @@ public class SelectionGrid<T> extends BaseComponent<SelectionGrid<T>> implements
                 int px = col * grain, py = row * grain;
                 if(element.equals(selected)) {
                     stack.pushPose();
-                    stack.translate(px-1, py-1, 0);
-                    RenderHelper.fillRect(stack.last().pose(), size+2, size+2, 0xFFFFDD00);
-                    stack.translate(1, 1, 0);
-                    RenderHelper.fillRect(stack.last().pose(), size, size, Colors.BLACK);
+                        stack.translate(px-1, py-1, 0);
+                        RenderHelper.fillRect(stack.last().pose(), size+2, size+2, 0xFFFFDD00);
+                        stack.translate(1, 1, 0);
+                        RenderHelper.fillRect(stack.last().pose(), size, size, Colors.BLACK);
                     stack.popPose();
                 }
                 RenderHelper.drawTexturedQuad(image.apply(element), Colors.NO_TINT, stack, px, py, size, size);

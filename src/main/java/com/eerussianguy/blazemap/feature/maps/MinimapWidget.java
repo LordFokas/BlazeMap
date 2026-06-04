@@ -52,8 +52,8 @@ public class MinimapWidget {
         stack.translate(posX, posY, 0);
 
         stack.pushPose();
-        stack.translate(-BORDER_SIZE, -BORDER_SIZE, 0);
-        RenderHelper.fillRect(stack.last().pose(), width + BORDER_SIZE*2, height + BORDER_SIZE*2, Colors.WIDGET_BACKGROUND);
+            stack.translate(-BORDER_SIZE, -BORDER_SIZE, 0);
+            RenderHelper.fillRect(stack.last().pose(), width + BORDER_SIZE*2, height + BORDER_SIZE*2, Colors.WIDGET_BACKGROUND);
         stack.popPose();
 
         RenderHelper.renderWithScissorNative(posX, posY, width, height, () -> {
@@ -62,10 +62,10 @@ public class MinimapWidget {
 
         if(editor){
             stack.pushPose();
-            stack.translate(0, height - HANDLE_SIZE - BORDER_SIZE, 0);
-            RenderHelper.fillRect(buffers, stack.last().pose(), HANDLE_SIZE + BORDER_SIZE, HANDLE_SIZE + BORDER_SIZE, Colors.WIDGET_BACKGROUND);
-            stack.translate(0, BORDER_SIZE, 0.1);
-            RenderHelper.fillRect(buffers, stack.last().pose(), HANDLE_SIZE, HANDLE_SIZE, 0xFFFF0000);
+                stack.translate(0, height - HANDLE_SIZE - BORDER_SIZE, 0);
+                RenderHelper.fillRect(buffers, stack.last().pose(), HANDLE_SIZE + BORDER_SIZE, HANDLE_SIZE + BORDER_SIZE, Colors.WIDGET_BACKGROUND);
+                stack.translate(0, BORDER_SIZE, 0.1);
+                RenderHelper.fillRect(buffers, stack.last().pose(), HANDLE_SIZE, HANDLE_SIZE, 0xFFFF0000);
             stack.popPose();
         }
 
@@ -76,12 +76,12 @@ public class MinimapWidget {
             int length = font.width(coords);
 
             stack.pushPose();
-            stack.translate(width / 2, height + BORDER_SIZE * 2, 0);
-            stack.scale(2, 2, 1);
-            stack.translate(-COORDS_BORDER - ((float)length) / 2F, 0, 0);
+                stack.translate(width / 2, height + BORDER_SIZE * 2, 0);
+                stack.scale(2, 2, 1);
+                stack.translate(-COORDS_BORDER - ((float)length) / 2F, 0, 0);
 
-            RenderHelper.fillRect(buffers, stack.last().pose(), length + COORDS_BORDER*2, font.lineHeight - 2 + COORDS_BORDER*2, Colors.WIDGET_BACKGROUND);
-            font.drawInBatch(coords, COORDS_BORDER, COORDS_BORDER, Colors.WHITE, false, stack.last().pose(), buffers, false, 0, LightTexture.FULL_BRIGHT);
+                RenderHelper.fillRect(buffers, stack.last().pose(), length + COORDS_BORDER*2, font.lineHeight - 2 + COORDS_BORDER*2, Colors.WIDGET_BACKGROUND);
+                font.drawInBatch(coords, COORDS_BORDER, COORDS_BORDER, Colors.WHITE, false, stack.last().pose(), buffers, false, 0, LightTexture.FULL_BRIGHT);
             stack.popPose();
         }
     }

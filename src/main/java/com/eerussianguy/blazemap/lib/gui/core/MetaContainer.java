@@ -30,13 +30,14 @@ public class MetaContainer extends BaseContainer<MetaContainer> {
     @Override
     public void render(PoseStack stack, boolean hasMouse, int mouseX, int mouseY) {
         stack.pushPose();
-        for(var layer : renderables) {
-            stack.translate(0, 0, 25);
-            stack.pushPose();
-            layer.renderAsChild(stack, hasMouse, mouseX, mouseY);
-            stack.popPose();
-        }
-        stack.pushPose();
+            for(var layer : renderables) {
+                stack.translate(0, 0, 25);
+
+                stack.pushPose();
+                    layer.renderAsChild(stack, hasMouse, mouseX, mouseY);
+                stack.popPose();
+            }
+        stack.popPose();
     }
 
     @Override

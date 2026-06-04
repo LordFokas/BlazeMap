@@ -64,9 +64,10 @@ public abstract class BaseContainer<T extends BaseContainer<T>> extends BaseComp
         getComponentAt(mouseX, mouseY, ReferenceFrame.PARENT).ifPresent(child -> {
             int childX = child.getPositionX();
             int childY = child.getPositionY();
+
             stack.pushPose();
-            stack.translate(childX, childY, 0.1);
-            child.renderTooltipAsChild(stack, mouseX - childX, mouseY - childY, service);
+                stack.translate(childX, childY, 0.1);
+                child.renderTooltipAsChild(stack, mouseX - childX, mouseY - childY, service);
             stack.popPose();
         });
     }
@@ -75,11 +76,12 @@ public abstract class BaseContainer<T extends BaseContainer<T>> extends BaseComp
     public void render(PoseStack stack, boolean hasMouse, int mouseX, int mouseY) {
         renderBackground(stack, hasMouse, mouseX, mouseY);
         for(var child : renderables) {
-            stack.pushPose();
             int childX = child.getPositionX(), childY = child.getPositionY();
             int childMouseX = mouseX - childX, childMouseY = mouseY - childY;
-            stack.translate(childX, childY, 0.1);
-            child.renderAsChild(stack, hasMouse && child.mouseIntercepts(childMouseX, childMouseY), childMouseX, childMouseY);
+
+            stack.pushPose();
+                stack.translate(childX, childY, 0.1);
+                child.renderAsChild(stack, hasMouse && child.mouseIntercepts(childMouseX, childMouseY), childMouseX, childMouseY);
             stack.popPose();
         }
     }

@@ -56,22 +56,25 @@ public class TerrainHeightLegend extends BaseComponent<TerrainHeightLegend> {
         RenderHelper.fillRect(buffers, stack.last().pose(), getWidth(), getHeight(), Colors.WIDGET_BACKGROUND);
 
         stack.pushPose();
-        stack.translate(16, BORDER, 0);
-        RenderHelper.drawQuad(buffers.getBuffer(getLegend()), stack.last().pose(), GRADIENT_WIDTH, legend.getHeight());
+            stack.translate(16, BORDER, 0);
+            RenderHelper.drawQuad(buffers.getBuffer(getLegend()), stack.last().pose(), GRADIENT_WIDTH, legend.getHeight());
         stack.popPose();
 
         var font = Minecraft.getInstance().font;
+
         stack.pushPose();
-        stack.translate(0, 2, 0);
-        stack.scale(TEXT_SCALE, TEXT_SCALE, 1);
-        for(int y = max; y >= min; y -= LABEL_STEP) {
-            String label = String.valueOf(y);
-            stack.pushPose();
-            stack.translate(getWidth() - font.width(label), 0, 0);
-            font.drawInBatch(label, 0, 0, Colors.WHITE, false, stack.last().pose(), buffers, false, 0, LightTexture.FULL_BRIGHT);
-            stack.popPose();
-            stack.translate(0, LABEL_STEP * TEXT_SCALE, 0);
-        }
+            stack.translate(0, 2, 0);
+            stack.scale(TEXT_SCALE, TEXT_SCALE, 1);
+            for(int y = max; y >= min; y -= LABEL_STEP) {
+                String label = String.valueOf(y);
+
+                stack.pushPose();
+                    stack.translate(getWidth() - font.width(label), 0, 0);
+                    font.drawInBatch(label, 0, 0, Colors.WHITE, false, stack.last().pose(), buffers, false, 0, LightTexture.FULL_BRIGHT);
+                stack.popPose();
+
+                stack.translate(0, LABEL_STEP * TEXT_SCALE, 0);
+            }
         stack.popPose();
 
         buffers.endBatch();

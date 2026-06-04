@@ -69,8 +69,9 @@ public class Container implements IDrawable {
         for(IDrawable element : children){
             if(element.isDisabled()) continue;
             stack.pushPose();
-            element.draw(stack, buffers, fontRenderer);
+                element.draw(stack, buffers, fontRenderer);
             stack.popPose();
+            
             stack.translate(0, element.getHeight(), 0);
         }
     }

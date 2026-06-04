@@ -4,6 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.MultiBufferSource.BufferSource;
 import net.minecraft.resources.ResourceLocation;
 
 import com.eerussianguy.blazemap.BlazeMap;
@@ -67,16 +68,17 @@ public class RenderHelper {
     }
 
     public static void renderChromaticGradient(PoseStack stack, float w, float h){
-        var buffers = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-        stack.pushPose();
-        w /= 6;
+        BufferSource buffers = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
         VertexConsumer vertices = buffers.getBuffer(RenderHelper.SOLID);
-        for(int i = 0; i < 6; i++) {
-            int colorA = CHROMA[ i % 6 ], colorB = CHROMA[ (i+1) % 6 ];
-            Matrix4f matrix = stack.last().pose();
-            renderGradient(vertices, matrix, w, h, colorA, colorB, colorB, colorA);
-            stack.translate(w, 0, 0);
-        }
+        w /= 6;
+
+        stack.pushPose();
+            for(int i = 0; i < 6; i++) {
+                int colorA = CHROMA[ i % 6 ], colorB = CHROMA[ (i+1) % 6 ];
+                Matrix4f matrix = stack.last().pose();
+                renderGradient(vertices, matrix, w, h, colorA, colorB, colorB, colorA);
+                stack.translate(w, 0, 0);
+            }
         stack.popPose();
         buffers.endBatch();
     }
@@ -115,27 +117,27 @@ public class RenderHelper {
     public static void drawFrame(VertexConsumer vertices, PoseStack stack, int width, int height, int border, int color) {
         stack.pushPose();
 
-        drawQuad(vertices, stack.last().pose(), border, border, color, 0F, 0.25F, 0F, 0.25F);
-        stack.translate(border, 0, 0);
-        drawQuad(vertices, stack.last().pose(), width - (border * 2), border, color, 0.25F, 0.75F, 0F, 0.25F);
-        stack.translate(width - (border * 2), 0, 0);
-        drawQuad(vertices, stack.last().pose(), border, border, color, 0.75F, 1F, 0F, 0.25F);
+            drawQuad(vertices, stack.last().pose(), border, border, color, 0F, 0.25F, 0F, 0.25F);
+            stack.translate(border, 0, 0);
+            drawQuad(vertices, stack.last().pose(), width - (border * 2), border, color, 0.25F, 0.75F, 0F, 0.25F);
+            stack.translate(width - (border * 2), 0, 0);
+            drawQuad(vertices, stack.last().pose(), border, border, color, 0.75F, 1F, 0F, 0.25F);
 
-        stack.translate(-width + border, border, 0);
+            stack.translate(-width + border, border, 0);
 
-        drawQuad(vertices, stack.last().pose(), border, height - (border * 2), color, 0F, 0.25F, 0.25F, 0.75F);
-        stack.translate(border, 0, 0);
-        drawQuad(vertices, stack.last().pose(), width - (border * 2), height - (border * 2), color, 0.25F, 0.75F, 0.25F, 0.75F);
-        stack.translate(width - (border * 2), 0, 0);
-        drawQuad(vertices, stack.last().pose(), border, height - (border * 2), color, 0.75F, 1F, 0.25F, 0.75F);
+            drawQuad(vertices, stack.last().pose(), border, height - (border * 2), color, 0F, 0.25F, 0.25F, 0.75F);
+            stack.translate(border, 0, 0);
+            drawQuad(vertices, stack.last().pose(), width - (border * 2), height - (border * 2), color, 0.25F, 0.75F, 0.25F, 0.75F);
+            stack.translate(width - (border * 2), 0, 0);
+            drawQuad(vertices, stack.last().pose(), border, height - (border * 2), color, 0.75F, 1F, 0.25F, 0.75F);
 
-        stack.translate(-width + border, height - (border * 2), 0);
+            stack.translate(-width + border, height - (border * 2), 0);
 
-        drawQuad(vertices, stack.last().pose(), border, border, color, 0F, 0.25F, 0.75F, 1F);
-        stack.translate(border, 0, 0);
-        drawQuad(vertices, stack.last().pose(), width - (border * 2), border, color, 0.25F, 0.75F, 0.75F, 1F);
-        stack.translate(width - (border * 2), 0, 0);
-        drawQuad(vertices, stack.last().pose(), border, border, color, 0.75F, 1F, 0.75F, 1F);
+            drawQuad(vertices, stack.last().pose(), border, border, color, 0F, 0.25F, 0.75F, 1F);
+            stack.translate(border, 0, 0);
+            drawQuad(vertices, stack.last().pose(), width - (border * 2), border, color, 0.25F, 0.75F, 0.75F, 1F);
+            stack.translate(width - (border * 2), 0, 0);
+            drawQuad(vertices, stack.last().pose(), border, border, color, 0.75F, 1F, 0.75F, 1F);
 
         stack.popPose();
     }

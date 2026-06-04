@@ -104,14 +104,15 @@ public class ProfilingRenderer {
         if(Helpers.getPlayer() == null) return;
 
         Profilers.DEBUG_TIME_PROFILER.begin();
+        double guiScale = mc.getWindow().getGuiScale();
 
         stack.pushPose();
-        double guiScale = mc.getWindow().getGuiScale();
-        if(guiScale > DEBUG_SCALE){
-            stack.scale((float)(DEBUG_SCALE / guiScale), (float)(DEBUG_SCALE / guiScale), 1);
-        }
-        stack.translate(5, 5, 0);
-        drawPanels(stack, buffers, mc.font);
+            if(guiScale > DEBUG_SCALE){
+                stack.scale((float)(DEBUG_SCALE / guiScale), (float)(DEBUG_SCALE / guiScale), 1);
+            }
+
+            stack.translate(5, 5, 0);
+            drawPanels(stack, buffers, mc.font);
         stack.popPose();
 
         Profilers.DEBUG_TIME_PROFILER.end();
@@ -120,9 +121,11 @@ public class ProfilingRenderer {
     private void drawPanels(PoseStack stack, MultiBufferSource buffers, Font fontRenderer) {
         for(Container panel : PANELS){
             if(panel.isDisabled()) continue;
+
             stack.pushPose();
-            panel.draw(stack, buffers, fontRenderer);
+                panel.draw(stack, buffers, fontRenderer);
             stack.popPose();
+
             stack.translate(Container.PANEL_WIDTH + 5, 0, 0);
         }
     }

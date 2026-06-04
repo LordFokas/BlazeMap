@@ -193,16 +193,16 @@ public class WorldMapPopup implements Widget {
     @Override
     public void render(PoseStack stack, int i0, int i1, float f0) {
         stack.pushPose();
+            stack.translate(posX, posY, 1);
 
-        stack.translate(posX, posY, 1);
+            RenderHelper.fillRect(stack.last().pose(), sizeX, sizeY, Colors.WIDGET_BACKGROUND);
+            for(PopupItem item : items) {
+                stack.pushPose();
+                    item.render(stack, sizeX, item == lastClicked, item == hovered);
+                stack.popPose();
 
-        RenderHelper.fillRect(stack.last().pose(), sizeX, sizeY, Colors.WIDGET_BACKGROUND);
-        for(PopupItem item : items) {
-            stack.pushPose();
-            item.render(stack, sizeX, item == lastClicked, item == hovered);
-            stack.popPose();
-            stack.translate(0, PopupItem.HEIGHT, 0);
-        }
+                stack.translate(0, PopupItem.HEIGHT, 0);
+            }
 
         stack.popPose();
 
@@ -255,9 +255,9 @@ public class WorldMapPopup implements Widget {
             if(icon != null) RenderHelper.drawTexturedQuad(icon, enabled ? iconTint : color, stack, 2,4, 16, 16);
 
             stack.pushPose();
-            stack.scale(2, 2, 1);
-            font.draw(stack, text, 10, 3, color);
-            if(folder) font.draw(stack, ">", (width/2) - 8, 3, color);
+                stack.scale(2, 2, 1);
+                font.draw(stack, text, 10, 3, color);
+                if(folder) font.draw(stack, ">", (width/2) - 8, 3, color);
             stack.popPose();
         }
 
