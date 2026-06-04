@@ -74,10 +74,15 @@ dependencies {
 
     compileOnly "curse.maven:$rubidium_project_id:$rubidium_file_id"
 
-    implementation fg.deobf("curse.maven:$architectury_project_id:$architectury_file_id")
-    implementation fg.deobf("curse.maven:$ftbchunks_project_id:$ftbchunks_file_id")
-    implementation fg.deobf("curse.maven:$ftblib_project_id:$ftblib_file_id")
-    implementation fg.deobf("curse.maven:$ftbteams_project_id:$ftbteams_file_id")
+    compileOnly fg.deobf("curse.maven:$architectury_project_id:$architectury_file_id")
+    compileOnly fg.deobf("curse.maven:$ftbchunks_project_id:$ftbchunks_file_id")
+    compileOnly fg.deobf("curse.maven:$ftblib_project_id:$ftblib_file_id")
+    compileOnly fg.deobf("curse.maven:$ftbteams_project_id:$ftbteams_file_id")
+
+    // implementation fg.deobf("curse.maven:$architectury_project_id:$architectury_file_id")
+    // implementation fg.deobf("curse.maven:$ftbchunks_project_id:$ftbchunks_file_id")
+    // implementation fg.deobf("curse.maven:$ftblib_project_id:$ftblib_file_id")
+    // implementation fg.deobf("curse.maven:$ftbteams_project_id:$ftbteams_file_id")
 
     // Apply Mixin AP
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'

@@ -264,44 +264,45 @@ public class MapRenderer implements AutoCloseable {
         if(needsUpdate) updateTexture();
 
         stack.pushPose();
-        Matrix4f matrix = stack.last().pose();
+            Matrix4f matrix = stack.last().pose();
 
-        RenderHelper.fillRect(buffers, matrix, this.width, this.height, 0xFF333333);
-        RenderHelper.drawQuad(buffers.getBuffer(renderType), matrix, width, height);
+            RenderHelper.fillRect(buffers, matrix, this.width, this.height, 0xFF333333);
+            RenderHelper.drawQuad(buffers.getBuffer(renderType), matrix, width, height);
 
-        stack.pushPose();
-        ClientLevel level = Minecraft.getInstance().level;
-        for(var key : overlays_on) {
-            stack.translate(0, 0, 0.1f);
             stack.pushPose();
-            key.value().getMarkers(level, resolution).forEach(marker -> {
-                stack.translate(0, 0, 0.0001f);
-                renderObject(buffers, stack, marker, SearchTargeting.NONE);
-            });
+                ClientLevel level = Minecraft.getInstance().level;
+                for(var key : overlays_on) {
+                    stack.translate(0, 0, 0.1f);
+
+                    stack.pushPose();
+                        key.value().getMarkers(level, resolution).forEach(marker -> {
+                            stack.translate(0, 0, 0.0001f);
+                            renderObject(buffers, stack, marker, SearchTargeting.NONE);
+                        });
+                    stack.popPose();
+                }
             stack.popPose();
-        }
-        stack.popPose();
 
-        stack.pushPose();
-        if(hasActiveSearch) {
-            for(MapLabel l : labels_off) {
-                renderObject(buffers, stack, l, SearchTargeting.MISS);
-            }
-            for(MapLabel l : labels_on) {
-                renderObject(buffers, stack, l, SearchTargeting.HIT);
-            }
-        }
-        else {
-            for(MapLabel l : labels) {
-                renderObject(buffers, stack, l, SearchTargeting.NONE);
-            }
-        }
+            stack.pushPose();
+                if(hasActiveSearch) {
+                    for(MapLabel l : labels_off) {
+                        renderObject(buffers, stack, l, SearchTargeting.MISS);
+                    }
+                    for(MapLabel l : labels_on) {
+                        renderObject(buffers, stack, l, SearchTargeting.HIT);
+                    }
+                }
+                else {
+                    for(MapLabel l : labels) {
+                        renderObject(buffers, stack, l, SearchTargeting.NONE);
+                    }
+                }
 
-        LocalPlayer player = Helpers.getPlayer();
-        stack.translate(0, 0, 1);
-        playerMarker.setPosition(player.blockPosition()).setRotation(player.getRotationVector().y);
-        renderObject(buffers, stack, playerMarker, SearchTargeting.NONE);
-        stack.popPose();
+                LocalPlayer player = Helpers.getPlayer();
+                stack.translate(0, 0, 1);
+                playerMarker.setPosition(player.blockPosition()).setRotation(player.getRotationVector().y);
+                renderObject(buffers, stack, playerMarker, SearchTargeting.NONE);
+            stack.popPose();
 
         stack.popPose();
     }
@@ -423,13 +424,13 @@ public class MapRenderer implements AutoCloseable {
         if(!inRange(marker.getPosition())) return;
 
         stack.pushPose();
-        stack.scale((float) this.zoom, (float) this.zoom, 1);
-        BlockPos position = marker.getPosition();
-        int dx = position.getX() - begin.getX();
-        int dy = position.getZ() - begin.getZ();
-        stack.translate(dx, dy, 0);
+            stack.scale((float) this.zoom, (float) this.zoom, 1);
+            BlockPos position = marker.getPosition();
+            int dx = position.getX() - begin.getX();
+            int dy = position.getZ() - begin.getZ();
+            stack.translate(dx, dy, 0);
 
-        ((ObjectRenderer<Marker<?>>) marker.getRenderer().value()).render(marker, stack, buffers, this.zoom, search);
+            ((ObjectRenderer<Marker<?>>) marker.getRenderer().value()).render(marker, stack, buffers, this.zoom, search);
 
         stack.popPose();
     }

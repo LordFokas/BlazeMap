@@ -26,9 +26,11 @@ public class SubsystemProfile extends Container {
         stack.translate(0, style.margin, 0);
         for(IDrawable element : children){
             if(element.isDisabled()) continue;
+
             stack.pushPose();
-            element.draw(stack, buffers, fontRenderer);
+                element.draw(stack, buffers, fontRenderer);
             stack.popPose();
+
             stack.translate(0, element.getHeight(), 0);
         }
         String label = metric == null ? name : String.format("%s : %s", name, metric.get());

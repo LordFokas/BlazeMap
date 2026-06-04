@@ -44,11 +44,13 @@ public class MinimapRenderer implements AutoCloseable {
 
         // Prepare to render minimap
         Profilers.Minimap.DRAW_TIME_PROFILER.begin();
-        stack.pushPose();
         float scale = (float) (1F / mc.getWindow().getGuiScale());
-        stack.scale(scale, scale, 1);
-        minimap.render(stack, buffers);
+
+        stack.pushPose();
+            stack.scale(scale, scale, 1);
+            minimap.render(stack, buffers);
         stack.popPose();
+
         Profilers.Minimap.DRAW_TIME_PROFILER.end();
     }
 

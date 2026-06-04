@@ -55,27 +55,30 @@ public abstract class BlazeGui extends Screen {
         renderFrame(stack, buffers);
 
         stack.pushPose();
-        stack.translate(left, top, 0.05F);
-        if(title != EMPTY) {
-            renderLabel(stack, buffers, title, 12, 12, true);
-        }
-        renderComponents(stack, buffers);
+            stack.translate(left, top, 0.05F);
+
+            if(title != EMPTY) {
+                renderLabel(stack, buffers, title, 12, 12, true);
+            }
+
+            renderComponents(stack, buffers);
         stack.popPose();
         buffers.endBatch();
 
         stack.pushPose();
-        stack.translate(0, 0, 0.1F);
-        super.render(stack, i0, i1, f0);
+            stack.translate(0, 0, 0.1F);
+            super.render(stack, i0, i1, f0);
         stack.popPose();
 
         stack.pushPose();
-        float scale = (float) getMinecraft().getWindow().getGuiScale();
-        float unscale = 1F / scale;
-        stack.scale(unscale, unscale, 1);
-        stack.translate(0, 0, 0.5F);
-        buffers = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-        renderAbsolute(stack, buffers, scale);
-        buffers.endBatch();
+            float scale = (float) getMinecraft().getWindow().getGuiScale();
+            float unscale = 1F / scale;
+            stack.scale(unscale, unscale, 1);
+            stack.translate(0, 0, 0.5F);
+
+            buffers = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+            renderAbsolute(stack, buffers, scale);
+            buffers.endBatch();
         stack.popPose();
     }
 
@@ -83,8 +86,8 @@ public abstract class BlazeGui extends Screen {
 
     protected void renderFrame(PoseStack stack, MultiBufferSource buffers) {
         stack.pushPose();
-        stack.translate(left, top, 0);
-        RenderHelper.drawFrame(buffers.getBuffer(background), stack, guiWidth, guiHeight, 8);
+            stack.translate(left, top, 0);
+            RenderHelper.drawFrame(buffers.getBuffer(background), stack, guiWidth, guiHeight, 8);
         stack.popPose();
     }
 
@@ -96,8 +99,8 @@ public abstract class BlazeGui extends Screen {
 
     protected void renderSlot(PoseStack stack, MultiBufferSource buffers, int x, int y, int width, int height) {
         stack.pushPose();
-        stack.translate(x, y, 0);
-        RenderHelper.drawFrame(buffers.getBuffer(slot), stack, width, height, 1);
+            stack.translate(x, y, 0);
+            RenderHelper.drawFrame(buffers.getBuffer(slot), stack, width, height, 1);
         stack.popPose();
     }
 }

@@ -49,33 +49,35 @@ public class MDInspectorWidget<MD extends MasterDatum> implements Widget, GuiEve
 
     @Override
     public void render(PoseStack stack, int i0, int i1, float f0) {
-        stack.pushPose();
         Window window = Minecraft.getInstance().getWindow();
         float scale = 1F / (float) window.getGuiScale();
-        stack.scale(scale, scale, 1);
 
-        stack.translate(posX, posY, 2);
-        stack.scale(WIDGET_SCALE, WIDGET_SCALE, 1);
-        stack.translate(-sizeX / 2, -sizeY / 2, 0);
+        stack.pushPose();
+            stack.scale(scale, scale, 1);
 
-        RenderHelper.fillRect(stack.last().pose(), sizeX, sizeY, Colors.WIDGET_BACKGROUND);
-        renderTitleBar(stack);
-        stack.translate(0, 15, 0);
-        if(controller == null) {
-            font.draw(stack, "No MDInspectionController found!", 7, 7, 0xFFFFAAAA);
-        } else {
-            renderMD(stack);
-        }
+            stack.translate(posX, posY, 2);
+            stack.scale(WIDGET_SCALE, WIDGET_SCALE, 1);
+            stack.translate(-sizeX / 2, -sizeY / 2, 0);
+
+            RenderHelper.fillRect(stack.last().pose(), sizeX, sizeY, Colors.WIDGET_BACKGROUND);
+            renderTitleBar(stack);
+            stack.translate(0, 15, 0);
+
+            if(controller == null) {
+                font.draw(stack, "No MDInspectionController found!", 7, 7, 0xFFFFAAAA);
+            } else {
+                renderMD(stack);
+            }
 
         stack.popPose();
     }
 
     private void renderTitleBar(PoseStack stack) {
         stack.pushPose();
-        RenderHelper.fillRect(stack.last().pose(), sizeX, 13, Colors.WIDGET_BACKGROUND);
-        font.draw(stack, String.format("%s [%d, %d]", datum.getID().location, chunkPos.x, chunkPos.z), 2, 4, Colors.WHITE);
-        stack.translate(sizeX - 13, 0, 0);
-        RenderHelper.fillRect(stack.last().pose(), 13, 13, 0xFFFF0000);
+            RenderHelper.fillRect(stack.last().pose(), sizeX, 13, Colors.WIDGET_BACKGROUND);
+            font.draw(stack, String.format("%s [%d, %d]", datum.getID().location, chunkPos.x, chunkPos.z), 2, 4, Colors.WHITE);
+            stack.translate(sizeX - 13, 0, 0);
+            RenderHelper.fillRect(stack.last().pose(), 13, 13, 0xFFFF0000);
         stack.popPose();
     }
 
@@ -85,22 +87,27 @@ public class MDInspectorWidget<MD extends MasterDatum> implements Widget, GuiEve
             font.draw(stack, string, 2, 0, Colors.WHITE);
             stack.translate(0, 10, 0);
         }
+
         stack.translate(2, 0, 0);
+        
         for(int grid = 0; grid < controller.getNumGrids(datum); grid++) {
             stack.translate(0, 12, 0);
             font.draw(stack, controller.getGridName(datum, grid), 0, -10, Colors.WHITE);
+            
             for(int z = 0; z < 16; z++) {
                 stack.pushPose();
-                for(int x = 0; x < 16; x++) {
-                    ResourceLocation icon = controller.getIcon(datum, grid, x, z);
-                    int tint = controller.getTint(datum, grid, x, z);
-                    if(icon == null) {
-                        RenderHelper.fillRect(stack.last().pose(), 16, 16, tint);
-                    } else {
-                        RenderHelper.drawTexturedQuad(icon, tint, stack, 0, 0, 16, 16);
+                    for(int x = 0; x < 16; x++) {
+                        ResourceLocation icon = controller.getIcon(datum, grid, x, z);
+                        int tint = controller.getTint(datum, grid, x, z);
+
+                        if(icon == null) {
+                            RenderHelper.fillRect(stack.last().pose(), 16, 16, tint);
+                        } else {
+                            RenderHelper.drawTexturedQuad(icon, tint, stack, 0, 0, 16, 16);
+                        }
+                        
+                        stack.translate(16, 0, 0);
                     }
-                    stack.translate(16, 0, 0);
-                }
                 stack.popPose();
                 stack.translate(0, 16, 0);
             }

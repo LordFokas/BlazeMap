@@ -62,10 +62,10 @@ public class HostWindowComponent extends LineContainer {
 
             // close button
             stack.pushPose();
-            stack.translate(close.getPositionX(), close.getPositionY(), 0);
-            int red = (hasMouse && close.mouseIntercepts(mouseX, mouseY)) ? 0xFFFF4444 : 0xFFFF0000;
-            RenderHelper.fillRect(stack.last().pose(), close.getWidth(), close.getHeight(), red);
-            mc.font.draw(stack, "x", 2.5F, 0.5F, Colors.WHITE);
+                stack.translate(close.getPositionX(), close.getPositionY(), 0);
+                int red = (hasMouse && close.mouseIntercepts(mouseX, mouseY)) ? 0xFFFF4444 : 0xFFFF0000;
+                RenderHelper.fillRect(stack.last().pose(), close.getWidth(), close.getHeight(), red);
+                mc.font.draw(stack, "x", 2.5F, 0.5F, Colors.WHITE);
             stack.popPose();
 
             // title

@@ -31,12 +31,13 @@ public interface BorderedComponent {
 
     default void renderBorderedBox(PoseStack stack, float posX, float posY, int w, int h, int border, int background) {
         stack.pushPose();
-        if(posX != 0 || posY != 0) {
-            stack.translate(posX, posY, 0);
-        }
-        RenderHelper.fillRect(stack.last().pose(), w, h, border);
-        stack.translate(1, 1, 0);
-        RenderHelper.fillRect(stack.last().pose(), w - 2, h - 2, background);
+            if(posX != 0 || posY != 0) {
+                stack.translate(posX, posY, 0);
+            }
+
+            RenderHelper.fillRect(stack.last().pose(), w, h, border);
+            stack.translate(1, 1, 0);
+            RenderHelper.fillRect(stack.last().pose(), w - 2, h - 2, background);
         stack.popPose();
     }
 

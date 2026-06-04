@@ -38,24 +38,24 @@ public abstract class BaseComponent<T extends BaseComponent<T>> extends Position
     @Override
     public final void render(PoseStack stack, int mouseX, int mouseY, float partial) {
         if(!isVisible()) return;
+
         BaseComponent.partial = partial;
-        stack.pushPose();
-
         boolean hasMouse = mouseIntercepts(mouseX, mouseY);
-
         int positionX = getPositionX(), positionY = getPositionY();
-        if(getReferenceFrame() == ReferenceFrame.GLOBAL) {
-            stack.translate(positionX, positionY, 0);
-            mouseX -= positionX;
-            mouseY -= positionY;
-        }
 
-        this.render(stack, hasMouse, mouseX, mouseY);
+        stack.pushPose();
+            if(getReferenceFrame() == ReferenceFrame.GLOBAL) {
+                stack.translate(positionX, positionY, 0);
+                mouseX -= positionX;
+                mouseY -= positionY;
+            }
 
-        stack.translate(0, 0, 100);
-        if(hasMouse && Minecraft.getInstance().screen instanceof TooltipService service) {
-            this.renderTooltip(stack, mouseX, mouseY, service);
-        }
+            this.render(stack, hasMouse, mouseX, mouseY);
+
+            stack.translate(0, 0, 100);
+            if(hasMouse && Minecraft.getInstance().screen instanceof TooltipService service) {
+                this.renderTooltip(stack, mouseX, mouseY, service);
+            }
 
         stack.popPose();
     }

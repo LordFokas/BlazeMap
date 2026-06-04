@@ -49,8 +49,8 @@ public class SBPicker extends BaseComponent<SBPicker> implements FocusableCompon
         renderFocusableFlatBackground(stack);
 
         stack.pushPose();
-        stack.translate(1, 1, 0);
-        RenderHelper.renderGradient(stack, getWidth() - 2, getHeight() - 2, Colors.WHITE, fullColor, Colors.BLACK, Colors.BLACK);
+            stack.translate(1, 1, 0);
+            RenderHelper.renderGradient(stack, getWidth() - 2, getHeight() - 2, Colors.WHITE, fullColor, Colors.BLACK, Colors.BLACK);
         stack.popPose();
 
         stack.translate(0, 0, 0.1F);

@@ -45,13 +45,16 @@ public class WaypointGroupNode extends WaypointTreeNode {
     @Override
     public void render(PoseStack stack, boolean hasMouse, int mouseX, int mouseY) {
         renderFlatBackground(stack, 0xFF444444);
+
         if(group.management.canCreateChild) {
             RenderHelper.drawTexturedQuad(ADD, Colors.NO_TINT, stack, add.getPositionX(), add.getPositionY(), add.getWidth(), add.getHeight());
         }
+
         stack.pushPose();
-        stack.translate(getHeight(), getHeight() / 2F - 4, 0);
-        font.draw(stack, open ? "v" : ">", -9, 1, Colors.BLACK);
+            stack.translate(getHeight(), getHeight() / 2F - 4, 0);
+            font.draw(stack, open ? "v" : ">", -9, 1, Colors.BLACK);
         stack.popPose();
+
         super.render(stack, hasMouse, mouseX, mouseY);
     }
 
