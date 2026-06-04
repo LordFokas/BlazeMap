@@ -114,7 +114,7 @@ public class WaypointRenderer {
     private static void renderWaypoint(Minecraft mc, PoseStack stack, MultiBufferSource.BufferSource buffers, Waypoint w, Vec3 pos, Level level, float partialTick, float alpha) {
         stack.pushPose();
             if (w.shouldShowBeam()) renderWaypointBeam(stack, buffers, level, partialTick, w, pos, alpha);
-            if (w.shouldShowLabel()) renderWaypointLabel(mc, stack, buffers, w, pos);
+            if (w.shouldShowLabel()) renderWaypointLabel(mc, stack, buffers, w, pos, alpha);
         stack.popPose();
     }
 
@@ -122,8 +122,8 @@ public class WaypointRenderer {
         long gameTime = level.getGameTime();
         int minYHeight = level.getMinBuildHeight();
         
-        // To render beam from the bottom of the world
-        final Vec3 lowestPos = new Vec3(pos.x(), minYHeight, pos.z());
+        // To render beam from the bottom of the world. Also, undoing block centring because it messes with beam render location.
+        final Vec3 lowestPos = new Vec3(pos.x(), minYHeight, pos.z()).add(-0.5, 0, -0.5);
 
         stack.pushPose();
             translateFromCameraToPos(stack, lowestPos);
@@ -133,11 +133,10 @@ public class WaypointRenderer {
         stack.popPose();
     }
 
-
     /**
      * <a href="https://www.wolframalpha.com/input?i=quadratic+fit+calculator&assumption=%7B%22F%22%2C+%22QuadraticFitCalculator%22%2C+%22data2%22%7D+-%3E%22%7B%7B460%2C+0.0282%7D%2C+%7B7100%2C+0.108%7D%2C+%7B14375%2C+0.1253%7D%7D%22">https://www.wolframalpha.com/input?i=quadratic+fit+calculator&assumption=%7B%22F%22%2C+%22QuadraticFitCalculator%22%2C+%22data2%22%7D+-%3E%22%7B%7B460%2C+0.0282%7D%2C+%7B7100%2C+0.108%7D%2C+%7B14375%2C+0.1253%7D%7D%22</a>
      */
-    private static void renderWaypointLabel(Minecraft mc, PoseStack stack, MultiBufferSource.BufferSource buffers, Waypoint w, Vec3 pos) {
+    private static void renderWaypointLabel(Minecraft mc, PoseStack stack, MultiBufferSource.BufferSource buffers, Waypoint w, Vec3 pos, float alpha) {
         String name = w.getName();
         RenderType icon = RenderType.text(w.getIcon());
         Camera camera = mc.gameRenderer.getMainCamera();
@@ -145,6 +144,9 @@ public class WaypointRenderer {
         // Note: Where do these values come from?
         float width = 32;
         float height = 32;
+
+        // Minecraft's fontsize is hardcoded. So having to manually define a scale multiplier to change the relative fontsize
+        float fontHeightScale = 2;
 
         stack.pushPose();
 
@@ -154,27 +156,41 @@ public class WaypointRenderer {
             Vec3 camPos = camera.getPosition();
             double dist = camPos.distanceToSqr(pos);
 
-            float distScale = Mth.clampedMap((float) dist, 0f, 128f * 128f, 0f, 1f);
-            distScale = (float) ((-6.92782E-10 * distScale * distScale) + (0.0000172555 * distScale) + 0.0204091);
-            distScale *= 4f;
+            // TODO: Adjust this dynamically to limit scaling with distance
+            float distScale = 1f/16f;
+            // float distScale = Mth.clampedMap((float) dist, 0f, 128f * 128f, 0f, 1f);
+            // distScale = (float) ((-6.92782E-10 * distScale * distScale) + (0.0000172555 * distScale) + 0.0204091);
+            // distScale *= 4f;
 
             stack.scale(distScale, distScale, distScale);
             stack.mulPose(Vector3f.ZP.rotationDegrees(180f));
-            stack.translate(0f, 0f, -20f);
 
+            // Draw label text
             if(name != null) {
                 stack.pushPose();
 
-                    stack.translate(-mc.font.width(name), (-60 + (height / 2)), 0);
-                    stack.scale(2, 2, 0);
+                    // Move starting point up above the icon
+                    stack.translate(0, -4 - (height * 0.5), 0);
+
+                    // Make font size bigger (because scaling is the only way Mojang's given us to do so)
+                    stack.scale(fontHeightScale, fontHeightScale, 0);
+
+                    // Put the text into position
+                    stack.translate(-mc.font.width(name) * 0.5, -mc.font.lineHeight, 0);
                     mc.font.drawInBatch(name, 0, 0, w.getColor(), true, stack.last().pose(), buffers, false, 0, LightTexture.FULL_BRIGHT);
-                    
+
                 stack.popPose();
             }
 
-            stack.translate(-width / 2, -height / 2, 0);
-            VertexConsumer iconBuffer = buffers.getBuffer(icon);
-            RenderHelper.drawQuad(iconBuffer, stack.last().pose(), width, height, w.getColor());
+            // Draw icon
+            stack.pushPose();
+
+                // Centre icon then draw it
+                stack.translate(-width * 0.5, -height * 0.5, 0);
+                VertexConsumer iconBuffer = buffers.getBuffer(icon);
+                RenderHelper.drawQuad(iconBuffer, stack.last().pose(), width, height, w.getColor());
+
+            stack.popPose();
 
         stack.popPose();
     }
